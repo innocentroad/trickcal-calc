@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trickcal Damage Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="header-content">
+                <h1>Trickcal Damage Calc</h1>
+                <div class="header-actions">
+                    <label class="crayon-switch">
+                        <input type="checkbox" id="enable-crayon">
+                        <span>クレヨン比較</span>
+                    </label>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <!-- Left Column: Inputs -->
+            <div class="panel input-panel">
+                
+
+                <h2 class="collapsible-header">攻撃側ステータス <span class="toggle-icon">▼</span></h2>
+                <div class="collapsible-content">
+                <div class="input-group">
+                    <label>プリセット</label>
+                    <select id="atk-preset" class="preset-select">
+                        <option value="">-- 手動入力 --</option>
+                        <option value="lily_v15">[次元15]リリー(活発)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>攻撃力</label>
+                    <div class="slider-input">
+                        <input type="range" id="atk-slider" min="1" max="150000" value="50000">
+                        <input type="number" id="atk-number" min="1" max="1000000" value="50000">
+                    </div>
+                    <div class="crayon-inputs" style="display: none;">
+                        <div class="crayon-field">
+                            <label>現在追加(%)</label>
+                            <input type="number" id="atk-cur-bonus" value="0">
+                        </div>
+                        <div class="crayon-field">
+                            <label>変更追加(%)</label>
+                            <input type="number" id="atk-new-bonus" value="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>会心</label>
+                    <div class="slider-input">
+                        <input type="range" id="crit-slider" min="1" max="150000" value="30000">
+                        <input type="number" id="crit-number" min="1" max="1000000" value="30000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>会心DMG</label>
+                    <div class="slider-input">
+                        <input type="range" id="crit-dmg-slider" min="1" max="150000" value="30000">
+                        <input type="number" id="crit-dmg-number" min="1" max="1000000" value="30000">
+                    </div>
+                    <div class="crayon-inputs" style="display: none;">
+                        <div class="crayon-field">
+                            <label>現在追加(%)</label>
+                            <input type="number" id="crit-cur-bonus" value="0">
+                        </div>
+                        <div class="crayon-field">
+                            <label>変更追加(%)</label>
+                            <input type="number" id="crit-new-bonus" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+                <div class="divider"></div>
+
+                <h2 class="collapsible-header">防御側ステータス <span class="toggle-icon">▼</span></h2>
+                <div class="collapsible-content">
+                <div class="input-group">
+                    <label>プリセット</label>
+                    <select id="enemy-preset" class="preset-select">
+                        <option value="">-- 手動入力 --</option>
+                        <option value="lily_v15">[次元15]リリー(活発)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>防御力</label>
+                    <div class="slider-input">
+                        <input type="range" id="def-slider" min="1" max="150000" value="50000">
+                        <input type="number" id="def-number" min="1" max="1000000" value="50000">
+                    </div>
+                    <div class="crayon-inputs" style="display: none;">
+                        <div class="crayon-field">
+                            <label>現在追加(%)</label>
+                            <input type="number" id="def-cur-bonus" value="0">
+                        </div>
+                        <div class="crayon-field">
+                            <label>変更追加(%)</label>
+                            <input type="number" id="def-new-bonus" value="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>会心抵抗</label>
+                    <div class="slider-input">
+                        <input type="range" id="crit-res-slider" min="1" max="150000" value="30000">
+                        <input type="number" id="crit-res-number" min="1" max="1000000" value="30000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>会心DMG抵抗</label>
+                    <div class="slider-input">
+                        <input type="range" id="crit-dmg-res-slider" min="1" max="150000" value="30000">
+                        <input type="number" id="crit-dmg-res-number" min="1" max="1000000" value="30000">
+                    </div>
+                    <div class="crayon-inputs" style="display: none;">
+                        <div class="crayon-field">
+                            <label>現在追加(%)</label>
+                            <input type="number" id="crit-res-cur-bonus" value="0">
+                        </div>
+                        <div class="crayon-field">
+                            <label>変更追加(%)</label>
+                            <input type="number" id="crit-res-new-bonus" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+                <div class="divider"></div>
+
+                <h2 class="collapsible-header">倍率 (%) <span class="toggle-icon">▼</span></h2>
+                <div class="collapsible-content">
+                <div class="multipliers-grid">
+                    <div class="input-group">
+                        <label>スキル</label>
+                        <input type="number" id="mult-skill-number" min="0" max="10000" value="100">
+                    </div>
+                    <div class="input-group" id="add-mult-group">
+                        <label>与/被DMG</label>
+                        <input type="number" id="mult-add-number" min="0" max="1000" value="100">
+                    </div>
+                    <div class="input-group">
+                        <label>相性</label>
+                        <select id="mult-type">
+                            <option value="50">50</option>
+                            <option value="75">75</option>
+                            <option value="100" selected>100</option>
+                            <option value="150">150</option>
+                            <option value="200">200</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>特殊</label>
+                        <input type="number" id="mult-sp-number" min="0" max="1000" value="100">
+                    </div>
+                    <div class="input-group">
+                        <label>その他</label>
+                        <input type="number" id="mult-other-number" min="0" max="1000" value="100">
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
+
+            <h2 class="collapsible-header">追加% <span class="toggle-icon">▼</span></h2>
+            <div class="collapsible-content">
+                <div class="multipliers-grid">
+                    <div class="input-group">
+                        <label>攻撃力</label>
+                        <input type="number" id="add-atk-p" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>会心率増加</label>
+                        <input type="number" id="add-crit-rate-p" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>会心DMG増</label>
+                        <input type="number" id="add-crit-dmg-p" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>防御力</label>
+                        <input type="number" id="add-def-p" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>被会心率減</label>
+                        <input type="number" id="add-crit-res-p" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>会心被DMG減</label>
+                        <input type="number" id="add-crit-dmg-res-p" value="0">
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Right Column: Results & Graphs -->
+            <div class="panel result-panel">
+                <div class="panel-header-with-toggle">
+                    <h2>計算結果</h2>
+                    <div class="damage-type-toggle">
+                        <label><input type="radio" name="dmg-type" value="phys" checked> 物理</label>
+                        <label><input type="radio" name="dmg-type" value="mag"> 魔法</label>
+                    </div>
+                </div>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>通常ダメージ</h3>
+                        <p id="res-normal">0</p>
+                        <span class="improvement-text" id="imp-normal" style="display:none">+0.0%</span>
+                    </div>
+                    <div class="result-card highlight">
+                        <h3>期待値</h3>
+                        <p id="res-expected">0</p>
+                        <span class="improvement-text" id="imp-expected" style="display:none">+0.0%</span>
+                    </div>
+                    <div class="result-card highlight-secondary">
+                        <h3>会心ダメージ</h3>
+                        <p id="res-crit-dmg">0</p>
+                        <span class="improvement-text" id="imp-crit-dmg" style="display:none">+0.0%</span>
+                    </div>
+                    <div class="result-card highlight-secondary">
+                        <h3>会心率</h3>
+                        <p id="res-crit-rate">0%</p>
+                        <span class="improvement-text" id="imp-crit-rate" style="display:none">+0.0%</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="graph-section">
+                    <div class="graph-controls">
+                        <div class="toggle-group">
+                            <select id="graph-perspective">
+                                <option value="attacker">表示: 攻撃側</option>
+                                <option value="defender">表示: 防御側</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="show-normal" checked> 通常ダメージ</label>
+                            <label><input type="checkbox" id="show-expected" checked> 期待値</label>
+                            <label><input type="checkbox" id="show-crit" checked> 会心ダメージ</label>
+                        </div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="damageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

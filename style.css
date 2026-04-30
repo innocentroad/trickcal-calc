@@ -134,6 +134,287 @@ header h1 {
     outline: none;
 }
 
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.3rem;
+    border-radius: 10px;
+}
+
+.header-tabs {
+    margin-bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    min-width: 280px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    font-family: 'Outfit', sans-serif;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+}
+
+.tab-btn.active {
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.tab-page {
+    display: none;
+}
+
+.tab-page.active {
+    display: block;
+}
+
+/* Estimator */
+.samples-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.samples-header h3 {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.text-btn {
+    background: var(--accent-color);
+    border: none;
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2);
+}
+
+.text-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(236, 72, 153, 0.3);
+}
+
+.icon-btn {
+    background: var(--accent-color);
+    border: none;
+    color: white;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+}
+
+.icon-btn:active {
+    transform: scale(0.95);
+}
+
+.sample-row {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.8rem;
+    border-radius: 12px;
+    margin-bottom: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sample-row-top {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.sample-main-inputs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.sample-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.sample-detail-inputs {
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.sample-detail-inputs.collapsed {
+    display: none;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.8rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.detail-item label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.btn-detail {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-detail:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+.est-output {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.est-result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.est-result-row:last-child {
+    border-bottom: none;
+}
+
+.est-result-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.est-result-value {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent-color);
+    text-align: right;
+}
+
+.est-result-range {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.est-candidate-header {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    margin: 0.8rem 0 0.3rem 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-left: 3px solid var(--primary-color);
+    padding-left: 0.5rem;
+}
+
+.sample-row-header {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr) auto;
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: center;
+}
+
+.sample-row-header span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panel-top-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sample-row input {
+    width: 100% !important;
+    height: 1.8rem;
+    font-size: 0.85rem;
+}
+
+.btn-remove {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0 0.5rem;
+    height: 1.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.est-result-panel {
+    margin-top: 1rem;
+}
+
+.est-result-text {
+    background: rgba(99, 102, 241, 0.1);
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 4px solid var(--accent-color);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-main);
+}
+
+.est-result-text strong {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+}
+
 .app-container {
     height: 100vh;
     display: flex;
@@ -141,18 +422,26 @@ header h1 {
 }
 
 .dashboard {
+    display: block;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.calc-layout {
     display: grid;
     grid-template-columns: 420px 1fr;
     gap: 1.5rem;
     align-items: start;
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 1.5rem 1rem;
-    max-width: 1400px;
-    width: 100%;
+    max-width: 1600px;
     margin: 0 auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.estimator-panel {
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .dashboard::-webkit-scrollbar {
@@ -165,7 +454,7 @@ header h1 {
 }
 
 @media (max-width: 800px) {
-    .dashboard {
+    .calc-layout {
         grid-template-columns: 1fr;
     }
 }
@@ -207,6 +496,57 @@ header h1 {
     color: var(--text-main);
     border-bottom: 2px solid rgba(255, 255, 255, 0.05);
     padding-bottom: 0.3rem;
+}
+
+.panel-header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.panel-header-main h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+
+.top-settings {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.type-select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: auto !important;
+}
+
+.type-select:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.crayon-check {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.crayon-check input {
+    cursor: pointer;
 }
 
 .divider {
@@ -292,6 +632,43 @@ select {
 select option {
     background-color: #191c29;
     color: var(--text-main);
+}
+
+.est-common-settings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.est-common-group {
+    flex: 1;
+    min-width: 280px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.est-common-group h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.est-common-group h4::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 14px;
+    background: var(--accent-color);
+    border-radius: 2px;
 }
 
 .multipliers-grid {

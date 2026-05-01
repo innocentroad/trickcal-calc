@@ -8,17 +8,49 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .app-container { position: relative; }
+        #reset-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 1001;
+        }
+        .reset-danger-btn {
+            background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 6px;
+            font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        .reset-danger-btn:hover { background: #dc2626; }
+
+        @media (max-width: 600px) {
+            header { height: auto !important; padding-top: 0 !important; }
+            header h1 { display: none; }
+            .header-content {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100%;
+                gap: 0;
+            }
+            .header-actions { position: static !important; }
+            #reset-btn { position: static !important; margin-left: 10px; }
+            .header-tabs { margin: 0 !important; flex: 1; min-width: auto !important; }
+            .tab-btn { padding: 6px 10px !important; font-size: 13px !important; }
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.5em; opacity: 0.7;">v1.4</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.5em; opacity: 0.7;">v1.5.1</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn active" data-tab="calc">通常計算</button>
                     <button class="tab-btn" data-tab="est">ステータス推定</button>
                 </div>
                 <div class="header-actions">
+                    <button type="button" id="reset-btn" class="reset-danger-btn">リセット×</button>
                 </div>
             </div>
         </header>
@@ -60,11 +92,11 @@
                                 </div>
                                 <div class="crayon-inputs" style="display: none;">
                                     <div class="crayon-field">
-                                        <label>現在追加(%)</label>
+                                        <label>現在(%)</label>
                                         <input type="number" id="atk-cur-bonus" value="0">
                                     </div>
                                     <div class="crayon-field">
-                                        <label>変更追加(%)</label>
+                                        <label>変更後(%)</label>
                                         <input type="number" id="atk-new-bonus" value="0">
                                     </div>
                                 </div>
@@ -84,11 +116,11 @@
                                 </div>
                                 <div class="crayon-inputs" style="display: none;">
                                     <div class="crayon-field">
-                                        <label>現在追加(%)</label>
+                                        <label>現在(%)</label>
                                         <input type="number" id="crit-cur-bonus" value="0">
                                     </div>
                                     <div class="crayon-field">
-                                        <label>変更追加(%)</label>
+                                        <label>変更後(%)</label>
                                         <input type="number" id="crit-new-bonus" value="0">
                                     </div>
                                 </div>
@@ -114,11 +146,11 @@
                                 </div>
                                 <div class="crayon-inputs" style="display: none;">
                                     <div class="crayon-field">
-                                        <label>現在追加(%)</label>
+                                        <label>現在(%)</label>
                                         <input type="number" id="def-cur-bonus" value="0">
                                     </div>
                                     <div class="crayon-field">
-                                        <label>変更追加(%)</label>
+                                        <label>変更後(%)</label>
                                         <input type="number" id="def-new-bonus" value="0">
                                     </div>
                                 </div>
@@ -138,11 +170,11 @@
                                 </div>
                                 <div class="crayon-inputs" style="display: none;">
                                     <div class="crayon-field">
-                                        <label>現在追加(%)</label>
+                                        <label>現在(%)</label>
                                         <input type="number" id="crit-res-cur-bonus" value="0">
                                     </div>
                                     <div class="crayon-field">
-                                        <label>変更追加(%)</label>
+                                        <label>変更後(%)</label>
                                         <input type="number" id="crit-res-new-bonus" value="0">
                                     </div>
                                 </div>

@@ -28,7 +28,8 @@ const inputs = {
     atkPreset: document.getElementById('atk-preset'),
     defPreset: document.getElementById('enemy-preset'),
     dmgType: document.getElementById('main-dmg-type'),
-    crayonSwitch: document.getElementById('enable-crayon')
+    crayonSwitch: document.getElementById('enable-crayon'),
+    skillDropdown: document.getElementById('main-skill-dropdown')
 };
 
 // Helper for Smart 100-base start
@@ -199,9 +200,31 @@ function applyPreset(side, key) {
     if (side === 'atk') { setInputValue(inputs.atk, type === 'phys' ? data.atk_p : data.atk_m); setInputValue(inputs.crit, data.crit); setInputValue(inputs.critDmgAtk, data.critDmg); }
     else { setInputValue(inputs.def, type === 'phys' ? data.def_p : data.def_m); setInputValue(inputs.critRes, data.critRes); setInputValue(inputs.critDmgRes, data.critDmgRes); }
     updateUI();
+    if (side === 'atk') updateMainSkillList();
 }
 inputs.atkPreset.addEventListener('change', (e) => applyPreset('atk', e.target.value)); inputs.defPreset.addEventListener('change', (e) => applyPreset('def', e.target.value));
 inputs.dmgType.addEventListener('change', () => { applyPreset('atk', inputs.atkPreset.value); applyPreset('def', inputs.defPreset.value); updateUI(); });
+
+function updateMainSkillList() {
+    const key = inputs.atkPreset.value;
+    const select = inputs.skillDropdown;
+    if (!select) return;
+    select.innerHTML = '<option value="" hidden>リスト</option><option value="100">100%</option>';
+    select.value = ""; // 表面を「リスト」にする
+    if (key && ENEMY_PRESETS[key] && ENEMY_PRESETS[key].skills) {
+        ENEMY_PRESETS[key].skills.forEach(s => {
+            const opt = document.createElement('option'); opt.value = s.mult; opt.textContent = `${s.name} (${s.mult}%)`;
+            select.appendChild(opt);
+        });
+    }
+}
+inputs.skillDropdown.addEventListener('change', (e) => {
+    if (e.target.value !== "") {
+        inputs.skill.value = e.target.value;
+        updateUI();
+        e.target.value = ""; // 表示を「リスト」に戻す
+    }
+});
 function setInputValue(inputPair, value) { if (inputPair.s && inputPair.n) { inputPair.s.value = value; inputPair.n.value = value; } }
 
 // --- Estimator Logic ---
@@ -284,24 +307,49 @@ function runEstimation() {
     const mode = estimator.mode.value, common = { add: (parseFloat(estimator.common.add.value) || 100) / 100, critAdd: (parseFloat(estimator.common.critAdd.value) || 0) / 100, critRes: (parseFloat(estimator.common.critRes.value) || 0) / 100, type: (parseFloat(estimator.common.type.value) || 100) / 100, other: (parseFloat(estimator.common.other.value) || 100) / 100 };
     const rows = Array.from(estimator.samplesList.querySelectorAll('.sample-row')).filter(r => r.dataset.mode === mode); if (rows.length === 0) return; if (mode === 'atk-side') estimateAtkSide(rows, common); else estimateDefSide(rows, common);
 }
+estimator.output.addEventListener('click', (e) => {
+    if (e.target.classList.contains('est-detail-toggle')) {
+        const row = e.target.closest('.est-result-row');
+        const details = row.querySelector('.est-result-details');
+        details.classList.toggle('collapsed');
+        e.target.textContent = details.classList.contains('collapsed') ? '+' : '−';
+    }
+});
 
 // Cluster Logic
-function findClusters(values, tolerance) {
+function findClusters(items, tolerance) {
     let clusters = [];
-    for (let v of values) {
+    for (let item of items) {
         let placed = false;
         for (let c of clusters) {
-            if (Math.abs(c.center - v) <= tolerance) {
-                c.values.push(v);
-                c.center = c.values.reduce((a,b)=>a+b)/c.values.length;
+            if (Math.abs(c.center - item.val) <= tolerance) {
+                c.items.push(item);
+                c.center = c.items.reduce((a, b) => a + b.val, 0) / c.items.length;
                 placed = true;
                 break;
             }
         }
-        if (!placed) clusters.push({ center: v, values: [v] });
+        if (!placed) clusters.push({ center: item.val, items: [item] });
     }
-    clusters.sort((a, b) => b.values.length - a.values.length || a.center - b.center);
+    clusters.sort((a, b) => b.items.length - a.items.length || a.center - b.center);
     return clusters;
+}
+
+function findBestSkillCluster(skills, tolerance) {
+    let best = [];
+    for (let i = 0; i < skills.length; i++) {
+        let cluster = [skills[i]];
+        for (let j = 0; j < skills.length; j++) {
+            if (i === j) continue;
+            if (Math.abs(skills[i].val - skills[j].val) / (skills[i].val || 1) <= tolerance) cluster.push(skills[j]);
+        }
+        if (cluster.length > best.length) best = cluster;
+        else if (cluster.length === best.length && cluster.length > 0) {
+            const getDiff = (c) => Math.max(...c.map(s=>s.val)) - Math.min(...c.map(s=>s.val));
+            if (getDiff(cluster) < getDiff(best)) best = cluster;
+        }
+    }
+    return best;
 }
 
 function solveDefRange(atk, skill, dmg, common) {
@@ -317,35 +365,50 @@ function solveCritResRange(critStat, normDmg, critDmg, common) {
     return { min: fMin, max: fMax };
 }
 function getRowCommon(row, globalCommon) { const getVal = (cls, gVal) => { const input = row.querySelector('.' + cls); return (input && input.value !== "") ? (parseFloat(input.value) || 0) / 100 : gVal; }; return { add: getVal('ov-add', globalCommon.add), type: getVal('ov-type', globalCommon.type), other: getVal('ov-other', globalCommon.other), critAdd: getVal('ov-crit-add', globalCommon.critAdd), critRes: getVal('ov-crit-res', globalCommon.critRes) }; }
-function formatResultRow(label, value) { return `<div class="est-result-row"><span class="est-result-label">${label}</span><div class="est-result-value">${value}</div></div>`; }
+function formatResultRow(label, value, detailsHtml = "") { 
+    return `
+    <div class="est-result-row">
+        <div class="est-result-main">
+            <span class="est-result-label">${label}</span>
+            <div class="est-result-value">
+                ${value}
+                ${detailsHtml ? '<button class="est-detail-toggle">+</button>' : ''}
+            </div>
+        </div>
+        ${detailsHtml ? `<div class="est-result-details collapsed">${detailsHtml}</div>` : ''}
+    </div>`;
+}
 
 function estimateAtkSide(rows, common) {
     let defs = [], reses = [];
-    for (const row of rows) {
+    rows.forEach((row, idx) => {
+        const label = `サンプル ${idx + 1}`;
         const rowCommon = getRowCommon(row, common), atk = parseFloat(row.querySelector('.est-atk').value), critStat = parseFloat(row.querySelector('.est-crit-stat').value), skill = (parseFloat(row.querySelector('.est-skill').value) || 100) / 100, dmg = parseFloat(row.querySelector('.est-dmg').value), cDmg = parseFloat(row.querySelector('.est-crit-dmg').value);
-        if (atk && dmg) { const r = solveDefRange(atk, skill, dmg, rowCommon); defs.push((r.min + r.max) / 2); }
-        if (critStat && dmg && cDmg) { const r = solveCritResRange(critStat, dmg, cDmg, rowCommon); reses.push((r.min + r.max) / 2); }
-    }
+        if (atk && dmg) { const r = solveDefRange(atk, skill, dmg, rowCommon); defs.push({ val: (r.min + r.max) / 2, label }); }
+        if (critStat && dmg && cDmg) { const r = solveCritResRange(critStat, dmg, cDmg, rowCommon); reses.push({ val: (r.min + r.max) / 2, label }); }
+    });
     let out = "";
     if (defs.length > 0) {
-        const clusters = findClusters(defs, 250);
+        const clusters = findClusters(defs, 50);
         out += `<div class="est-candidate-header">敵の防御力 候補</div>`;
         clusters.slice(0, 3).forEach((c, i) => {
-            out += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.values.length}件一致)</span>`);
+            const detailsHtml = c.items.map(it => `<div><span>${it.label}</span><span>約 ${Math.floor(it.val).toLocaleString()}</span></div>`).join('');
+            out += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.items.length}件一致)</span>`, detailsHtml);
         });
     }
     if (reses.length > 0) {
-        const clusters = findClusters(reses, 250);
+        const clusters = findClusters(reses, 50);
         out += `<div class="est-candidate-header">敵の会心DMG抵抗 候補</div>`;
         clusters.slice(0, 3).forEach((c, i) => {
-            out += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.values.length}件一致)</span>`);
+            const detailsHtml = c.items.map(it => `<div><span>${it.label}</span><span>約 ${Math.floor(it.val).toLocaleString()}</span></div>`).join('');
+            out += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.items.length}件一致)</span>`, detailsHtml);
         });
     }
     estimator.output.innerHTML = out || `<div class="est-result-label">データを入力してください</div>`;
 }
 
 function estimateDefSide(rows, common) {
-    const samples = rows.map(r => { const rowCommon = getRowCommon(r, common); return { def: parseFloat(r.querySelector('.est-def').value), critRes: parseFloat(r.querySelector('.est-crit-res').value), skill: (parseFloat(r.querySelector('.est-skill-enemy').value) || 0) / 100, dmg: parseFloat(r.querySelector('.est-dmg-taken').value), cDmg: parseFloat(r.querySelector('.est-crit-taken').value), common: rowCommon }; }).filter(s => s.def && s.dmg);
+    const samples = rows.map((r, idx) => { const rowCommon = getRowCommon(r, common); return { label: `サンプル ${idx + 1}`, def: parseFloat(r.querySelector('.est-def').value), critRes: parseFloat(r.querySelector('.est-crit-res').value), skill: (parseFloat(r.querySelector('.est-skill-enemy').value) || 0) / 100, dmg: parseFloat(r.querySelector('.est-dmg-taken').value), cDmg: parseFloat(r.querySelector('.est-crit-taken').value), common: rowCommon }; }).filter(s => s.def && s.dmg);
     if (samples.length < 1) return; let atkResultHtml = ""; const allSkillKnown = samples.every(s => s.skill > 0);
     if (allSkillKnown) {
         let atks = [];
@@ -353,37 +416,54 @@ function estimateDefSide(rows, common) {
             const mult = s.skill * s.common.add * s.common.type * s.common.other; let l = 1, h = 2000000, fMin = 1, fMax = 2000000;
             while (l <= h) { let mid = Math.floor((l + h) / 2); if (Math.floor(mid * calcBaseDamageRate(mid, s.def) * mult) <= s.dmg) { fMin = mid; l = mid + 1; } else h = mid - 1; }
             l = 1, h = 2000000; while (l <= h) { let mid = Math.floor((l + h) / 2); if (Math.floor(mid * calcBaseDamageRate(mid, s.def) * mult) >= s.dmg) { fMax = mid; h = mid - 1; } else l = mid + 1; }
-            atks.push((fMin + fMax) / 2);
+            atks.push({ val: (fMin + fMax) / 2, label: s.label });
         }
-        const clusters = findClusters(atks, 250);
+        const clusters = findClusters(atks, 50);
         atkResultHtml += `<div class="est-candidate-header">敵の攻撃力 候補</div>`;
         clusters.slice(0, 3).forEach((c, i) => {
-            atkResultHtml += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.values.length}件一致)</span>`);
+            const detailsHtml = c.items.map(it => `<div><span>${it.label}</span><span>約 ${Math.floor(it.val).toLocaleString()}</span></div>`).join('');
+            atkResultHtml += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.items.length}件一致)</span>`, detailsHtml);
         });
     } else if (samples.length >= 2) {
         let candidates = [];
         for (let atk = 1000; atk <= 250000; atk += 100) {
-            let skills = samples.map(s => { const rate = calcBaseDamageRate(atk, s.def); if (rate <= 0.0001) return null; return s.dmg / (atk * rate * s.common.add * s.common.type * s.common.other); });
-            if (skills.includes(null)) continue; let diff = Math.max(...skills) - Math.min(...skills), avg = skills.reduce((a,b)=>a+b)/skills.length, relDiff = diff / (avg || 1);
-            if (relDiff < 0.05) {
-                let localBestAtk = atk, localMinRel = relDiff, localBestSkill = avg;
+            let skills = samples.map(s => { const rate = calcBaseDamageRate(atk, s.def); if (rate <= 0.0001) return null; return { val: s.dmg / (atk * rate * s.common.add * s.common.type * s.common.other), label: s.label }; });
+            if (skills.includes(null)) continue; 
+            const bestCluster = findBestSkillCluster(skills, 0.05);
+            if (bestCluster.length >= 2) {
+                const skillVals = bestCluster.map(s => s.val);
+                let diff = Math.max(...skillVals) - Math.min(...skillVals), avg = skillVals.reduce((a, b) => a + b) / skillVals.length, relDiff = diff / (avg || 1);
+                
+                let localBestAtk = atk, localMinRel = relDiff, localBestSkill = avg, localBestSkills = bestCluster;
                 for (let sub = atk - 50; sub <= atk + 50; sub++) {
                     if (sub < 1000) continue;
-                    let sks = samples.map(s => { const r = calcBaseDamageRate(sub, s.def); if (r <= 0.0001) return null; return s.dmg / (sub * r * s.common.add * s.common.type * s.common.other); });
-                    if (sks.includes(null)) continue; let d = Math.max(...sks) - Math.min(...sks), a = sks.reduce((a,b)=>a+b)/sks.length, rd = d / (a || 1);
-                    if (rd < localMinRel) { localMinRel = rd; localBestAtk = sub; localBestSkill = a; }
+                    let sks = samples.map(s => { const r = calcBaseDamageRate(sub, s.def); if (r <= 0.0001) return null; return { val: s.dmg / (sub * r * s.common.add * s.common.type * s.common.other), label: s.label }; });
+                    if (sks.includes(null)) continue; 
+                    const subCluster = findBestSkillCluster(sks, 0.05);
+                    if (subCluster.length < bestCluster.length) continue;
+                    const skVals = subCluster.map(s => s.val);
+                    let d = Math.max(...skVals) - Math.min(...skVals), a = skVals.reduce((a, b) => a + b) / skVals.length, rd = d / (a || 1);
+                    if (rd < localMinRel) { localMinRel = rd; localBestAtk = sub; localBestSkill = a; localBestSkills = subCluster; }
                 }
-                let existing = candidates.find(c => Math.abs(c.atk - localBestAtk) < 50);
-                if (existing) { if (localMinRel < existing.rel) { existing.atk = localBestAtk; existing.rel = localMinRel; existing.skill = localBestSkill; } }
-                else candidates.push({ atk: localBestAtk, rel: localMinRel, skill: localBestSkill });
+                let existing = candidates.find(c => Math.abs(c.atk - localBestAtk) < 50 && c.count === localBestSkills.length);
+                if (existing) { if (localMinRel < existing.rel) { existing.atk = localBestAtk; existing.rel = localMinRel; existing.skill = localBestSkill; existing.skills = localBestSkills; } }
+                else candidates.push({ atk: localBestAtk, rel: localMinRel, skill: localBestSkill, skills: localBestSkills, count: localBestSkills.length, total: samples.length });
             }
         }
         if (candidates.length > 0) {
             atkResultHtml += `<div class="est-candidate-header">敵の攻撃力 / スキル倍率 候補</div>`;
-            candidates.sort((a, b) => a.rel - b.rel).slice(0, 3).forEach((c, i) => {
-                atkResultHtml += formatResultRow(`候補 ${i + 1}`, `約 ${c.atk.toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(約 ${(c.skill * 100).toFixed(1)}%)</span>`);
+            candidates.sort((a, b) => b.count - a.count || a.rel - b.rel).slice(0, 3).forEach((c, i) => {
+                const detailsHtml = samples.map(s => {
+                    const inCluster = c.skills.find(cs => cs.label === s.label);
+                    const style = inCluster ? '' : 'style="opacity:0.5; text-decoration:line-through;"';
+                    const rate = calcBaseDamageRate(c.atk, s.def);
+                    const val = s.dmg / (c.atk * rate * s.common.add * s.common.type * s.common.other);
+                    return `<div ${style}><span>${s.label}</span><span>攻撃力 ${c.atk.toLocaleString()} / 倍率 ${(val * 100).toFixed(2)}%</span></div>`;
+                }).join('');
+                const valueHtml = `攻撃力 約 ${c.atk.toLocaleString()} / スキル倍率 約 ${(c.skill * 100).toFixed(1)}% <span style="color:#94a3b8; font-size:0.85em; margin-left:8px;">(${c.count}/${c.total}件一致)</span>`;
+                atkResultHtml += formatResultRow(`候補 ${i + 1}`, valueHtml, detailsHtml);
             });
-        } else atkResultHtml = formatResultRow("敵の攻撃力", "候補なし (誤差大)");
+        } else atkResultHtml = formatResultRow("敵の攻撃力", "候補なし (一致データ不足)");
     } else atkResultHtml = formatResultRow("敵の攻撃力", "データ不足");
     
     let critResultHtml = ""; const critSamples = samples.filter(s => s.critRes && s.cDmg);
@@ -393,22 +473,27 @@ function estimateDefSide(rows, common) {
             let l = 1, h = 1000000, fMin = 1, fMax = 1000000;
             while (l <= h) { let mid = Math.floor((l + h) / 2); const testMult = calcCritMultiplier(mid, s.critRes) + s.common.critAdd - s.common.critRes; if (Math.floor(s.dmg * testMult) <= s.cDmg) { fMin = mid; l = mid + 1; } else h = mid - 1; }
             l = 1, h = 1000000; while (l <= h) { let mid = Math.floor((l + h) / 2); const testMult = calcCritMultiplier(mid, s.critRes) + s.common.critAdd - s.common.critRes; if (Math.floor(s.dmg * testMult) >= s.cDmg) { fMax = mid; h = mid - 1; } else l = mid + 1; }
-            reses.push((fMin + fMax) / 2);
+            reses.push({ val: (fMin + fMax) / 2, label: s.label });
         }
-        const clusters = findClusters(reses, 250);
+        const clusters = findClusters(reses, 50);
         critResultHtml += `<div class="est-candidate-header">敵の会心DMG(ステ) 候補</div>`;
         clusters.slice(0, 3).forEach((c, i) => {
-            critResultHtml += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.values.length}件一致)</span>`);
+            const detailsHtml = c.items.map(it => `<div><span>${it.label}</span><span>約 ${Math.floor(it.val).toLocaleString()}</span></div>`).join('');
+            critResultHtml += formatResultRow(`候補 ${i + 1}`, `約 ${Math.floor(c.center).toLocaleString()} <span style="color:#94a3b8; font-size:0.9em; margin-left:8px;">(${c.items.length}件一致)</span>`, detailsHtml);
         });
     }
     estimator.output.innerHTML = atkResultHtml + critResultHtml;
 }
 
 // --- Persistence Logic ---
-const STORAGE_KEY = 'trickcal_calc_state_v1.5.1';
+const STORAGE_KEY = 'trickcal_calc_state_v1.6.0';
 function saveState() {
     const state = { main: {}, estCommon: {}, estMode: estimator.mode.value, samples: [], tab: document.querySelector('.tab-btn.active').dataset.tab, dmgType: inputs.dmgType.value, crayon: inputs.crayonSwitch.checked };
-    Object.entries(inputs).forEach(([key, obj]) => { if (obj.n) state.main[key] = obj.n.value; else if (obj.cur) state.main[key] = { cur: obj.cur.value, new: obj.new.value }; });
+    Object.entries(inputs).forEach(([key, obj]) => { 
+        if (key === 'skillDropdown') return; // リストボタンの状態は保存しない
+        if (obj.n) state.main[key] = obj.n.value; 
+        else if (obj.cur) state.main[key] = { cur: obj.cur.value, new: obj.new.value }; 
+    });
     ['skill', 'add', 'special', 'other', 'atkP', 'critRateP', 'critDmgP', 'defP', 'critResP', 'critDmgResP'].forEach(k => { if (inputs[k]) state.main[k] = inputs[k].value; });
     state.estCommonStats = estCommonStats;
     document.querySelectorAll('.sample-row').forEach(row => {
@@ -423,7 +508,18 @@ function loadState() {
     try {
         const state = JSON.parse(raw);
         Object.entries(state.main).forEach(([key, val]) => {
-            if (inputs[key]) { if (inputs[key].n) { inputs[key].n.value = val; if (inputs[key].s) inputs[key].s.value = val; } else if (inputs[key].cur) { inputs[key].cur.value = val.cur; inputs[key].new.value = val.new; } else inputs[key].value = val; }
+            if (key === 'skillDropdown') return; // リストボタンの状態は読み込まない
+            if (inputs[key]) { 
+                if (inputs[key].n) { 
+                    inputs[key].n.value = val; 
+                    if (inputs[key].s) inputs[key].s.value = val; 
+                } else if (inputs[key].cur) { 
+                    inputs[key].cur.value = val.cur; 
+                    inputs[key].new.value = val.new; 
+                } else {
+                    inputs[key].value = val; 
+                }
+            }
         });
         if (state.dmgType) inputs.dmgType.value = state.dmgType;
         if (state.crayon !== undefined) { inputs.crayonSwitch.checked = state.crayon; crayonInputsDivs.forEach(el => el.style.display = state.crayon ? 'grid' : 'none'); Object.values(impTexts).forEach(el => el.style.display = state.crayon ? 'block' : 'none'); }
@@ -521,3 +617,11 @@ if (estimator.samplesList.children.length === 0) {
         row.style.display = row.dataset.mode === mode ? 'block' : 'none';
     });
 }
+
+// Initialize Preset Selectors
+Object.entries(ENEMY_PRESETS).forEach(([key, data]) => {
+    const opt = document.createElement('option'); opt.value = key; opt.textContent = data.name;
+    inputs.atkPreset.appendChild(opt.cloneNode(true));
+    inputs.defPreset.appendChild(opt.cloneNode(true));
+});
+updateMainSkillList();

@@ -313,35 +313,76 @@ header h1 {
 }
 
 .est-result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
+    padding: 0.6rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.est-result-row:last-child {
-    border-bottom: none;
+.est-result-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .est-result-label {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .est-result-value {
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: var(--accent-color);
     text-align: right;
+    display: flex;
+    align-items: center;
 }
 
-.est-result-range {
-    display: block;
-    font-size: 0.75rem;
+.est-detail-toggle {
+    background: rgba(236, 72, 153, 0.1);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.est-detail-toggle:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.est-result-details {
+    margin-top: 0.6rem;
+    padding: 0.8rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-size: 0.8rem;
     color: var(--text-muted);
-    font-weight: 400;
+    line-height: 1.5;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.est-result-details.collapsed {
+    display: none;
+}
+
+.est-result-details div {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.1rem 0;
+}
+
+.est-result-details div span:last-child {
+    color: var(--text-main);
+    font-weight: 600;
 }
 
 .est-candidate-header {
@@ -645,9 +686,207 @@ select {
     appearance: none;
 }
 
-select option {
-    background-color: #191c29;
+    border-color: rgba(236, 72, 153, 0.3);
+}
+
+.result-card.highlight-secondary p {
+    color: var(--accent-color);
+}
+
+.graph-section {
+    margin-top: 2rem;
+}
+
+.graph-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.checkbox-group label {
+    display: flex;
+}
+
+.result-panel {
+    position: sticky;
+    top: 0;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+}
+
+.panel-header-with-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.3rem;
+}
+
+.panel-header-with-toggle h2 {
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+
+.panel h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
     color: var(--text-main);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.3rem;
+}
+
+.panel-header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.panel-header-main h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+
+.top-settings {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.type-select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: auto !important;
+}
+
+.type-select:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.crayon-check {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.crayon-check input {
+    cursor: pointer;
+}
+
+.divider {
+    height: 1px;
+    background: var(--panel-border);
+    margin: 0.8rem 0;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+    gap: 0.8rem;
+}
+
+.input-group label {
+    flex-shrink: 0;
+    width: 7.5rem;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.warning-text {
+    color: var(--danger);
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+.slider-input {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    height: 6px;
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--primary-hover);
+    transform: scale(1.2);
+}
+
+input[type="number"], select {
+    width: 90px;
+    padding: 0.3rem 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input[type="number"]:focus, select:focus {
+    border-color: var(--primary-color);
+}
+
+::placeholder {
+    color: var(--placeholder-gray) !important;
+    opacity: 1 !important;
+}
+
+select {
+    width: 100%;
+    appearance: none;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 
 .est-common-settings {
@@ -692,7 +931,6 @@ select option {
     grid-template-columns: repeat(3, 80px);
     gap: 0.8rem;
 }
-
 .multipliers-grid .input-group {
     display: block;
     margin-bottom: 0;
@@ -703,8 +941,6 @@ select option {
     margin-bottom: 0.3rem;
     font-size: 0.75rem;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 .multipliers-grid .input-group input, 
 .multipliers-grid .input-group select {
@@ -793,14 +1029,6 @@ select option {
     gap: 1rem;
 }
 
-.checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
 .checkbox-group input[type="checkbox"] {
     accent-color: var(--primary-color);
 }
@@ -883,4 +1111,33 @@ select option {
 }
 .collapsed-content {
     display: none !important;
+}
+
+select option {
+    background-color: #191c29 !important;
+    color: #ffffff !important;
+}
+
+.skill-icon-btn { 
+    display: inline-block; 
+    width: 2.5rem !important; /* 横幅を固定して、スキル名で広がらないようにする */
+    padding: 0 !important; 
+    margin-left: 4px; 
+    background: rgba(255, 255, 255, 0.05) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+    border-radius: 2px; 
+    color: var(--text-muted) !important; 
+    font-size: 0.6rem !important; 
+    cursor: pointer; 
+    vertical-align: middle; 
+    transition: all 0.2s; 
+    height: 0.9rem !important;
+    line-height: 0.8rem !important;
+    text-align: center;
+    appearance: none; /* OS標準の見た目を消す */
+}
+.skill-icon-btn:hover { 
+    background: rgba(99, 102, 241, 0.2) !important; 
+    color: var(--text-main) !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
 }

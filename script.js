@@ -165,8 +165,8 @@ function updateChart(v) {
             animation: false, responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
             plugins: { legend: { labels: { color: '#f8fafc' } } },
             scales: {
-                x: { type: 'linear', min: minRange, max: maxRange, title: { display: true, text: isAttacker ? '攻撃力' : '防御力', color: '#94a3b8' }, ticks: { color: '#94a3b8', callback: v => shortenNumber(v) }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
-                y: { title: { display: true, text: 'ダメージ', color: '#94a3b8' }, ticks: { color: '#94a3b8', callback: v => shortenNumber(v) }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
+                x: { type: 'linear', min: minRange, max: maxRange, title: { display: true, text: isAttacker ? '攻撃力' : '防御力', color: '#94a3b8' }, ticks: { color: '#94a3b8', callback: v => shortenNumber(Math.round(v)) }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                y: { title: { display: true, text: 'ダメージ', color: '#94a3b8' }, ticks: { color: '#94a3b8', callback: v => shortenNumber(Math.round(v)) }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
             }
         }
     });
@@ -195,15 +195,140 @@ Object.values(inputs).forEach(obj => {
 inputs.type.addEventListener('change', updateUI); Object.values(graphControls).forEach(ctrl => ctrl.addEventListener('change', updateUI));
 function getDamageType() { return inputs.dmgType.value; }
 function setDamageType(type) { inputs.dmgType.value = type; }
-function applyPreset(side, key) {
-    if (!key || !ENEMY_PRESETS[key]) return; const data = ENEMY_PRESETS[key]; if (data.dmgType) setDamageType(data.dmgType); const type = getDamageType();
-    if (side === 'atk') { setInputValue(inputs.atk, type === 'phys' ? data.atk_p : data.atk_m); setInputValue(inputs.crit, data.crit); setInputValue(inputs.critDmgAtk, data.critDmg); }
-    else { setInputValue(inputs.def, type === 'phys' ? data.def_p : data.def_m); setInputValue(inputs.critRes, data.critRes); setInputValue(inputs.critDmgRes, data.critDmgRes); }
+
+const enemyPhaseDropdown = document.getElementById('enemy-phase');
+const enemyPhaseGroup = document.getElementById('enemy-phase-group');
+const atkPhaseDropdown = document.getElementById('atk-phase');
+const atkPhaseGroup = document.getElementById('atk-phase-group');
+
+function toggleHighlight(inputObj, isHighlighted) {
+    if (!inputObj) return;
+    if (inputObj.n) {
+        inputObj.n.classList.toggle('highlight-preset', isHighlighted);
+        if (inputObj.s) inputObj.s.classList.toggle('highlight-preset', isHighlighted);
+    } else {
+        inputObj.classList.toggle('highlight-preset', isHighlighted);
+    }
+}
+
+function applyPreset(side, key, skipDmgTypeOverride = false) {
+    const group = side === 'atk' ? atkPhaseGroup : enemyPhaseGroup;
+    const dropdown = side === 'atk' ? atkPhaseDropdown : enemyPhaseDropdown;
+
+    if (!key || !ENEMY_PRESETS[key]) {
+        // When no preset is selected (manual input), reset UI
+        group.style.display = 'none';
+        dropdown.dataset.currentPreset = '';
+        if (side === 'atk') {
+            toggleHighlight(inputs.atk, false);
+            toggleHighlight(inputs.crit, false);
+            toggleHighlight(inputs.critDmgAtk, false);
+            inputs.special.value = 100;
+            toggleHighlight(inputs.special, false);
+            toggleHighlight(inputs.dmgType, false);
+        } else {
+            toggleHighlight(inputs.def, false);
+            toggleHighlight(inputs.critRes, false);
+            toggleHighlight(inputs.critDmgRes, false);
+            inputs.add.value = 100;
+            inputs.add.dataset.weaknessAdd = 0;
+            toggleHighlight(inputs.add, false);
+        }
+        return;
+    }
+
+    const data = ENEMY_PRESETS[key]; 
+    
+    let isDmgTypeForced = false;
+    if (side === 'atk' && data.dmgType && !skipDmgTypeOverride) {
+        setDamageType(data.dmgType);
+        isDmgTypeForced = true;
+    }
+    const type = getDamageType();
+    
+    if (side === 'atk') {
+        toggleHighlight(inputs.dmgType, isDmgTypeForced);
+    }
+    
+    let phaseMult = 1.0;
+    let phaseScaleStats = [];
+
+    if (data.phases && data.phases.length > 0) {
+        group.style.display = 'block';
+        if (dropdown.dataset.currentPreset !== key) {
+            dropdown.innerHTML = '';
+            data.phases.forEach((p, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = p.name;
+                dropdown.appendChild(opt);
+            });
+            dropdown.dataset.currentPreset = key;
+            dropdown.selectedIndex = 0;
+        }
+        const activePhase = data.phases[dropdown.selectedIndex] || data.phases[0];
+        phaseMult = activePhase.mult;
+        phaseScaleStats = activePhase.scaleStats || [];
+    } else {
+        group.style.display = 'none';
+        dropdown.dataset.currentPreset = '';
+    }
+
+    const applyPhase = (statName, val, inputObj) => {
+        const isModified = phaseScaleStats.includes(statName) && phaseMult !== 1.0;
+        toggleHighlight(inputObj, isModified);
+        if (isModified) {
+            return Math.floor(val * phaseMult);
+        }
+        return val;
+    };
+
+    if (side === 'atk') { 
+        setInputValue(inputs.atk, applyPhase('atk_' + (type === 'phys' ? 'p' : 'm'), type === 'phys' ? data.atk_p : data.atk_m, inputs.atk)); 
+        setInputValue(inputs.crit, applyPhase('crit', data.crit, inputs.crit)); 
+        setInputValue(inputs.critDmgAtk, applyPhase('critDmg', data.critDmg, inputs.critDmgAtk)); 
+        
+        if (data.special !== undefined && data.special !== 100) {
+            inputs.special.value = data.special;
+            toggleHighlight(inputs.special, true);
+        } else {
+            inputs.special.value = 100;
+            toggleHighlight(inputs.special, false);
+        }
+    }
+    else { 
+        setInputValue(inputs.def, applyPhase('def_' + (type === 'phys' ? 'p' : 'm'), type === 'phys' ? data.def_p : data.def_m, inputs.def)); 
+        setInputValue(inputs.critRes, applyPhase('critRes', data.critRes, inputs.critRes)); 
+        setInputValue(inputs.critDmgRes, applyPhase('critDmgRes', data.critDmgRes, inputs.critDmgRes)); 
+        
+        let isWeak = false;
+        let prevWeakness = parseFloat(inputs.add.dataset.weaknessAdd) || 0;
+        let baseAdd = (parseFloat(inputs.add.value) || 100) - prevWeakness;
+        let newWeakness = 0;
+
+        if (data.weakness && data.weakness[type]) {
+            if (data.weakness[type].add !== undefined) {
+                newWeakness = data.weakness[type].add;
+                isWeak = true;
+            }
+        }
+        
+        inputs.add.value = baseAdd + newWeakness;
+        inputs.add.dataset.weaknessAdd = newWeakness;
+        toggleHighlight(inputs.add, isWeak);
+    }
     updateUI();
     if (side === 'atk') updateMainSkillList();
 }
 inputs.atkPreset.addEventListener('change', (e) => applyPreset('atk', e.target.value)); inputs.defPreset.addEventListener('change', (e) => applyPreset('def', e.target.value));
-inputs.dmgType.addEventListener('change', () => { applyPreset('atk', inputs.atkPreset.value); applyPreset('def', inputs.defPreset.value); updateUI(); });
+enemyPhaseDropdown.addEventListener('change', () => applyPreset('def', inputs.defPreset.value));
+atkPhaseDropdown.addEventListener('change', () => applyPreset('atk', inputs.atkPreset.value));
+inputs.dmgType.addEventListener('change', () => { 
+    toggleHighlight(inputs.dmgType, false);
+    applyPreset('atk', inputs.atkPreset.value, true); 
+    applyPreset('def', inputs.defPreset.value, true); 
+    updateUI(); 
+});
 
 function updateMainSkillList() {
     const key = inputs.atkPreset.value;
@@ -486,7 +611,7 @@ function estimateDefSide(rows, common) {
 }
 
 // --- Persistence Logic ---
-const STORAGE_KEY = 'trickcal_calc_state_v1.6.0';
+const STORAGE_KEY = 'trickcal_calc_state_v1.7';
 function saveState() {
     const state = { main: {}, estCommon: {}, estMode: estimator.mode.value, samples: [], tab: document.querySelector('.tab-btn.active').dataset.tab, dmgType: inputs.dmgType.value, crayon: inputs.crayonSwitch.checked };
     Object.entries(inputs).forEach(([key, obj]) => { 

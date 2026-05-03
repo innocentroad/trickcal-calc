@@ -44,7 +44,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.5em; opacity: 0.7;">v1.6.0</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.5em; opacity: 0.7;">v1.7</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn active" data-tab="calc">通常計算</button>
                     <button class="tab-btn" data-tab="est">ステータス推定</button>
@@ -81,6 +81,11 @@
                                 <label>プリセット</label>
                                 <select id="atk-preset" class="preset-select">
                                     <option value="">-- 手動入力 --</option>
+                                </select>
+                            </div>
+                            <div class="input-group" id="atk-phase-group" style="display: none;">
+                                <label>フェーズ</label>
+                                <select id="atk-phase" class="preset-select">
                                 </select>
                             </div>
                             <div class="input-group">
@@ -134,6 +139,11 @@
                                 <label>プリセット</label>
                                 <select id="enemy-preset" class="preset-select">
                                     <option value="">-- 手動入力 --</option>
+                                </select>
+                            </div>
+                            <div class="input-group" id="enemy-phase-group" style="display: none;">
+                                <label>フェーズ</label>
+                                <select id="enemy-phase" class="preset-select">
                                 </select>
                             </div>
                             <div class="input-group">

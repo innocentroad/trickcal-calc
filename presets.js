@@ -14,7 +14,7 @@ const ENEMY_PRESETS = {
     "lily_light_v15": {
         name: "[次元15]リリー(活発)",
         hp: 661796770,
-        atk_p: 0,
+        atk_p: 1,
         atk_m: 28118,
         def_p: 52196,
         def_m: 52196,
@@ -31,50 +31,302 @@ const ENEMY_PRESETS = {
     "meow_ef_11": {
         name: "[EF/微辛1]M.E.O.W",
         hp: 401524,
-        atk_p: 1569,
-        atk_m: 0,
+        atk_p: 1507,
+        atk_m: 1,
         def_p: 2792,
         def_m: 2792,
         dmgType: "phys",
-        crit: 2396,
-        critDmg: 2396,
+        crit: 2370,
+        critDmg: 2370,
         critRes: 1946,
         critDmgRes: 1946,
-        special: 200,
+        special: 214,
         weakness: {
             phys: { add: 75 }
         },
         phases: [
             { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
-            { name: "Phase 2 (4/5)", mult: 1.0923, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
-            { name: "Phase 3 (3/5)", mult: 1.1846, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
-            { name: "Phase 4 (2/5)", mult: 1.2769, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
-            { name: "Phase 5 (1/5)", mult: 1.3692, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
-            { name: "Phase 6 (0/5)", mult: 1.4615, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+            { name: "Phase 2 (4/5)", mult: 1.09230083, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.18460416, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.27690499, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.36920583, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.46150666, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
             { name: "叩きつけ[AoE/2段]", mult:50  },
             { name: "張り手[AoE]", mult:150  },
             { name: "ランチャー[AoE/RNG/3発]", mult:240  },
-            { name: "ガトリング[AoE/10発?]", mult:150  },
+            { name: "ガトリング[AoE/9発?]", mult:150  },
             { name: "波状攻撃[AoE/12発]", mult:200  },
             { name: "火炎放射[AoE/11発]", mult:400  },
             { name: "ミサイル[AoE/RNG/14発?]", mult:700  },
             { name: "溜めレーザー[AoE/14発]", mult:300  }
         ]
     },
+    "meow_ef_12": {
+        name: "[EF/微辛2]M.E.O.W",
+        hp: 2179702,
+        atk_p: 3609,
+        atk_m: 1,
+        def_p: 6696,
+        def_m: 6696,
+        dmgType: "phys",
+        crit: 5674,
+        critDmg: 5674,
+        critRes: 4648,
+        critDmgRes: 4648,
+        special: 385,
+        weakness: {
+            phys: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09677149, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19354297, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29031446, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.38708594, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.48385743, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { name: "叩きつけ[AoE/2段]", mult:50  },
+            { name: "張り手[AoE]", mult:150  },
+            { name: "ランチャー[AoE/RNG/3発]", mult:240  },
+            { name: "ガトリング[AoE/9発?]", mult:150  },
+            { name: "波状攻撃[AoE/12発]", mult:200  },
+            { name: "火炎放射[AoE/11発]", mult:400  },
+            { name: "ミサイル[AoE/RNG/14発?]", mult:700  },
+            { name: "溜めレーザー[AoE/14発]", mult:300  }
+        ]
+    },
+    "meow_ef_21": {
+        name: "[EF/小辛1]M.E.O.W",
+        hp: 4745749,
+        atk_p: 5360,
+        atk_m: 1,
+        def_p: 9946,
+        def_m: 9946,
+        dmgType: "phys",
+        crit: 8436,
+        critDmg: 8436,
+        critRes: 6899,
+        critDmgRes: 6899,
+        special: 528,
+        weakness: {
+            phys: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09782418, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19564836, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29347254, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39129693, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.48912111, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { name: "叩きつけ[AoE/2段]", mult:50  },
+            { name: "張り手[AoE]", mult:150  },
+            { name: "ランチャー[AoE/RNG/3発]", mult:240  },
+            { name: "ガトリング[AoE/9発?]", mult:150  },
+            { name: "波状攻撃[AoE/12発]", mult:200  },
+            { name: "火炎放射[AoE/11発]", mult:400  },
+            { name: "ミサイル[AoE/RNG/14発?]", mult:700  },
+            { name: "溜めレーザー[AoE/14発]", mult:300  }
+        ]
+    },
+    "meow_ef_22": {
+        name: "[EF/小辛2]M.E.O.W",
+        hp: 11848508,
+        atk_p: 8470,
+        atk_m: 1,
+        def_p: 15796,
+        def_m: 15796,
+        dmgType: "phys",
+        crit: 13400,
+        critDmg: 13400,
+        critRes: 10950,
+        critDmgRes: 10950,
+        special: 790,
+        weakness: {
+            phys: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09862904, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19725800, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29588696, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39451592, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49314488, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { name: "叩きつけ[AoE/2段]", mult:50  },
+            { name: "張り手[AoE]", mult:150  },
+            { name: "ランチャー[AoE/RNG/3発]", mult:240  },
+            { name: "ガトリング[AoE/9発?]", mult:150  },
+            { name: "波状攻撃[AoE/12発]", mult:200  },
+            { name: "火炎放射[AoE/11発]", mult:400  },
+            { name: "ミサイル[AoE/RNG/14発?]", mult:700  },
+            { name: "溜めレーザー[AoE/14発]", mult:300  }
+        ]
+    },
+    "meow_ef_31": {
+        name: "[EF/中辛1]M.E.O.W",
+        hp: 26286605,
+        atk_p: 12700,
+        atk_m: 1,
+        def_p: 23594,
+        def_m: 23594,
+        dmgType: "phys",
+        crit: 19986,
+        critDmg: 19986,
+        critRes: 16342,
+        critDmgRes: 16342,
+        special: 1129,
+        weakness: {
+            phys: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09908179, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19816359, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29724535, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39632714, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49540894, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { name: "叩きつけ[AoE/2段]", mult:50  },
+            { name: "張り手[AoE]", mult:150  },
+            { name: "ランチャー[AoE/RNG/3発]", mult:240  },
+            { name: "ガトリング[AoE/9発?]", mult:150  },
+            { name: "波状攻撃[AoE/12発]", mult:200  },
+            { name: "火炎放射[AoE/11発]", mult:400  },
+            { name: "ミサイル[AoE/RNG/14発?]", mult:700  },
+            { name: "溜めレーザー[AoE/14発]", mult:300  }
+        ]
+    },
+    "meow_ef_32": {
+        name: "[EF/中辛2]M.E.O.W",
+        hp: 58588935,
+        atk_p: 19000,
+        atk_m: 1,
+        def_p: 35280,
+        def_m: 35280,
+        dmgType: "phys",
+        crit: 29900,
+        critDmg: 29900,
+        critRes: 24450,
+        critDmgRes: 24450,
+        special: 1643,
+        weakness: {
+            phys: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09938597, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19877194, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29815792, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39754389, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49692986, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { name: "叩きつけ[AoE/2段]", mult:50  },
+            { name: "張り手[AoE]", mult:150  },
+            { name: "ランチャー[AoE/RNG/3発]", mult:240  },
+            { name: "ガトリング[AoE/9発?]", mult:150  },
+            { name: "波状攻撃[AoE/12発]", mult:200  },
+            { name: "火炎放射[AoE/11発]", mult:400  },
+            { name: "ミサイル[AoE/RNG/14発?]", mult:700  },
+            { name: "溜めレーザー[AoE/14発]", mult:300  }
+        ]
+    },
+    "meow_ef_41": {
+        name: "[EF/麻辣1]M.E.O.W",
+        hp: 127799868,
+        atk_p: 28100,
+        atk_m: 1,
+        def_p: 52200,
+        def_m: 52200,
+        dmgType: "phys",
+        crit: 44200,
+        critDmg: 44200,
+        critRes: 36100,
+        critDmgRes: 36100,
+        special: 2385,
+        weakness: {
+            phys: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09958470, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19916940, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29875410, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39833881, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49792351, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { name: "叩きつけ[AoE/2段]", mult:50  },
+            { name: "張り手[AoE]", mult:150  },
+            { name: "ランチャー[AoE/RNG/3発]", mult:240  },
+            { name: "ガトリング[AoE/9発?]", mult:150  },
+            { name: "波状攻撃[AoE/12発]", mult:200  },
+            { name: "火炎放射[AoE/11発]", mult:400  },
+            { name: "ミサイル[AoE/RNG/14発?]", mult:700  },
+            { name: "溜めレーザー[AoE/14発]", mult:300  }
+        ]
+    },
+    "meow_ef_42": {
+        name: "[EF/麻辣2]M.E.O.W",
+        hp: 286321339,
+        atk_p: 42110,
+        atk_m: 1,
+        def_p: 78200,
+        def_m: 78200,
+        dmgType: "phys",
+        crit: 66180,
+        critDmg: 66180,
+        critRes: 54150,
+        critDmgRes: 54150,
+        special: 3528,
+        weakness: {
+            phys: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09972275, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19944550, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29916825, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39889100, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49861376, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { name: "叩きつけ[AoE/全2段]", mult:50  },
+            { name: "張り手[AoE]", mult:150  },
+            { name: "ランチャー[AoE/RNG/3発]", mult:240  },
+            { name: "ガトリング[AoE/全弾9発?]", mult:150  },
+            { name: "波状攻撃[AoE/全弾12発]", mult:200  },
+            { name: "火炎放射[AoE/全弾11発]", mult:400  },
+            { name: "ミサイル[AoE/RNG/全弾14発?]", mult:700  },
+            { name: "溜めレーザー[AoE/全弾14発]", mult:300  },
+            { name: "--------------------------", mult:100  },
+            { name: "叩きつけ[AoE/2段hit]", mult:100  },
+            { name: "ガトリング[AoE/9発hit]", mult:1350  },
+            { name: "波状攻撃[AoE/12発hit]", mult:2400  },
+            { name: "火炎放射[AoE/11発hit]", mult:4400  },
+            { name: "ミサイル[AoE/RNG/2発hit]", mult:1400  },
+            { name: "溜めレーザー[AoE/14発hit]", mult:4200  }
+        ]
+    },
     "general_test": {
-        name: "テスト用案山子",
+        name: "dummy",
         hp: 1000000,
-        atk_p: 10000,
-        atk_m: 10000,
-        def_p: 10000,
-        def_m: 10000,
+        atk_p: 30000,
+        atk_m: 30000,
+        def_p: 50000,
+        def_m: 50000,
         dmgType: 'phys',
-        crit: 10000,
-        critDmg: 10000,
-        critRes: 10000,
-        critDmgRes: 10000,
+        crit: 25000,
+        critDmg: 25000,
+        critRes: 25000,
+        critDmgRes: 25000,
         special: 100,
         skills: [
             { name: "通常攻撃", mult: 100 },

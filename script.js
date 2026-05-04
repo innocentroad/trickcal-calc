@@ -368,7 +368,7 @@ function createSampleRow() {
     row.innerHTML = `<div class="sample-row-top"><div class="sample-main-inputs">${mainHtml}</div><div class="sample-actions"><button class="btn-detail">+</button><button class="btn-remove">×</button></div></div><div class="sample-detail-inputs collapsed"><div class="detail-grid"><div class="detail-item"><label>与被%</label><input type="number" class="ov-add" placeholder="${estimator.common.add.value}"></div><div class="detail-item"><label>相性%</label><select class="ov-type"><option value=""></option><option value="50">50</option><option value="75">75</option><option value="100">100</option><option value="150">150</option><option value="200">200</option></select></div><div class="detail-item"><label>他%</label><input type="number" class="ov-other" placeholder="${estimator.common.other.value}"></div><div class="detail-item"><label>会増%</label><input type="number" class="ov-crit-add" placeholder="${estimator.common.critAdd.value}"></div><div class="detail-item"><label>会減%</label><input type="number" class="ov-crit-res" placeholder="${estimator.common.critRes.value}"></div></div></div>`;
     row.querySelector('.btn-remove').addEventListener('click', () => { row.remove(); runEstimation(); saveState(); });
     row.querySelector('.btn-detail').addEventListener('click', () => { const detail = row.querySelector('.sample-detail-inputs'); detail.classList.toggle('collapsed'); row.querySelector('.btn-detail').textContent = detail.classList.contains('collapsed') ? '+' : '−'; });
-    row.querySelectorAll('input, select').forEach(input => { input.addEventListener('input', () => { runEstimation(); saveState(); }); if (input.tagName === 'INPUT') setupSmartStart(input); });
+    row.querySelectorAll('input, select').forEach(input => { input.addEventListener('input', () => { debouncedRunEstimation(); saveState(); }); if (input.tagName === 'INPUT') setupSmartStart(input); });
     const typeSelect = row.querySelector('.ov-type');
     if (typeSelect) {
         typeSelect.options[0].textContent = estimator.common.type.value;
@@ -415,7 +415,7 @@ estimator.mode.addEventListener('change', () => {
 Object.entries(estimator.common).forEach(([key, input]) => { 
     input.addEventListener('input', () => { 
         estCommonStats[estimator.mode.value][key] = input.value;
-        runEstimation(); saveState(); 
+        debouncedRunEstimation(); saveState(); 
         estimator.samplesList.querySelectorAll('.sample-row').forEach(row => { 
             if (row.dataset.mode === estimator.mode.value) {
                 if (row.querySelector('.ov-add')) row.querySelector('.ov-add').placeholder = estimator.common.add.value; 
@@ -431,6 +431,11 @@ Object.entries(estimator.common).forEach(([key, input]) => {
 function runEstimation() {
     const mode = estimator.mode.value, common = { add: (parseFloat(estimator.common.add.value) || 100) / 100, critAdd: (parseFloat(estimator.common.critAdd.value) || 0) / 100, critRes: (parseFloat(estimator.common.critRes.value) || 0) / 100, type: (parseFloat(estimator.common.type.value) || 100) / 100, other: (parseFloat(estimator.common.other.value) || 100) / 100 };
     const rows = Array.from(estimator.samplesList.querySelectorAll('.sample-row')).filter(r => r.dataset.mode === mode); if (rows.length === 0) return; if (mode === 'atk-side') estimateAtkSide(rows, common); else estimateDefSide(rows, common);
+}
+let _estTimer = null;
+function debouncedRunEstimation() {
+    if (_estTimer) clearTimeout(_estTimer);
+    _estTimer = setTimeout(() => { runEstimation(); _estTimer = null; }, 300);
 }
 estimator.output.addEventListener('click', (e) => {
     if (e.target.classList.contains('est-detail-toggle')) {
@@ -551,29 +556,56 @@ function estimateDefSide(rows, common) {
         });
     } else if (samples.length >= 2) {
         let candidates = [];
-        for (let atk = 1000; atk <= 250000; atk += 100) {
-            let skills = samples.map(s => { const rate = calcBaseDamageRate(atk, s.def); if (rate <= 0.0001) return null; return { val: s.dmg / (atk * rate * s.common.add * s.common.type * s.common.other), label: s.label }; });
-            if (skills.includes(null)) continue; 
-            const bestCluster = findBestSkillCluster(skills, 0.05);
-            if (bestCluster.length >= 2) {
-                const skillVals = bestCluster.map(s => s.val);
-                let diff = Math.max(...skillVals) - Math.min(...skillVals), avg = skillVals.reduce((a, b) => a + b) / skillVals.length, relDiff = diff / (avg || 1);
-                
-                let localBestAtk = atk, localMinRel = relDiff, localBestSkill = avg, localBestSkills = bestCluster;
-                for (let sub = atk - 50; sub <= atk + 50; sub++) {
-                    if (sub < 1000) continue;
-                    let sks = samples.map(s => { const r = calcBaseDamageRate(sub, s.def); if (r <= 0.0001) return null; return { val: s.dmg / (sub * r * s.common.add * s.common.type * s.common.other), label: s.label }; });
-                    if (sks.includes(null)) continue; 
-                    const subCluster = findBestSkillCluster(sks, 0.05);
-                    if (subCluster.length < bestCluster.length) continue;
-                    const skVals = subCluster.map(s => s.val);
-                    let d = Math.max(...skVals) - Math.min(...skVals), a = skVals.reduce((a, b) => a + b) / skVals.length, rd = d / (a || 1);
-                    if (rd < localMinRel) { localMinRel = rd; localBestAtk = sub; localBestSkill = a; localBestSkills = subCluster; }
-                }
-                let existing = candidates.find(c => Math.abs(c.atk - localBestAtk) < 50 && c.count === localBestSkills.length);
-                if (existing) { if (localMinRel < existing.rel) { existing.atk = localBestAtk; existing.rel = localMinRel; existing.skill = localBestSkill; existing.skills = localBestSkills; } }
-                else candidates.push({ atk: localBestAtk, rel: localMinRel, skill: localBestSkill, skills: localBestSkills, count: localBestSkills.length, total: samples.length });
+        const evalSkills = (atk, tol) => {
+            const skills = samples.map(s => {
+                const rate = calcBaseDamageRate(atk, s.def);
+                if (rate <= 0.0001) return null;
+                return { val: s.dmg / (atk * rate * s.common.add * s.common.type * s.common.other), label: s.label };
+            });
+            if (skills.includes(null)) return null;
+            const cluster = findBestSkillCluster(skills, tol);
+            if (cluster.length < 2) return null;
+            const vals = cluster.map(s => s.val);
+            const avg = vals.reduce((a, b) => a + b) / vals.length;
+            const rel = (Math.max(...vals) - Math.min(...vals)) / (avg || 1);
+            return { atk, rel, skill: avg, skills: cluster, count: cluster.length, total: samples.length };
+        };
+
+        // Pass 1: coarse scan (step 2000) — ~125 iters
+        const roughHits = [];
+        for (let atk = 1000; atk <= 250000; atk += 2000) {
+            if (evalSkills(atk, 0.08)) roughHits.push(atk);
+        }
+
+        // Pass 2: medium scan (step 50) around rough hits — ~40 iters each
+        const medHits = [];
+        const medSeen = new Set();
+        for (const rough of roughHits) {
+            for (let atk = rough - 2000; atk <= rough + 2000; atk += 50) {
+                if (atk < 1000 || atk > 250000 || medSeen.has(atk)) continue;
+                medSeen.add(atk);
+                if (evalSkills(atk, 0.06)) medHits.push(atk);
             }
+        }
+
+        // Deduplicate medium hits (merge within 500)
+        const dedupMed = [];
+        for (const atk of medHits) {
+            if (!dedupMed.some(a => Math.abs(a - atk) < 500)) dedupMed.push(atk);
+        }
+
+        // Pass 3: fine scan (step 1) ±200 around each dedup'd medium hit — ~400 iters each
+        for (const med of dedupMed) {
+            let best = null;
+            for (let atk = Math.max(1000, med - 200); atk <= Math.min(250000, med + 200); atk++) {
+                const r = evalSkills(atk, 0.05);
+                if (!r) continue;
+                if (!best || r.count > best.count || (r.count === best.count && r.rel < best.rel)) best = r;
+            }
+            if (!best) continue;
+            const existing = candidates.find(c => Math.abs(c.atk - best.atk) < 500 && c.count === best.count);
+            if (existing) { if (best.rel < existing.rel) Object.assign(existing, best); }
+            else candidates.push(best);
         }
         if (candidates.length > 0) {
             atkResultHtml += `<div class="est-candidate-header">敵の攻撃力 / スキル倍率 候補</div>`;

@@ -23,9 +23,9 @@ const ENEMY_PRESETS = {
         critDmg: 44178,
         critRes: 36146,
         critDmgRes: 36146,
-        special: 100,
+        special: 2385,
         skills: [
-            { name: "通常攻撃", mult: 2385 }
+            { name: "通常攻撃", mult: 100 }
         ]
     },
     "meow_ef_11": {

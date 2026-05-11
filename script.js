@@ -94,10 +94,10 @@ function calcBaseDamageRate(atk, def) {
     return Math.max(0.1125, Math.min(1.2, rate));
 }
 function calcCritRate(critAtk, critDef) {
-    const x = critAtk / (2 * critDef);
+    const x = critAtk / critDef;
     let rate = 0;
-    if (x >= 1.0) rate = 0.45 + 0.35 * ((x - 1) / (x - 1 + 10/3));
-    else rate = 0.05 + 0.40 * (x / (x + 0.29 * (1 - x)));
+    if (x >= 1.0) rate = 0.30 + 0.50 * ((x - 1) / (x - 1 + 10/3));
+    else rate = 0.05 + 0.25 * (x / (x + (4/3) * (1 - x)));
     return Math.max(0.05, Math.min(0.8, rate));
 }
 function calcCritMultiplier(critAtk, critDmgRes) {

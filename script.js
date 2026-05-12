@@ -115,7 +115,7 @@ function getValues() {
     const getBonus = (key) => ({ cur: 1.0 + (parseFloat(inputs[key]?.cur?.value) || 0)/100, new: 1.0 + (parseFloat(inputs[key]?.new?.value) || 0)/100 });
     return {
         isCrayon: crayonToggle.checked, atk: parseFloat(inputs.atk.n.value) || 0, crit: parseFloat(inputs.crit.n.value) || 0, critDmgAtk: parseFloat(inputs.critDmgAtk.n.value) || 0, def: parseFloat(inputs.def.n.value) || 0, critRes: parseFloat(inputs.critRes.n.value) || 0, critDmgRes: parseFloat(inputs.critDmgRes.n.value) || 0,
-        atk_c: getBonus('atkC'), crit_c: { cur: 1.0, new: 1.0 }, critDmgAtk_c: getBonus('critC'), def_c: getBonus('defC'), critRes_c: { cur: 1.0, new: 1.0 }, critDmgRes_c: getBonus('critResC'),
+        atk_c: getBonus('atkC'), crit_c: getBonus('critC'), critDmgAtk_c: getBonus('critC'), def_c: getBonus('defC'), critRes_c: getBonus('critResC'), critDmgRes_c: getBonus('critResC'),
         skill: (parseFloat(inputs.skill?.value) === 0 ? 0 : (parseFloat(inputs.skill?.value) || 100)) / 100, add: addMult, type: (parseFloat(inputs.type?.value) === 0 ? 0 : (parseFloat(inputs.type?.value) || 100)) / 100, special: (parseFloat(inputs.special?.value) === 0 ? 0 : (parseFloat(inputs.special?.value) || 100)) / 100, other: (parseFloat(inputs.other?.value) === 0 ? 0 : (parseFloat(inputs.other?.value) || 100)) / 100,
         atkP: parseFloat(inputs.atkP?.value) || 0, critRateP: parseFloat(inputs.critRateP?.value) || 0, critDmgP: parseFloat(inputs.critDmgP?.value) || 0, defP: parseFloat(inputs.defP?.value) || 0, critResP: parseFloat(inputs.critResP?.value) || 0, critDmgResP: parseFloat(inputs.critDmgResP?.value) || 0
     };
@@ -137,8 +137,30 @@ function shortenNumber(v) {
 function updateUI() {
     const v = getValues(); const oldRes = calculateAll(v); let res = oldRes; let newV = null;
     if (v.isCrayon) {
-        newV = { ...v }; newV.atk = (v.atk / v.atk_c.cur) * v.atk_c.new; newV.crit = (v.crit / v.crit_c.cur) * v.crit_c.new; newV.critDmgAtk = (v.critDmgAtk / v.critDmgAtk_c.cur) * v.critDmgAtk_c.new; newV.def = (v.def / v.def_c.cur) * v.def_c.new; newV.critRes = (v.critRes / v.critRes_c.cur) * v.critRes_c.new; newV.critDmgRes = (v.critDmgRes / v.critDmgRes_c.cur) * v.critDmgRes_c.new;
-        res = calculateAll(newV); impTexts.expected.innerHTML = formatImp(oldRes.expected, res.expected); impTexts.normal.innerHTML = formatImp(oldRes.normal, res.normal); impTexts.critDmg.innerHTML = formatImp(oldRes.crit, res.crit); impTexts.critRate.innerHTML = formatImp(oldRes.critRate, res.critRate, true);
+        newV = { ...v }; 
+        newV.atk = (v.atk / v.atk_c.cur) * v.atk_c.new; 
+        newV.crit = (v.crit / v.crit_c.cur) * v.crit_c.new; 
+        newV.critDmgAtk = (v.critDmgAtk / v.critDmgAtk_c.cur) * v.critDmgAtk_c.new; 
+        newV.def = (v.def / v.def_c.cur) * v.def_c.new; 
+        newV.critRes = (v.critRes / v.critRes_c.cur) * v.critRes_c.new; 
+        newV.critDmgRes = (v.critDmgRes / v.critDmgRes_c.cur) * v.critDmgRes_c.new;
+        
+        res = calculateAll(newV); 
+        impTexts.expected.innerHTML = formatImp(oldRes.expected, res.expected); 
+        impTexts.normal.innerHTML = formatImp(oldRes.normal, res.normal); 
+        impTexts.critDmg.innerHTML = formatImp(oldRes.crit, res.crit); 
+        impTexts.critRate.innerHTML = formatImp(oldRes.critRate, res.critRate, true);
+        
+        // Show corrected stats
+        document.getElementById('crayon-stats-display').style.display = 'block';
+        document.getElementById('corr-atk').textContent = Math.floor(newV.atk).toLocaleString();
+        document.getElementById('corr-crit').textContent = Math.floor(newV.crit).toLocaleString();
+        document.getElementById('corr-crit-dmg').textContent = Math.floor(newV.critDmgAtk).toLocaleString();
+        document.getElementById('corr-def').textContent = Math.floor(newV.def).toLocaleString();
+        document.getElementById('corr-crit-res').textContent = Math.floor(newV.critRes).toLocaleString();
+        document.getElementById('corr-crit-dmg-res').textContent = Math.floor(newV.critDmgRes).toLocaleString();
+    } else {
+        document.getElementById('crayon-stats-display').style.display = 'none';
     }
     results.normal.textContent = Math.floor(res.normal).toLocaleString(); results.critDmg.textContent = Math.floor(res.crit).toLocaleString(); results.expected.textContent = Math.floor(res.expected).toLocaleString(); results.critRate.textContent = (res.critRate * 100).toFixed(1) + '%';
     updateChart(v.isCrayon ? newV : v);

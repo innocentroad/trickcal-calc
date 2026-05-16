@@ -665,7 +665,7 @@ function estimateDefSide(rows, common) {
 }
 
 // --- Persistence Logic ---
-const STORAGE_KEY = 'trickcal_calc_state_v1.7';
+const STORAGE_KEY = 'trickcal_calc_state_v1.7.2';
 function saveState() {
     const state = { main: {}, estCommon: {}, estMode: estimator.mode.value, samples: [], tab: document.querySelector('.tab-btn.active').dataset.tab, dmgType: inputs.dmgType.value, crayon: inputs.crayonSwitch.checked };
     Object.entries(inputs).forEach(([key, obj]) => { 

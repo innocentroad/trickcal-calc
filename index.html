@@ -6,19 +6,36 @@
     <title>Trickcal Damage Calculator</title>
     <link rel="icon" href="ico.webp?v=2.0.1" type="image/webp">
     <link rel="stylesheet" href="style.css?v=2.0.1">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         try {
             const raw = localStorage.getItem('trickcal_calc_state_v1.8');
             const state = raw ? JSON.parse(raw) : null;
             document.documentElement.dataset.initialPerspective = state?.perspective || 'self';
+            document.documentElement.dataset.initialTab = state?.tab || 'calc';
         } catch (e) {
             document.documentElement.dataset.initialPerspective = 'self';
+            document.documentElement.dataset.initialTab = 'calc';
         }
     </script>
     <style>
         .app-container { position: relative; }
+        html[data-initial-tab="calc"] .tab-btn[data-tab="calc"],
+        html[data-initial-tab="spell"] .tab-btn[data-tab="spell"],
+        html[data-initial-tab="crayon"] .tab-btn[data-tab="crayon"],
+        html[data-initial-tab="est"] .tab-btn[data-tab="est"] {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        html[data-initial-tab="calc"] #tab-calc,
+        html[data-initial-tab="spell"] #tab-spell,
+        html[data-initial-tab="crayon"] #tab-crayon,
+        html[data-initial-tab="est"] #tab-est {
+            display: block;
+            padding-bottom: 160px;
+        }
         #reset-btn {
             position: absolute;
             top: 12px;
@@ -55,7 +72,8 @@
             <div class="header-content">
                 <h1>Trickcal Damage Calc <small style="font-size: 0.5em; opacity: 0.7;">v2.0</small></h1>
                 <div class="tabs header-tabs">
-                    <button class="tab-btn active" data-tab="calc">ダメージ<br>計算</button>
+                    <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
+                    <button class="tab-btn" data-tab="spell">スペル<br>カード</button>
                     <button class="tab-btn" data-tab="crayon">クレヨン<br>比較</button>
                     <button class="tab-btn" data-tab="est">ステータス<br>推定</button>
                 </div>
@@ -67,7 +85,7 @@
 
         <main class="dashboard">
             <!-- Calculation Mode View -->
-            <div id="tab-calc" class="tab-page active">
+            <div id="tab-calc" class="tab-page">
                 <div class="calc-layout">
                     <!-- Top Section: Inputs -->
                     <div class="panel input-panel">
@@ -109,23 +127,27 @@
                                         </select>
                                     </span>
                                 </h2>
-                                <div class="input-group">
+                                <div class="input-group compact-meta-row">
                                     <label>プリセット</label>
                                     <div class="preset-row">
                                         <select id="self-preset" class="preset-select">
                                             <option value="">-- 手動入力 --</option>
                                         </select>
                                         <button id="save-self-preset" class="icon-btn" title="現在のステータスを保存">💾</button>
-                                        <button id="del-self-preset" class="icon-btn" title="選択中のカスタムプリセットを削除" style="display: none;">❌</button>
+                                        <button id="del-self-preset" class="icon-btn preset-action-hidden" title="選択中のカスタムプリセットを削除">❌</button>
                                     </div>
                                 </div>
-                                <div class="input-group phase-row-spacer" aria-hidden="true">
+                                <div class="input-group compact-meta-row phase-row-spacer phase-inline-row" aria-hidden="true">
                                     <label>フェーズ</label>
-                                    <select class="preset-select" tabindex="-1">
-                                        <option>--</option>
-                                    </select>
+                                    <div class="phase-row-controls">
+                                        <select class="preset-select" tabindex="-1">
+                                            <option>--</option>
+                                        </select>
+                                        <span class="phase-action-spacer" aria-hidden="true"></span>
+                                        <span class="phase-action-spacer" aria-hidden="true"></span>
+                                    </div>
                                 </div>
-                                
+
                                 <div class="stat-category">
                                     <h3 class="stat-cat-header">攻撃ステータス</h3>
                                     <div class="multipliers-grid">
@@ -153,14 +175,14 @@
                                             <input type="number" id="self-crit-res" value="30000">
                                         </div>
                                         <div class="input-group">
-                                            <label>会心DMG抵</label>
+                                            <label>会心DMG抵抗</label>
                                             <input type="number" id="self-crit-dmg-res" value="30000">
                                         </div>
                                     </div>
                                 </div>
                                 
         <div class="dynamic-section self-mult-section">
-            <h3 class="stat-cat-header" style="margin-top: 1rem;">倍率 (%)</h3>
+            <h3 class="stat-cat-header">倍率 (%)</h3>
             <div class="multipliers-grid">
                 <div class="input-group">
                     <label>スキル 
@@ -172,7 +194,7 @@
                     <input type="number" id="self-mult-skill-number" min="0" max="10000" value="100">
                 </div>
                 <div class="input-group" id="self-add-mult-group">
-                    <label>与/被DMG</label>
+                    <label>与被DMG増減</label>
                     <input type="number" id="self-mult-add-number" min="0" max="1000" value="100">
                 </div>
                 <div class="input-group">
@@ -197,7 +219,7 @@
         </div>
 
         <div class="dynamic-section self-atk-adds-section">
-            <h3 class="stat-cat-header" style="margin-top: 1rem;">追加 (%)</h3>
+            <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
                 <div class="input-group">
                     <label>攻撃力</label>
@@ -215,7 +237,7 @@
         </div>
 
         <div class="dynamic-section self-def-adds-section disabled-section">
-            <h3 class="stat-cat-header" style="margin-top: 1rem;">追加 (%)</h3>
+            <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
                 <div class="input-group">
                     <label>防御力</label>
@@ -232,24 +254,54 @@
             </div>
         </div>
 
+                                <div class="card-section card-section-bottom" id="self-card-section">
+                                    <div class="card-section-header">
+                                        <h3 class="stat-cat-header">遺物カード</h3>
+                                        <div class="card-section-header-meta">
+                                            <span class="card-section-cost-label">合計コスト</span>
+                                            <span class="card-section-cost-inline" id="self-artifact-cost-inline">
+                                                <img src="img/Card/cost.webp" alt="" class="card-section-cost-icon">
+                                                <span class="card-section-cost-fill" id="self-artifact-cost-fill">0</span>
+                                                <span class="card-section-cost-value" id="self-artifact-cost-value">0</span>
+                                            </span>
+                                            <button type="button" id="self-artifact-clear-all" class="card-section-clear-btn" title="装備を外す">装備を外す</button>
+                                        </div>
+                                    </div>
+                                    <div class="card-group">
+                                        <div id="self-relic-slots" class="card-slots"></div>
+                                    </div>
+                                    <div class="card-summary" id="self-card-summary">カード補正: なし</div>
+                                    <div id="relic-effect-popover" class="spell-effect-popover relic-effect-popover" style="display: none;">
+                                        <div class="spell-effect-popover-head">
+                                            <strong id="relic-effect-popover-title">遺物カード効果</strong>
+                                            <button type="button" id="relic-effect-popover-close" class="spell-effect-popover-close" aria-label="閉じる">×</button>
+                                        </div>
+                                        <div id="relic-effect-popover-body" class="spell-effect-popover-body"></div>
+                                    </div>
+                                </div>
+
                             </div>
 
                             <!-- Enemy Panel -->
                             <div class="side-panel enemy-side is-defender">
                                 <h2 class="side-header">敵キャラ <span class="role-badge">Defender</span><span id="weakness-badge" class="weakness-badge" style="display: none;"></span></h2>
-                                <div class="input-group">
+                                <div class="input-group compact-meta-row">
                                     <label>プリセット</label>
                                     <div class="preset-row">
                                         <select id="enemy-preset" class="preset-select">
                                             <option value="">-- 手動入力 --</option>
                                         </select>
                                         <button id="save-enemy-preset" class="icon-btn" title="現在のステータスを保存">💾</button>
-                                        <button id="del-enemy-preset" class="icon-btn" title="選択中のカスタムプリセットを削除" style="display: none;">❌</button>
+                                        <button id="del-enemy-preset" class="icon-btn preset-action-hidden" title="選択中のカスタムプリセットを削除">❌</button>
                                     </div>
                                 </div>
-                                <div class="input-group" id="enemy-phase-group" style="display: none;">
+                                <div class="input-group compact-meta-row phase-inline-row" id="enemy-phase-group" style="display: none;">
                                     <label>フェーズ</label>
-                                    <select id="enemy-phase" class="preset-select"></select>
+                                    <div class="phase-row-controls">
+                                        <select id="enemy-phase" class="preset-select"></select>
+                                        <span class="phase-action-spacer" aria-hidden="true"></span>
+                                        <span class="phase-action-spacer" aria-hidden="true"></span>
+                                    </div>
                                 </div>
 
                                 <div class="stat-category">
@@ -279,14 +331,14 @@
                                             <input type="number" id="enemy-crit-res" value="30000">
                                         </div>
                                         <div class="input-group">
-                                            <label>会心DMG抵</label>
+                                            <label>会心DMG抵抗</label>
                                             <input type="number" id="enemy-crit-dmg-res" value="30000">
                                         </div>
                                     </div>
                                 </div>
                                 
         <div class="dynamic-section enemy-mult-section disabled-section">
-            <h3 class="stat-cat-header" style="margin-top: 1rem;">倍率 (%)</h3>
+            <h3 class="stat-cat-header">倍率 (%)</h3>
             <div class="multipliers-grid">
                 <div class="input-group">
                     <label>スキル 
@@ -298,7 +350,7 @@
                     <input type="number" id="enemy-mult-skill-number" min="0" max="10000" value="100">
                 </div>
                 <div class="input-group" id="enemy-add-mult-group">
-                    <label>与/被DMG</label>
+                    <label>与被DMG増減</label>
                     <input type="number" id="enemy-mult-add-number" min="0" max="1000" value="100">
                 </div>
                 <div class="input-group">
@@ -323,7 +375,7 @@
         </div>
 
         <div class="dynamic-section enemy-atk-adds-section disabled-section">
-            <h3 class="stat-cat-header" style="margin-top: 1rem;">追加 (%)</h3>
+            <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
                 <div class="input-group">
                     <label>攻撃力</label>
@@ -341,7 +393,7 @@
         </div>
 
         <div class="dynamic-section enemy-def-adds-section">
-            <h3 class="stat-cat-header" style="margin-top: 1rem;">追加 (%)</h3>
+            <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
                 <div class="input-group">
                     <label>防御力</label>
@@ -358,6 +410,16 @@
             </div>
         </div>
 
+        <div class="dynamic-section enemy-debuff-section">
+            <h3 class="stat-cat-header">デバフ</h3>
+            <div class="multipliers-grid">
+                <div class="input-group">
+                    <label>毒スタック</label>
+                    <input type="number" id="enemy-debuff-poison-stacks" min="0" max="9" value="0">
+                </div>
+            </div>
+        </div>
+
                             </div>
                         </div> <!-- End of .side-panels -->
 
@@ -365,6 +427,95 @@
 
                         </div> <!-- End of .calc-layout -->
             </div> <!-- End of #tab-calc -->
+
+            <div id="relic-picker-popover" class="relic-picker-popover" style="display: none;">
+                <div class="relic-picker-backdrop" id="relic-picker-backdrop"></div>
+                <div class="relic-picker-dialog">
+                    <div class="relic-picker-head">
+                        <strong id="relic-picker-title">遺物カードを選択</strong>
+                        <button type="button" id="relic-picker-close" class="spell-effect-popover-close" aria-label="閉じる">×</button>
+                    </div>
+                    <div id="relic-picker-grid" class="relic-picker-grid"></div>
+                </div>
+            </div>
+
+            <!-- Spell Card Mode View -->
+            <div id="tab-spell" class="tab-page">
+                <div class="spell-layout">
+                    <div class="panel spell-panel">
+                        <div class="spell-header">
+                            <div class="spell-title-wrap">
+                                <h2>スペルカード</h2>
+                                <div class="spell-help-anchor">
+                                    <span class="help-icon" id="spell-help-toggle" title="ヘルプ">i</span>
+                                    <div id="spell-help-text" class="spell-help-popover" style="display:none;">
+                                        画像一覧から選択して、選択中のスペルカードと合計コストを管理します。
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="spell-header-actions">
+                                <button type="button" id="spell-toggle-selected" class="secondary-btn spell-toggle-btn">選択中を表示</button>
+                                <label class="spell-apply-toggle">
+                                    <input type="checkbox" id="spell-apply-toggle">
+                                    <span>計算結果に反映</span>
+                                </label>
+                                <div class="spell-cost-box">
+                                    <span>合計</span>
+                                    <span class="spell-header-cost-inline">
+                                        <img src="img/Card/cost.webp" alt="" class="spell-header-cost-icon">
+                                        <span class="spell-header-cost-fill" id="spell-total-cost-fill">0</span>
+                                        <span class="spell-header-cost-value" id="spell-total-cost">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spell-grid">
+                            <div class="spell-bonus-summary spell-bonus-summary-top" id="spell-bonus-summary">補正合計: なし</div>
+                            <div class="spell-selected-panel spell-selected-panel-top" id="spell-selected-panel" style="display: none;">
+                                <div class="spell-panel-title-row">
+                                    <h3 id="spell-selected-title">選択中スペル</h3>
+                                    <button type="button" id="spell-clear-all" class="secondary-btn">すべて外す</button>
+                                </div>
+                                <div id="spell-selected-list" class="spell-selected-list"></div>
+                            </div>
+
+                            <div class="spell-library-panel">
+                                <div class="spell-panel-title-row">
+                                    <h3>カード一覧</h3>
+                                    <div class="spell-filter-row">
+                                        <div class="spell-bulk-grade-row">
+                                            <span class="spell-bulk-grade-label">全カード★</span>
+                                            <div class="spell-bulk-grade-actions" id="spell-bulk-grade-actions">
+                                                <button type="button" class="spell-bulk-grade-btn" data-star="1">1</button>
+                                                <button type="button" class="spell-bulk-grade-btn" data-star="2">2</button>
+                                                <button type="button" class="spell-bulk-grade-btn" data-star="3">3</button>
+                                                <button type="button" class="spell-bulk-grade-btn" data-star="4">4</button>
+                                                <button type="button" class="spell-bulk-grade-btn" data-star="5">5</button>
+                                            </div>
+                                        </div>
+                                        <select id="spell-rarity-filter" class="preset-select spell-filter-select">
+                                            <option value="">全レア度</option>
+                                            <option value="伝説">伝説</option>
+                                            <option value="希少">希少</option>
+                                            <option value="高級">高級</option>
+                                        </select>
+                                        <span id="spell-selected-summary" class="spell-selected-summary">未選択</span>
+                                    </div>
+                                </div>
+                                <div id="spell-library-grid" class="spell-library-grid"></div>
+                                <div id="spell-effect-popover" class="spell-effect-popover" style="display: none;">
+                                    <div class="spell-effect-popover-head">
+                                        <strong id="spell-effect-popover-title">効果設定</strong>
+                                        <button type="button" id="spell-effect-popover-close" class="spell-effect-popover-close" aria-label="閉じる">×</button>
+                                    </div>
+                                    <div id="spell-effect-popover-body" class="spell-effect-popover-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Crayon Board Mode View -->
             <div id="tab-crayon" class="tab-page">
@@ -665,6 +816,35 @@
                                 </div>
                             </div>
                         </div>
+                        <div id="crayon-stats-display" class="crayon-stats-panel" style="display:none;">
+                            <h3 class="crayon-stats-title">クレヨン適用後のステータス</h3>
+                            <div class="results-grid crayon-stats-grid">
+                                <div class="result-card crayon-stat-card">
+                                    <h4>攻撃力</h4>
+                                    <p id="corr-atk">0</p>
+                                </div>
+                                <div class="result-card crayon-stat-card">
+                                    <h4>会心</h4>
+                                    <p id="corr-crit">0</p>
+                                </div>
+                                <div class="result-card crayon-stat-card">
+                                    <h4>会心DMG</h4>
+                                    <p id="corr-crit-dmg">0</p>
+                                </div>
+                                <div class="result-card crayon-stat-card">
+                                    <h4>防御力</h4>
+                                    <p id="corr-def">0</p>
+                                </div>
+                                <div class="result-card crayon-stat-card">
+                                    <h4>会心抵抗</h4>
+                                    <p id="corr-crit-res">0</p>
+                                </div>
+                                <div class="result-card crayon-stat-card">
+                                    <h4>会心DMG抵抗</h4>
+                                    <p id="corr-crit-dmg-res">0</p>
+                                </div>
+                            </div>
+                        </div>
                         
                     </div>
                 </div>
@@ -687,7 +867,7 @@
                                 <h4>倍率補正 (%)</h4>
                                 <div class="multipliers-grid">
                                     <div class="input-group">
-                                        <label>与/被DMG</label>
+                                        <label>与被DMG増減</label>
                                         <input type="number" id="est-common-add" value="100">
                                     </div>
                                     <div class="input-group">
@@ -778,59 +958,52 @@
             <!-- Collapsible Details Panel (Graph & Crayon Stats) -->
             <div id="bottom-details-panel" class="bottom-details-panel collapsed">
                 <div class="details-content-wrapper">
-                    <div id="crayon-stats-display">
-                        <h3 style="margin-bottom: 8px; font-size: 0.9em; color: #94a3b8;">クレヨン適用後のステータス</h3>
-                        <div class="results-grid" style="grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 12px;">
-                            <div class="result-card" style="padding: 8px;">
-                                <h4 style="font-size: 0.7em; margin-bottom: 2px; color: #94a3b8;">攻撃力</h4>
-                                <p id="corr-atk" style="font-size: 0.9em; font-weight: 600;">0</p>
-                            </div>
-                            <div class="result-card" style="padding: 8px;">
-                                <h4 style="font-size: 0.7em; margin-bottom: 2px; color: #94a3b8;">会心</h4>
-                                <p id="corr-crit" style="font-size: 0.9em; font-weight: 600;">0</p>
-                            </div>
-                            <div class="result-card" style="padding: 8px;">
-                                <h4 style="font-size: 0.7em; margin-bottom: 2px; color: #94a3b8;">会心DMG</h4>
-                                <p id="corr-crit-dmg" style="font-size: 0.9em; font-weight: 600;">0</p>
-                            </div>
-                            <div class="result-card" style="padding: 8px;">
-                                <h4 style="font-size: 0.7em; margin-bottom: 2px; color: #94a3b8;">防御力</h4>
-                                <p id="corr-def" style="font-size: 0.9em; font-weight: 600;">0</p>
-                            </div>
-                            <div class="result-card" style="padding: 8px;">
-                                <h4 style="font-size: 0.7em; margin-bottom: 2px; color: #94a3b8;">会心抵抗</h4>
-                                <p id="corr-crit-res" style="font-size: 0.9em; font-weight: 600;">0</p>
-                            </div>
-                            <div class="result-card" style="padding: 8px;">
-                                <h4 style="font-size: 0.7em; margin-bottom: 2px; color: #94a3b8;">会心DMG抵抗</h4>
-                                <p id="corr-crit-dmg-res" style="font-size: 0.9em; font-weight: 600;">0</p>
+                    <div class="details-main-grid">
+                        <div id="final-modifier-display" class="final-modifier-display">
+                            <div class="final-modifier-panel">
+                                <div class="final-modifier-header">
+                                    <h3>最終補正値</h3>
+                                    <span id="final-modifier-perspective" class="final-modifier-perspective">攻撃側基準</span>
+                                </div>
+                                <div class="final-modifier-group">
+                                    <div class="final-modifier-group-title">最終ステータス</div>
+                                    <div id="final-core-chip-list" class="final-modifier-chip-list"></div>
+                                </div>
+                                <div class="final-modifier-group">
+                                    <div class="final-modifier-group-title">ダメージ倍率</div>
+                                    <div id="final-multiplier-chip-list" class="final-modifier-chip-list"></div>
+                                </div>
+                                <div class="final-modifier-group">
+                                    <div class="final-modifier-group-title">追加補正</div>
+                                    <div id="final-stat-chip-list" class="final-modifier-chip-list"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="graph-section">
-                        <div class="graph-controls" style="margin-bottom: 8px;">
-                            <div class="toggle-group">
-                                <select id="graph-perspective" style="padding: 2px 4px; font-size: 0.8rem;">
-                                    <option value="attacker">表示: 攻撃側</option>
-                                    <option value="defender">表示: 防御側</option>
-                                </select>
+                        <div class="graph-section">
+                            <div class="graph-controls" style="margin-bottom: 8px;">
+                                <div class="toggle-group">
+                                    <select id="graph-perspective" style="padding: 2px 4px; font-size: 0.8rem;">
+                                        <option value="attacker">表示: 攻撃側</option>
+                                        <option value="defender">表示: 防御側</option>
+                                    </select>
+                                </div>
+                                <div class="checkbox-group" style="font-size: 0.8rem;">
+                                    <label><input type="checkbox" id="show-normal" checked> 通常ダメージ</label>
+                                    <label><input type="checkbox" id="show-expected" checked> 期待値</label>
+                                    <label><input type="checkbox" id="show-crit" checked> 会心ダメージ</label>
+                                </div>
                             </div>
-                            <div class="checkbox-group" style="font-size: 0.8rem;">
-                                <label><input type="checkbox" id="show-normal" checked> 通常ダメージ</label>
-                                <label><input type="checkbox" id="show-expected" checked> 期待値</label>
-                                <label><input type="checkbox" id="show-crit" checked> 会心ダメージ</label>
+                            <div class="canvas-container" style="height: 250px;">
+                                <canvas id="damageChart"></canvas>
                             </div>
-                        </div>
-                        <div class="canvas-container" style="height: 200px;">
-                            <canvas id="damageChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
     <script src="presets.js?v=2.0.1"></script>
+    <script src="cards.js?v=2.0.1"></script>
     <script src="script.js?v=2.0.1"></script>
 </body>
 </html>
+

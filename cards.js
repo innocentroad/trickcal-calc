@@ -741,6 +741,58 @@ const CARD_LIBRARY = {
             ]
         },
         {
+            id: "relic_chloe_sewing_chest",
+            kind: "artifact",
+            rarity: "伝説",
+            signature: true,
+            favoriteCharacter: "クロエ",
+            name: "クロエの万能裁縫箱",
+            cost: 30,
+            bonusesByStar: [
+                { hasteP: 19.7, critResP: 14.8 },
+                { hasteP: 24.6, critResP: 18.5 },
+                { hasteP: 29.6, critResP: 22.2 },
+                { hasteP: 34.5, critResP: 25.9 },
+                { hasteP: 39.4, critResP: 29.6 }
+            ],
+            source: "user:はんだCSV/効果メモ",
+            conditionalEffects: [
+                {
+                    id: "shield_taken_reduction",
+                    type: "toggle",
+                    label: "シールド時 被ダメージ減少",
+                    shortLabel: "シールド時 被ダメ減",
+                    nonStacking: true,
+                    descriptionByStar: [
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない"
+                    ],
+                    bonusesByStar: [
+                        { takenDmgP: 18.0 },
+                        { takenDmgP: 21.0 },
+                        { takenDmgP: 24.0 },
+                        { takenDmgP: 27.0 },
+                        { takenDmgP: 30.0 }
+                    ]
+                },
+                {
+                    id: "signature_skill",
+                    type: "info",
+                    label: "Lv.1 パッシブスキル 強化",
+                    description: "強化対象の詳細は後日対応"
+                },
+                {
+                    id: "signature_lv3",
+                    type: "info",
+                    label: "Lv.3",
+                    description: "魔法攻撃力・会心抵抗・会心ダメージ抵抗+9%"
+                }
+            ]
+        },
+        {
             id: "relic_dragon_sword",
             kind: "artifact",
             rarity: "伝説",
@@ -2253,6 +2305,93 @@ const CARD_LIBRARY = {
         }
     ]
 };
+
+const CARD_SOLDER_DATA = {
+    relic_yomi_flower: { 1: { critRateP: 5.2, critDmgP: 2.8 }, 2: { critRateP: 10.5, critDmgP: 5.7 } },
+    relic_elfin_ice_cake: { 1: { atkP: 3.8, hpP: 4.9 }, 2: { atkP: 7.5, hpP: 9.9 } },
+    relic_butter_yellow_card: { 1: { atkP: 4.4, hasteP: 3.5 }, 2: { atkP: 8.8, hasteP: 7.0 } },
+    relic_vivi_baton: { 1: { hpP: 6.4, critDmgResP: 1.6 }, 2: { hpP: 12.8, critDmgResP: 3.3 } },
+    relic_elena_drone: { 1: { hpP: 4.1, atkP: 3.4 }, 2: { hpP: 8.3, atkP: 6.7 } },
+    relic_ritz_whetstone: { 1: { hpP: 4.6, defP: 4.6 }, 2: { hpP: 9.2, defP: 9.2 } },
+    relic_blanse_bouquet: { 1: { critRateP: 1.7, critDmgP: 1.1 }, 2: { critRateP: 3.3, critDmgP: 2.1 } },
+    relic_picola_pouch: { 1: { atkP: 4.6, healingP: 3.7 }, 2: { atkP: 9.2, healingP: 7.4 } },
+    relic_chloe_sewing_chest: { 1: { hasteP: 4.9, critResP: 3.7 }, 2: { hasteP: 9.9, critResP: 7.4 } },
+    relic_shion_black_cloak: { 1: { atkP: 7.9, critRateP: 3.3 }, 2: { atkP: 15.8, critRateP: 6.6 } },
+    relic_naia_watergun: { 1: { hpP: 4.9, defP: 3.8 }, 2: { hpP: 9.9, defP: 7.5 } },
+    relic_shupan_backpack: { 1: { hpP: 6.4, atkP: 4.8 }, 2: { hpP: 12.8, atkP: 9.7 } },
+    relic_snoky_fedora: { 1: { hasteP: 2.8, hpP: 4.7 }, 2: { hasteP: 5.7, hpP: 9.4 } },
+    relic_serine_night_mirage: { 1: { critResP: 3.4, critDmgResP: 1.9 }, 2: { critResP: 6.9, critDmgResP: 3.8 } },
+    relic_carrot_cane: { 1: { hasteP: 2.6, defP: 3.3 }, 2: { hasteP: 5.3, defP: 6.7 } },
+    relic_dragon_sword: { 1: { atkP: 10.0 }, 2: { atkP: 20.1 } },
+    relic_life_gem: { 1: { hpP: 6.1, critDmgResP: 1.6 }, 2: { hpP: 12.3, critDmgResP: 3.1 } },
+    relic_30kg_kettlebell: { 1: { critRateP: 4.4, critDmgP: 2.3 }, 2: { critRateP: 8.8, critDmgP: 4.7 } },
+    relic_nisril_knife: { 1: { atkP: 4.1, hasteP: 3.4 }, 2: { atkP: 8.3, hasteP: 6.7 } },
+    relic_fuwafuwa_vest: { 1: { defP: 6.6 }, 2: { defP: 13.2 } },
+    relic_eldain_lamp: { 1: { healingP: 9.9 }, 2: { healingP: 19.8 } },
+    relic_assassin_book: { 1: { atkP: 2.0, critRateP: 2.0 }, 2: { atkP: 4.1, critRateP: 4.1 } },
+    relic_sword_staff: { 1: { atkP: 3.4, hasteP: 2.7 }, 2: { atkP: 6.9, hasteP: 5.5 } },
+    relic_safety_belt: { 1: { hpP: 8.8 }, 2: { hpP: 17.5 } },
+    relic_battle_manual: { 1: { critRateP: 2.9, critDmgP: 1.6 }, 2: { critRateP: 5.9, critDmgP: 3.2 } },
+    relic_blue_grimoire: { 1: { atkP: 5.9 }, 2: { atkP: 11.8 } },
+    relic_scale_armor: { 1: { hpRecoveryP: 1.3, defP: 2.5 }, 2: { hpRecoveryP: 2.6, defP: 5.0 } },
+    relic_blessed_pauldron: { 1: { hpP: 3.0, defP: 2.3 }, 2: { hpP: 6.1, defP: 4.6 } },
+    relic_origin_grail: { 1: { critDmgP: 1.2, hasteP: 1.7 }, 2: { critDmgP: 2.4, hasteP: 3.4 } },
+    relic_high_priest_censer: { 1: { defP: 4.3 }, 2: { defP: 8.7 } },
+    relic_madness_mask: { 1: { critDmgResP: 1.3 }, 2: { critDmgResP: 2.7 } },
+    relic_healing_pendant: { 1: { healingP: 3.2 }, 2: { healingP: 6.4 } },
+    relic_obsidian_shuriken: { 1: { atkP: 3.3 }, 2: { atkP: 6.7 } },
+    relic_greed_ring: { 1: { critDmgResP: 0.8 }, 2: { critDmgResP: 1.7 } },
+    relic_oldwood_dagger: { 1: { critDmgP: 1.3 }, 2: { critDmgP: 2.6 } },
+    relic_elf_staff: { 1: { hpRecoveryP: 1.1 }, 2: { hpRecoveryP: 2.2 } },
+    relic_gem_ring: { 1: { atkP: 1.0, critDmgP: 0.6 }, 2: { atkP: 2.1, critDmgP: 1.1 } },
+    relic_thorn_crown: { 1: { defP: 1.9 }, 2: { defP: 3.8 } },
+    relic_old_arrow: { 1: { hasteP: 1.5 }, 2: { hasteP: 3.0 } },
+    relic_frost_charm: { 1: { critResP: 1.1 }, 2: { critResP: 2.2 } },
+    relic_furoshiki_robe: { 1: { critResP: 1.1 }, 2: { critResP: 2.2 } },
+    relic_shining_tiara: { 1: { healingP: 1.1 }, 2: { healingP: 2.2 } },
+    relic_cardboard_armor: { 1: { defP: 1.6 }, 2: { defP: 3.3 } },
+    relic_rusty_awl: { 1: { critRateP: 1.1 }, 2: { critRateP: 2.2 } },
+
+    spell_alice_hex: { 1: { atkP: 1.9, critRateP: 1.9 }, 2: { atkP: 3.9, critRateP: 3.9 } },
+    spell_epica_anthem: { 1: { atkP: 2.6, critDmgP: 1.3 }, 2: { atkP: 5.2, critDmgP: 2.7 } },
+    spell_yiide_dream: { 1: { critResP: 1.9, critDmgResP: 1.0 }, 2: { critResP: 3.8, critDmgResP: 2.1 } },
+    spell_suspicious_potion: { 1: { critRateP: 4.7, critDmgP: 2.9 }, 2: { critRateP: 5.9, critDmgP: 3.7 } },
+    spell_beauty_is_sin: { 1: { critRateP: 2.4, critDmgP: 1.2 }, 2: { critRateP: 4.8, critDmgP: 2.5 } },
+    spell_battle_master: { 1: { atkP: 4.0 }, 2: { atkP: 8.1 } },
+    spell_aromatherapy: { 1: { healingP: 0.6, hpRecoveryP: 0.4 }, 2: { healingP: 1.3, hpRecoveryP: 0.9 } },
+    spell_motivation_up: { 1: { critRateP: 1.5, hasteP: 1.2 }, 2: { critRateP: 3.0, hasteP: 2.4 } },
+    spell_caring: { 1: { hpP: 1.8, healingP: 1.1 }, 2: { hpP: 3.6, healingP: 2.2 } },
+    spell_center_best: { 1: { critDmgP: 1.3 }, 2: { critDmgP: 2.7 } },
+    spell_frontline: { 1: { defP: 2.5 }, 2: { defP: 4.9 } },
+    spell_backline: { 1: { hasteP: 2.0 }, 2: { hasteP: 3.9 } },
+    spell_personality_madness: { 1: { atkP: 1.9 }, 2: { atkP: 3.9 } },
+    spell_personality_lively: { 1: { critRateP: 1.9 }, 2: { critRateP: 3.9 } },
+    spell_personality_pure: { 1: { hpRecoveryP: 1.0 }, 2: { hpRecoveryP: 2.0 } },
+    spell_personality_gloomy: { 1: { defP: 1.9 }, 2: { defP: 3.9 } },
+    spell_personality_calm: { 1: { critDmgP: 1.0 }, 2: { critDmgP: 2.0 } },
+    spell_speedy_movement: { 1: { hasteP: 0.8, critDmgP: 0.5 }, 2: { hasteP: 1.5, critDmgP: 1.0 } },
+    spell_firm_conviction: { 1: { critResP: 0.5, critDmgResP: 0.3 }, 2: { critResP: 1.0, critDmgResP: 0.6 } },
+    spell_critical_strike: { 1: { critRateP: 0.7, critDmgP: 0.4 }, 2: { critRateP: 1.4, critDmgP: 0.8 } },
+    spell_hp_training: { 1: { hpP: 1.0, defP: 0.7 }, 2: { hpP: 2.0, defP: 1.4 } },
+    spell_bulletproof: { 1: { hpP: 1.0, defP: 0.7 }, 2: { hpP: 1.9, defP: 1.4 } },
+    spell_health_best: { 1: { defP: 1.2 }, 2: { defP: 2.4 } },
+    spell_afterimage: { 1: { hasteP: 0.8 }, 2: { hasteP: 1.7 } },
+    spell_personal_training: { 1: { hpP: 0.7, critResP: 0.2 }, 2: { hpP: 1.3, critResP: 0.5 } },
+    spell_you_can_do_it: { 1: { atkP: 0.9 }, 2: { atkP: 1.9 } },
+    spell_apprentice_mage: { 1: { atkP: 0.5, critDmgP: 0.3 }, 2: { atkP: 0.9, critDmgP: 0.5 } },
+    spell_catch_him: { 1: { hasteP: 0.3, critRateP: 0.5 }, 2: { hasteP: 0.7, critRateP: 0.9 } },
+    spell_random_coin: { 1: { hpP: 1.2 }, 2: { hpP: 2.3 } },
+    spell_tree_bark: { 1: { hpRecoveryP: 0.3, defP: 0.5 }, 2: { hpRecoveryP: 0.5, defP: 0.9 } },
+    spell_rookie_fighter: { 1: { atkP: 0.4, critRateP: 0.4 }, 2: { atkP: 0.8, critRateP: 0.8 } },
+    spell_soda_capsule: { 1: { defP: 0.4 }, 2: { defP: 0.8 } },
+    spell_strawberry_capsule: { 1: { hpP: 0.4 }, 2: { hpP: 0.8 } }
+};
+
+for (const card of [...CARD_LIBRARY.artifacts, ...CARD_LIBRARY.spells]) {
+    if (CARD_SOLDER_DATA[card.id]) {
+        card.solderBonuses = CARD_SOLDER_DATA[card.id];
+    }
+}
 
 const CARD_INDEX = Object.fromEntries(
     [...CARD_LIBRARY.artifacts, ...CARD_LIBRARY.spells].map(card => [card.id, card])

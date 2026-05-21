@@ -145,6 +145,8 @@ let activeSpellEffectPopoverCardId = null;
 let activeSpellEffectPopoverAnchor = null;
 let activeRelicPickerSlot = null;
 let activeRelicEffectAnchor = null;
+let activeSolderPopoverAnchor = null;
+let activeSolderPopoverContext = null;
 
 function syncBottomBarSafeArea() {
     const bottomBar = document.querySelector('.bottom-result-bar');
@@ -200,6 +202,8 @@ function calcCritMultiplier(critAtk, critDmgRes) {
 function createEmptyCardBonus() {
     return {
         hpP: 0,
+        healingP: 0,
+        hpRecoveryP: 0,
         atkP: 0,
         defP: 0,
         enemyDefDownP: 0,
@@ -220,7 +224,7 @@ function createEmptyCardBonus() {
 
 function accumulateCardBonus(target, source) {
     if (!source) return target;
-    ['hpP', 'atkP', 'defP', 'enemyDefDownP', 'hasteP', 'critRateP', 'critDmgP', 'critResP', 'critDmgResP', 'enemyCritResDownP', 'enemyCritDmgResDownP', 'addP', 'takenDmgP', 'specialP', 'otherP'].forEach(key => {
+    ['hpP', 'healingP', 'hpRecoveryP', 'atkP', 'defP', 'enemyDefDownP', 'hasteP', 'critRateP', 'critDmgP', 'critResP', 'critDmgResP', 'enemyCritResDownP', 'enemyCritDmgResDownP', 'addP', 'takenDmgP', 'specialP', 'otherP'].forEach(key => {
         target[key] = (target[key] || 0) + (source[key] || 0);
     });
     return target;
@@ -234,10 +238,29 @@ function createEmptyCardEffectState(card) {
     return state;
 }
 
+function getCardSolderMaxLevel(card) {
+    const explicitMax = parseInt(card?.solderMax ?? '', 10);
+    if (explicitMax > 0) return explicitMax;
+    if (card?.solderBonuses && typeof card.solderBonuses === 'object') {
+        const levels = Object.keys(card.solderBonuses)
+            .map(key => parseInt(key, 10))
+            .filter(Number.isFinite);
+        if (levels.length > 0) return Math.max(...levels);
+    }
+    return 2;
+}
+
+function normalizeCardSolderLevel(card, rawLevel) {
+    const maxLevel = getCardSolderMaxLevel(card);
+    const level = Math.max(0, parseInt(rawLevel || 0, 10) || 0);
+    return Math.min(level, maxLevel);
+}
+
 function normalizeSpellEntry(card, rawEntry = {}) {
     const normalized = {
         star: Math.max(1, Math.min(5, parseInt(rawEntry.star || 1, 10) || 1)),
         qty: Math.max(0, parseInt(rawEntry.qty || 0, 10) || 0),
+        solder: normalizeCardSolderLevel(card, rawEntry.solder || 0),
         effects: createEmptyCardEffectState(card)
     };
     if (rawEntry.effects && typeof rawEntry.effects === 'object') {
@@ -351,6 +374,101 @@ function createGradeDisplay(currentStar) {
         wrap.appendChild(img);
     }
     return wrap;
+}
+
+function createSolderButton(card, currentLevel, onOpen, enabled = true) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'solder-pill-btn';
+    btn.textContent = `はんだ +${currentLevel}`;
+    btn.dataset.level = String(currentLevel);
+    btn.classList.toggle('is-disabled', !enabled);
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!enabled) return;
+        onOpen(btn);
+    });
+    return btn;
+}
+
+function ensureSolderPopoverLayer() {
+    const appContainer = document.querySelector('.app-container');
+    let popover = document.getElementById('solder-level-popover');
+    if (!popover) {
+        popover = document.createElement('div');
+        popover.id = 'solder-level-popover';
+        popover.className = 'solder-level-popover';
+        popover.style.display = 'none';
+        appContainer?.appendChild(popover);
+    } else if (appContainer && popover.parentElement !== appContainer) {
+        appContainer.appendChild(popover);
+    }
+    return popover;
+}
+
+function closeSolderPopover() {
+    const popover = document.getElementById('solder-level-popover');
+    if (popover) popover.style.display = 'none';
+    activeSolderPopoverAnchor = null;
+    activeSolderPopoverContext = null;
+}
+
+function positionSolderPopover(anchorEl) {
+    const popover = document.getElementById('solder-level-popover');
+    if (!popover || !anchorEl) return;
+    const anchorRect = anchorEl.getBoundingClientRect();
+    const popRect = popover.getBoundingClientRect();
+    const gap = 8;
+    let left = anchorRect.left + (anchorRect.width / 2) - (popRect.width / 2);
+    let top = anchorRect.bottom + gap;
+    const maxLeft = window.innerWidth - popRect.width - 12;
+    left = Math.max(12, Math.min(maxLeft, left));
+    const maxTop = window.innerHeight - popRect.height - 12;
+    if (top > maxTop) {
+        top = Math.max(12, anchorRect.top - popRect.height - gap);
+    }
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function openSolderPopover(card, currentLevel, onSelect, anchorEl) {
+    const popover = ensureSolderPopoverLayer();
+    if (!popover || !card || !anchorEl) return;
+    const maxLevel = getCardSolderMaxLevel(card);
+    popover.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'solder-level-list';
+    for (let level = 0; level <= maxLevel; level++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'solder-level-option';
+        const title = document.createElement('span');
+        title.className = 'solder-level-option-title';
+        title.textContent = `+${level}`;
+        const bonus = level > 0 ? (card.solderBonuses?.[level] || null) : null;
+        const parts = bonus ? formatCardSummaryParts(bonus) : [];
+        const desc = document.createElement('span');
+        desc.className = 'solder-level-option-desc';
+        desc.textContent = level === 0
+            ? '追加効果なし'
+            : (parts.length ? parts.join(' / ') : '追加効果データなし');
+        btn.classList.toggle('active', level === currentLevel);
+        btn.appendChild(title);
+        btn.appendChild(desc);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSelect(level);
+            closeSolderPopover();
+        });
+        list.appendChild(btn);
+    }
+    popover.appendChild(list);
+    popover.style.display = 'block';
+    activeSolderPopoverAnchor = anchorEl;
+    activeSolderPopoverContext = { cardId: card.id };
+    positionSolderPopover(anchorEl);
 }
 
 function populateCardSelectOptions(select, kind) {
@@ -593,6 +711,7 @@ function updateRelicSlotVisual(slot) {
     const media = slot.querySelector('.card-relic-media');
     const bg = slot.querySelector('.card-relic-bg');
     const gradeHost = slot.querySelector('.card-relic-grade-host');
+    const solderHost = slot.querySelector('.card-relic-solder-host');
     const placeholder = slot.querySelector('.card-relic-placeholder');
     const costValue = slot.querySelector('.card-relic-cost-value');
     const costFill = slot.querySelector('.card-relic-cost-fill');
@@ -672,6 +791,23 @@ function updateRelicSlotVisual(slot) {
             gradeHost.appendChild(picker);
         }
     }
+    if (solderHost) {
+        solderHost.innerHTML = '';
+        if (card) {
+            const currentStar = parseInt(slot.dataset.star || '1', 10) || 1;
+            const currentSolder = normalizeCardSolderLevel(card, slot.dataset.solder || 0);
+            const picker = createSolderButton(card, currentSolder, (anchorEl) => {
+                openSolderPopover(card, currentSolder, (value) => {
+                    slot.dataset.solder = String(normalizeCardSolderLevel(card, value));
+                    updateRelicSlotVisual(slot);
+                    updateUI();
+                    saveState();
+                }, anchorEl);
+            }, currentStar === 5);
+            picker.classList.add('card-relic-solder-btn');
+            solderHost.appendChild(picker);
+        }
+    }
 }
 
 function createRelicSlot(side, selection = {}) {
@@ -680,6 +816,7 @@ function createRelicSlot(side, selection = {}) {
     slot.dataset.side = side;
     slot.dataset.kind = 'artifact';
     slot.dataset.star = String(selection.star || 1);
+    slot.dataset.solder = String(selection.solder || 0);
     slot.dataset.effects = JSON.stringify(selection.effects || {});
 
     const mediaWrap = document.createElement('div');
@@ -721,6 +858,7 @@ function createRelicSlot(side, selection = {}) {
         <div class="card-relic-sub">遺物カードを選択</div>
         <div class="card-relic-grade-row">
             <button type="button" class="card-relic-remove-btn" title="外す" aria-label="外す">×</button>
+            <div class="card-relic-solder-host"></div>
         </div>
     `;
     info.querySelector('.card-relic-grade-row')?.appendChild(gradeHost);
@@ -766,6 +904,7 @@ function createRelicSlot(side, selection = {}) {
         e.stopPropagation();
         select.value = '';
         slot.dataset.star = '1';
+        slot.dataset.solder = '0';
         setRelicEffectState(slot, null, {});
         updateRelicSlotVisual(slot);
         updateUI();
@@ -774,6 +913,7 @@ function createRelicSlot(side, selection = {}) {
 
     select.addEventListener('change', () => {
         const nextCard = CARD_INDEX[select.value || ''];
+        slot.dataset.solder = '0';
         setRelicEffectState(slot, nextCard, {});
         updateRelicSlotVisual(slot);
         updateUI();
@@ -964,6 +1104,7 @@ function initializeCardUI() {
                 const select = row.querySelector('.card-select');
                 if (select) select.value = '';
                 row.dataset.star = '1';
+                row.dataset.solder = '0';
                 setRelicEffectState(row, null, {});
                 updateRelicSlotVisual(row);
             });
@@ -1006,6 +1147,7 @@ function collectCardSelections(side) {
     const readRow = row => ({
         cardId: row.querySelector('.card-select')?.value || '',
         star: parseInt(row.dataset.star || '1', 10) || 1,
+        solder: normalizeCardSolderLevel(CARD_INDEX[row.querySelector('.card-select')?.value || ''], row.dataset.solder || 0),
         effects: getRelicEffectState(row, CARD_INDEX[row.querySelector('.card-select')?.value || ''])
     });
     return {
@@ -1027,6 +1169,7 @@ function restoreCardSelections(side, state = {}) {
             select.value = saved.cardId || '';
         }
         row.dataset.star = String(saved.star || 1);
+        row.dataset.solder = String(saved.solder || 0);
         row.dataset.effects = JSON.stringify(saved.effects || {});
         updateRelicSlotVisual(row);
     });
@@ -1058,6 +1201,10 @@ function getCardBonusFromSelection(selection, context = {}) {
         ...baseBonus,
         note: card.note ? `${card.name}: ${card.note}` : ''
     };
+    const solderLevel = normalizeCardSolderLevel(card, selection.solder || 0);
+    if ((selection.star || 1) >= 5 && solderLevel > 0 && card.solderBonuses?.[solderLevel]) {
+        accumulateCardBonus(resolved, card.solderBonuses[solderLevel]);
+    }
     const effects = card.conditionalEffects || [];
     const effectState = selection.effects || {};
     const appliedNonStackingEffects = context.appliedNonStackingEffects;
@@ -1092,7 +1239,7 @@ function getCardBonusesForSide(side, includeSpellBonuses = false, context = {}) 
             const qty = entry?.qty || 0;
             if (qty <= 0) return;
             for (let i = 0; i < qty; i++) {
-                const resolved = getCardBonusFromSelection({ cardId, star: entry.star, effects: entry.effects }, nextContext);
+                const resolved = getCardBonusFromSelection({ cardId, star: entry.star, solder: entry.solder, effects: entry.effects }, nextContext);
                 if (!resolved) continue;
                 accumulateCardBonus(total, resolved);
             }
@@ -1104,6 +1251,8 @@ function getCardBonusesForSide(side, includeSpellBonuses = false, context = {}) 
 function formatCardSummaryParts(bonus) {
     const parts = [];
     if (bonus.hpP) parts.push(`HP ${formatSignedPercent(bonus.hpP)}`);
+    if (bonus.healingP) parts.push(`HP治癒量 ${formatSignedPercent(bonus.healingP)}`);
+    if (bonus.hpRecoveryP) parts.push(`HP回復量 ${formatSignedPercent(bonus.hpRecoveryP)}`);
     if (bonus.atkP) parts.push(`攻撃 ${formatSignedPercent(bonus.atkP)}`);
     if (bonus.defP) parts.push(`防御 ${formatSignedPercent(bonus.defP)}`);
     if (bonus.enemyDefDownP) parts.push(`敵防御減 ${formatSignedPercent(bonus.enemyDefDownP)}`);
@@ -1220,6 +1369,8 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
 function formatEffectBonusParts(bonus) {
     const parts = [];
     if (bonus.hpP) parts.push(`HP ${formatSignedPercent(bonus.hpP)}`);
+    if (bonus.healingP) parts.push(`HP治癒量 ${formatSignedPercent(bonus.healingP)}`);
+    if (bonus.hpRecoveryP) parts.push(`HP回復量 ${formatSignedPercent(bonus.hpRecoveryP)}`);
     if (bonus.atkP) parts.push(`攻撃 ${formatSignedPercent(bonus.atkP)}`);
     if (bonus.defP) parts.push(`防御 ${formatSignedPercent(bonus.defP)}`);
     if (bonus.enemyDefDownP) parts.push(`敵防御減 ${formatSignedPercent(bonus.enemyDefDownP)}`);
@@ -1388,7 +1539,7 @@ function setSpellSelectedPanelOpen(open) {
     if (panel) panel.style.display = open ? 'block' : 'none';
     if (toggleBtn) {
         toggleBtn.classList.toggle('active', open);
-        toggleBtn.textContent = open ? '選択中を隠す' : '選択中を表示';
+        toggleBtn.textContent = open ? '選択スペルを隠す' : '選択スペルを表示';
     }
     saveSpellSelectionsState();
 }
@@ -1435,6 +1586,18 @@ function setSpellQuantity(cardId, nextQty, nextStar = null) {
         entry.star = Math.max(1, Math.min(5, parseInt(nextStar, 10) || 1));
     }
     syncSpellLibraryVisual(cardId);
+    renderSelectedSpellList();
+    updateSpellTotalCost();
+    updateUI();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function updateSpellSolder(cardId, nextLevel) {
+    const entry = getSpellEntry(cardId);
+    const card = CARD_INDEX[cardId];
+    entry.solder = normalizeCardSolderLevel(card, nextLevel);
+    renderSpellLibrary();
     renderSelectedSpellList();
     updateSpellTotalCost();
     updateUI();
@@ -1779,7 +1942,7 @@ function toggleSpellEffectPopover(cardId, anchorEl) {
 function updateSpellStar(cardId, star) {
     const entry = getSpellEntry(cardId);
     entry.star = Math.max(1, Math.min(5, parseInt(star, 10) || 1));
-    syncSpellLibraryVisual(cardId);
+    renderSpellLibrary();
     renderSelectedSpellList();
     updateSpellTotalCost();
     updateUI();
@@ -1855,6 +2018,10 @@ function renderSpellLibrary() {
         gradePicker.classList.add('grade-picker-overlay');
         const qtyControls = document.createElement('div');
         qtyControls.className = 'spell-qty-controls';
+        const solderControls = createSolderButton(card, entry.solder || 0, (anchorEl) => {
+            openSolderPopover(card, entry.solder || 0, (value) => updateSpellSolder(card.id, value), anchorEl);
+        }, (entry.star || 1) === 5);
+        solderControls.classList.add('spell-solder-controls', 'spell-solder-btn-overlay');
 
         const minusBtn = document.createElement('button');
         minusBtn.type = 'button';
@@ -1879,6 +2046,7 @@ function renderSpellLibrary() {
         qtyControls.appendChild(qty);
         qtyControls.appendChild(plusBtn);
         actions.appendChild(qtyControls);
+        media.appendChild(solderControls);
 
         media.appendChild(img);
         media.appendChild(costBadge);
@@ -1934,12 +2102,32 @@ function renderSelectedSpellList() {
 
         const info = document.createElement('div');
         info.className = 'spell-selected-info';
-        info.innerHTML = `
-            <div class="spell-selected-name">${card.name}</div>
-            <div class="spell-selected-sub-row">
-                <div class="spell-selected-sub ${getSpellQtyTierClass(entry.qty)}">個数 ${entry.qty}</div>
-            </div>
-        `;
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'spell-selected-name';
+        nameEl.textContent = card.name;
+
+        const subRow = document.createElement('div');
+        subRow.className = 'spell-selected-sub-row';
+
+        const qtySub = document.createElement('div');
+        qtySub.className = `spell-selected-sub ${getSpellQtyTierClass(entry.qty)}`;
+        qtySub.textContent = `個数 ${entry.qty}`;
+
+        const solderBtn = createSolderButton(
+            card,
+            entry.solder || 0,
+            (anchorEl) => {
+                openSolderPopover(card, entry.solder || 0, (value) => updateSpellSolder(cardId, value), anchorEl);
+            },
+            (entry.star || 1) === 5
+        );
+        solderBtn.classList.add('spell-selected-solder-btn');
+
+        subRow.appendChild(qtySub);
+        subRow.appendChild(solderBtn);
+        info.appendChild(nameEl);
+        info.appendChild(subRow);
 
         if (card.conditionalEffects?.length) {
             const effectsWrap = document.createElement('div');
@@ -1988,6 +2176,7 @@ function renderSelectedSpellList() {
 
 function initializeSpellTab() {
     ensureEffectPopoverLayer();
+    ensureSolderPopoverLayer();
     const filter = document.getElementById('spell-rarity-filter');
     if (filter && !filter.dataset.bound) {
         filter.dataset.bound = '1';
@@ -3570,10 +3759,16 @@ window.addEventListener('resize', () => {
     } else {
         closeSpellEffectPopover();
     }
+    if (activeSolderPopoverAnchor) {
+        positionSolderPopover(activeSolderPopoverAnchor);
+    }
 });
 window.addEventListener('scroll', () => {
     if (activeSpellEffectPopoverCardId && activeSpellEffectPopoverAnchor) {
         positionSpellEffectPopover(activeSpellEffectPopoverAnchor);
+    }
+    if (activeSolderPopoverAnchor) {
+        positionSolderPopover(activeSolderPopoverAnchor);
     }
 }, true);
 
@@ -3582,6 +3777,13 @@ document.addEventListener('click', (e) => {
     if (!popover || popover.style.display === 'none') return;
     if (e.target.closest('#spell-effect-popover') || e.target.closest('.spell-effect-badge')) return;
     closeSpellEffectPopover();
+});
+
+document.addEventListener('click', (e) => {
+    const popover = document.getElementById('solder-level-popover');
+    if (!popover || popover.style.display === 'none') return;
+    if (popover.contains(e.target) || e.target.closest('.solder-pill-btn')) return;
+    closeSolderPopover();
 });
 
 // Keep toggle circle outside .panel so position:fixed works consistently,

@@ -254,7 +254,7 @@ function getCardLabel(card) {
 
 function getCardImagePath(card) {
     const folder = card.kind === 'artifact' ? 'Artifact' : 'Spell';
-    return `img/card/${folder}/${card.imageFile || `${card.name}.webp`}`;
+    return `img/Card/${folder}/${card.imageFile || `${card.name}.webp`}`;
 }
 
 function getCardCost(card, star = 1) {

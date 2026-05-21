@@ -68,21 +68,67 @@ const PLAYER_PRESETS = {
 };
 
 const ENEMY_PRESETS = {
-    "lily_light_v15": {
-        name: "[次元15] リリー(活発)",
+    "lily_d_15": {
+        name: "[次元15] リリー",
         hp: 661796770,
         atk_p: 28118,
         atk_m: 28118,
-        def_p: 52196,
-        def_m: 52196,
+        def_p: 52195,
+        def_m: 52195,
         dmgType: 'mag',
         crit: 44178,
         critDmg: 44178,
         critRes: 36146,
         critDmgRes: 36146,
-        special: 2385,
+        special: 2385.714,
         skills: [
             { name: "通常攻撃", mult: 100 }
+        ]
+    },
+    "Kérberos_d_15": {
+        name: "[次元15] ケルベロス",
+        hp: 860335869,
+        atk_p: 24090,
+        atk_m: 24090,
+        def_p: 52195,
+        def_m: 52195,
+        dmgType: 'mag',
+        crit: 32120,
+        critDmg: 32130,
+        critRes: 36146,
+        critDmgRes: 36146,
+        special: 2385.714,
+        skills: [
+            { name: "普通攻撃[2段: 50%*2]", mult:100 },
+            { name: "叩きつけ", mult:150 },
+            { name: "舐め回し[18段: (22%+150%)*9][目隠し]", mult:1248 },
+            { name: "咆哮[17段: (17.94%*17)]", mult:305 },
+            { name: "突進[2段*n: (175%*2)*n]", mult:350 },
+            { name: "突進[最終段]", mult:241 },
+            { name: "吸い込み[16段+1段: (25%*16+250%)]", mult:650 }
+        ]
+    },
+    "Kérberos_d_18": {
+        name: "[次元18] ケルベロス",
+        hp: 1932297888,
+        atk_p: 36090,
+        atk_m: 36090,
+        def_p: 78195,
+        def_m: 78195,
+        dmgType: 'mag',
+        crit: 48120,
+        critDmg: 48120,
+        critRes: 54146,
+        critDmgRes: 54146,
+        special: 3528.571,
+        skills: [
+            { name: "普通攻撃[2段: 50%*2]", mult:100 },
+            { name: "叩きつけ", mult:150 },
+            { name: "舐め回し[18段: (22%+150%)*9][目隠し]", mult:1248 },
+            { name: "咆哮[17段: (17.94%*17)]", mult:305 },
+            { name: "突進[2段*n: (175%*2)*n]", mult:350 },
+            { name: "突進[最終段]", mult:241 },
+            { name: "吸い込み[16段+1段: (25%*16+250%)]", mult:650 }
         ]
     },
     "meow_ef_11": {

@@ -69,6 +69,9 @@ const inputs = {
             defP: document.getElementById('enemy-add-def-p'),
             critResP: document.getElementById('enemy-add-crit-res-p'),
             critDmgResP: document.getElementById('enemy-add-crit-dmg-res-p')
+        },
+        debuffs: {
+            poisonStacks: document.getElementById('enemy-debuff-poison-stacks')
         }
     }
 };
@@ -136,6 +139,40 @@ const graphControls = {
 let damageChart = null;
 let isRestoringState = false;
 let syncToggleCirclePosition = () => {};
+let isSpellSelectedPanelOpen = false;
+let spellSelections = {};
+let activeSpellEffectPopoverCardId = null;
+let activeSpellEffectPopoverAnchor = null;
+let activeRelicPickerSlot = null;
+let activeRelicEffectAnchor = null;
+
+function syncBottomBarSafeArea() {
+    const bottomBar = document.querySelector('.bottom-result-bar');
+    if (!bottomBar || bottomBar.style.display === 'none') {
+        document.documentElement.style.setProperty('--bottom-bar-safe', '0px');
+        return;
+    }
+    const rect = bottomBar.getBoundingClientRect();
+    const safePadding = Math.ceil(rect.height) + 16;
+    document.documentElement.style.setProperty('--bottom-bar-safe', `${safePadding}px`);
+}
+
+function syncRelicPickerSafeArea() {
+    const header = document.querySelector('header');
+    const bottomBar = document.querySelector('.bottom-result-bar');
+    const toggleCircle = document.getElementById('perspective-toggle-circle');
+    const root = document.documentElement;
+    const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
+    const bottomHeight = bottomBar ? Math.ceil(bottomBar.getBoundingClientRect().height) : 0;
+    const toggleBottom = toggleCircle ? Math.ceil(toggleCircle.getBoundingClientRect().bottom) : 0;
+    const topSafe = Math.max(headerHeight + 12, toggleBottom + 12);
+    root.style.setProperty('--relic-picker-top-safe', `${topSafe}px`);
+    root.style.setProperty('--relic-picker-bottom-safe', `${bottomHeight + 12}px`);
+}
+
+function isSpellApplyEnabled() {
+    return !!document.getElementById('spell-apply-toggle')?.checked;
+}
 
 // Formulas
 function calcBaseDamageRate(atk, def) {
@@ -158,6 +195,1849 @@ function calcCritMultiplier(critAtk, critDmgRes) {
     if (x >= 1.0) mult = 1.75 + 0.85 * (x - 1) / (x + 2);
     else mult = 1.75 - 1.10 * (1 - x) / (2 - x);
     return Math.max(1.2, Math.min(2.5, mult));
+}
+
+function createEmptyCardBonus() {
+    return {
+        hpP: 0,
+        atkP: 0,
+        defP: 0,
+        enemyDefDownP: 0,
+        hasteP: 0,
+        critRateP: 0,
+        critDmgP: 0,
+        critResP: 0,
+        critDmgResP: 0,
+        enemyCritResDownP: 0,
+        enemyCritDmgResDownP: 0,
+        addP: 0,
+        takenDmgP: 0,
+        specialP: 0,
+        otherP: 0,
+        notes: []
+    };
+}
+
+function accumulateCardBonus(target, source) {
+    if (!source) return target;
+    ['hpP', 'atkP', 'defP', 'enemyDefDownP', 'hasteP', 'critRateP', 'critDmgP', 'critResP', 'critDmgResP', 'enemyCritResDownP', 'enemyCritDmgResDownP', 'addP', 'takenDmgP', 'specialP', 'otherP'].forEach(key => {
+        target[key] = (target[key] || 0) + (source[key] || 0);
+    });
+    return target;
+}
+
+function createEmptyCardEffectState(card) {
+    const state = {};
+    (card?.conditionalEffects || []).forEach(effect => {
+        state[effect.id] = !!effect.defaultEnabled;
+    });
+    return state;
+}
+
+function normalizeSpellEntry(card, rawEntry = {}) {
+    const normalized = {
+        star: Math.max(1, Math.min(5, parseInt(rawEntry.star || 1, 10) || 1)),
+        qty: Math.max(0, parseInt(rawEntry.qty || 0, 10) || 0),
+        effects: createEmptyCardEffectState(card)
+    };
+    if (rawEntry.effects && typeof rawEntry.effects === 'object') {
+        Object.keys(normalized.effects).forEach(effectId => {
+            normalized.effects[effectId] = !!rawEntry.effects[effectId];
+        });
+    }
+    return normalized;
+}
+
+function getCardLabel(card) {
+    return `${card.rarity} | ${card.name}`;
+}
+
+function getCardImagePath(card) {
+    const folder = card.kind === 'artifact' ? 'Artifact' : 'Spell';
+    return `img/card/${folder}/${card.imageFile || `${card.name}.webp`}`;
+}
+
+function getCardCost(card, star = 1) {
+    if (Array.isArray(card.costByStar) && card.costByStar.length > 0) {
+        const idx = Math.max(0, Math.min(card.costByStar.length - 1, (parseInt(star, 10) || 1) - 1));
+        return card.costByStar[idx];
+    }
+    return card.cost || 0;
+}
+
+function getCardRarityBadgePath(card) {
+    if (card.signature) return 'img/Card/Card_Signature.webp';
+    if (card.rarity === '伝説') return 'img/Card/Card_Legendary.webp';
+    if (card.rarity === '希少') return 'img/Card/Card_Unique.webp';
+    if (card.rarity === '高級') return 'img/Card/Card_Rare.webp';
+    return '';
+}
+
+function getCardRarityLabel(card) {
+    return card.signature ? '愛用' : (card.rarity || '');
+}
+
+function getCardFrameClass(card) {
+    if (card.signature) return 'rarity-signature';
+    if (card.rarity === '伝説') return 'rarity-legendary';
+    if (card.rarity === '希少') return 'rarity-unique';
+    if (card.rarity === '高級') return 'rarity-rare';
+    return '';
+}
+
+function getCardRarityRank(card) {
+    if (card?.signature) return 0;
+    if (card?.rarity === '伝説') return 1;
+    if (card?.rarity === '希少') return 2;
+    if (card?.rarity === '高級') return 3;
+    return 9;
+}
+
+function sortCardsForDisplay(cards = []) {
+    return [...cards].sort((a, b) => {
+        const rarityDiff = getCardRarityRank(a) - getCardRarityRank(b);
+        if (rarityDiff !== 0) return rarityDiff;
+        return String(a.name || '').localeCompare(String(b.name || ''), 'ja');
+    });
+}
+
+function paintGradePicker(picker, starValue) {
+    const star = Math.max(1, Math.min(5, parseInt(starValue, 10) || 1));
+    picker.querySelectorAll('.grade-star-btn').forEach((btn, idx) => {
+        const img = btn.querySelector('.grade-star-icon');
+        if (img) {
+            img.src = idx < star ? 'img/Grade_on.webp' : 'img/Grade_off.webp';
+        }
+    });
+}
+
+function createGradePicker(currentStar, onChange, cardId = '') {
+    const wrap = document.createElement('div');
+    wrap.className = 'grade-picker';
+    if (cardId) wrap.dataset.cardId = cardId;
+    const star = Math.max(1, Math.min(5, parseInt(currentStar, 10) || 1));
+    for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'grade-star-btn';
+        btn.dataset.value = String(i);
+        btn.setAttribute('aria-label', `星${i}`);
+
+        const img = document.createElement('img');
+        img.className = 'grade-star-icon';
+        img.src = i <= star ? 'img/Grade_on.webp' : 'img/Grade_off.webp';
+        img.alt = '';
+
+        btn.appendChild(img);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onChange(i);
+        });
+        wrap.appendChild(btn);
+    }
+    return wrap;
+}
+
+function createGradeDisplay(currentStar) {
+    const wrap = document.createElement('div');
+    wrap.className = 'grade-picker grade-picker-readonly';
+    const star = Math.max(1, Math.min(5, parseInt(currentStar, 10) || 1));
+    for (let i = 1; i <= 5; i++) {
+        const img = document.createElement('img');
+        img.className = 'grade-star-icon grade-star-icon-readonly';
+        img.src = i <= star ? 'img/Grade_on.webp' : 'img/Grade_off.webp';
+        img.alt = '';
+        wrap.appendChild(img);
+    }
+    return wrap;
+}
+
+function populateCardSelectOptions(select, kind) {
+    const cards = CARD_LIBRARY[kind === 'artifact' ? 'artifacts' : 'spells'] || [];
+    const currentValue = select.value;
+    const placeholder = kind === 'artifact' ? '-- 遺物カードなし --' : '-- スペルカードなし --';
+    select.innerHTML = `<option value="">${placeholder}</option>`;
+    cards.forEach(card => {
+        const opt = document.createElement('option');
+        opt.value = card.id;
+        opt.textContent = getCardLabel(card);
+        select.appendChild(opt);
+    });
+    select.value = Array.from(select.options).some(opt => opt.value === currentValue) ? currentValue : '';
+}
+
+function getRelicCards() {
+    return CARD_LIBRARY.artifacts || [];
+}
+
+function getArtifactSelectionCost(side = 'self') {
+    const selections = collectCardSelections(side);
+    return (selections.artifacts || selections.relics || []).reduce((sum, selection) => {
+        if (!selection?.cardId) return sum;
+        const card = CARD_INDEX[selection.cardId];
+        if (!card) return sum;
+        return sum + getCardCost(card, selection.star || 1);
+    }, 0);
+}
+
+function closeRelicPicker() {
+    activeRelicPickerSlot = null;
+    const popover = document.getElementById('relic-picker-popover');
+    if (popover) popover.style.display = 'none';
+}
+
+function ensureEffectPopoverLayer() {
+    const appContainer = document.querySelector('.app-container');
+    const spellPopover = document.getElementById('spell-effect-popover');
+    const relicPopover = document.getElementById('relic-effect-popover');
+    if (appContainer && spellPopover && spellPopover.parentElement !== appContainer) {
+        appContainer.appendChild(spellPopover);
+    }
+    if (appContainer && relicPopover && relicPopover.parentElement !== appContainer) {
+        appContainer.appendChild(relicPopover);
+    }
+}
+
+function openRelicPicker(slot) {
+    const popover = document.getElementById('relic-picker-popover');
+    const grid = document.getElementById('relic-picker-grid');
+    if (!slot || !popover || !grid) return;
+
+    activeRelicPickerSlot = slot;
+    grid.innerHTML = '';
+    const currentCardId = slot.querySelector('.card-select')?.value || '';
+
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'relic-picker-card relic-picker-clear-card';
+    clearBtn.title = '外す';
+    clearBtn.innerHTML = '<span class="relic-picker-clear-mark">×</span>';
+    clearBtn.addEventListener('click', () => {
+        const select = slot.querySelector('.card-select');
+        if (select) select.value = '';
+        slot.dataset.star = '1';
+        setRelicEffectState(slot, null, {});
+        updateRelicSlotVisual(slot);
+        closeRelicPicker();
+        updateUI();
+        saveState();
+    });
+    grid.appendChild(clearBtn);
+
+    getRelicCards().forEach(card => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'relic-picker-card';
+        if (card.id === currentCardId) btn.classList.add('active');
+
+        const frameClass = getCardFrameClass(card);
+        const media = document.createElement('div');
+        media.className = 'relic-picker-card-media';
+        if (frameClass) media.classList.add(frameClass);
+
+        const bg = document.createElement('img');
+        bg.className = 'relic-picker-card-bg';
+        bg.alt = '';
+
+        const img = document.createElement('img');
+        img.className = 'relic-picker-card-thumb';
+        img.src = getCardImagePath(card);
+        img.alt = card.name;
+        const thumbClip = document.createElement('div');
+        thumbClip.className = 'relic-picker-card-thumb-clip';
+        thumbClip.appendChild(img);
+
+        const name = document.createElement('div');
+        name.className = 'relic-picker-card-name sr-only';
+        name.textContent = card.name;
+
+        const rarityBg = getCardRarityBadgePath(card);
+        if (rarityBg) bg.src = rarityBg;
+        media.appendChild(bg);
+        media.appendChild(thumbClip);
+        btn.appendChild(media);
+        btn.appendChild(name);
+        btn.title = card.name;
+        btn.addEventListener('click', () => {
+            const select = slot.querySelector('.card-select');
+            if (select) select.value = card.id;
+            setRelicEffectState(slot, card, {});
+            updateRelicSlotVisual(slot);
+            closeRelicPicker();
+            updateUI();
+            saveState();
+        });
+        grid.appendChild(btn);
+    });
+
+    syncRelicPickerSafeArea();
+    popover.style.display = 'block';
+}
+
+function closeRelicEffectPopover() {
+    activeRelicEffectAnchor = null;
+    const popover = document.getElementById('relic-effect-popover');
+    if (popover) {
+        popover.style.display = 'none';
+        popover.style.visibility = 'hidden';
+    }
+}
+
+function positionRelicEffectPopover(anchorEl) {
+    const popover = document.getElementById('relic-effect-popover');
+    const bottomBar = document.querySelector('.bottom-result-bar');
+    if (!popover || !anchorEl) return;
+    const rect = anchorEl.getBoundingClientRect();
+    const popRect = popover.getBoundingClientRect();
+    const margin = 12;
+    const bottomBarRect = bottomBar?.getBoundingClientRect();
+    const bottomLimit = bottomBarRect ? (bottomBarRect.top - margin) : (window.innerHeight - margin);
+    const maxLeft = Math.max(margin, window.innerWidth - popRect.width - margin);
+    let left = rect.left + rect.width * 0.5 - popRect.width * 0.5;
+    let top = rect.bottom + 8;
+
+    if (top + popRect.height > bottomLimit) {
+        top = rect.top - popRect.height - 8;
+    }
+    if (top < margin) {
+        top = margin;
+    }
+
+    left = Math.min(Math.max(margin, left), maxLeft);
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function openRelicEffectPopover(slot, anchorEl) {
+    const select = slot?.querySelector('.card-select');
+    const card = CARD_INDEX[select?.value || ''];
+    const popover = document.getElementById('relic-effect-popover');
+    const titleEl = document.getElementById('relic-effect-popover-title');
+    const bodyEl = document.getElementById('relic-effect-popover-body');
+    if (!card || !popover || !titleEl || !bodyEl) return;
+
+    titleEl.textContent = `${card.name} の効果`;
+    bodyEl.innerHTML = '';
+
+    const currentStar = parseInt(slot.dataset.star || '1', 10) || 1;
+    const starIndex = Math.max(0, Math.min(4, currentStar - 1));
+    const baseBonus = card.bonusesByStar?.[starIndex] || {};
+    const bonusParts = formatCardSummaryParts(baseBonus);
+    appendSpellEffectGroup(
+        bodyEl,
+        '基本補正',
+        bonusParts.length ? bonusParts : ['なし'],
+        (text) => createSpellBaseInfo(text)
+    );
+
+    const effectState = getRelicEffectState(slot, card);
+    const effects = card.conditionalEffects || [];
+    const toggleEffects = effects.filter(effect => effect.type === 'toggle');
+    const infoEffects = effects.filter(effect => effect.type === 'info');
+    const signatureToggleEffects = toggleEffects.filter(isSignatureEffect);
+    const miscToggleEffects = toggleEffects.filter(effect => !isSignatureEffect(effect));
+    const signatureInfoEffects = infoEffects
+        .filter(isSignatureInfoEffect)
+        .map(getArtifactSignatureDisplayEffect)
+        .filter(Boolean);
+    const miscInfoEffects = infoEffects.filter(effect => !isSignatureInfoEffect(effect));
+
+    appendSpellEffectGroup(
+        bodyEl,
+        '切替効果',
+        miscToggleEffects,
+        (effect) => createRelicEffectToggle(slot, card, effect, !!effectState[effect.id], currentStar)
+    );
+
+    appendSpellEffectGroup(
+        bodyEl,
+        '補足効果',
+        miscInfoEffects,
+        (effect) => createSpellEffectInfo(effect, currentStar)
+    );
+
+    appendSignatureEffectGroup(
+        bodyEl,
+        card,
+        signatureToggleEffects,
+        signatureInfoEffects,
+        (effect) => createRelicEffectToggle(slot, card, effect, !!effectState[effect.id], currentStar),
+        (effect) => createSpellEffectInfo(effect, currentStar)
+    );
+
+    if (card.note && effects.length === 0) {
+        const note = document.createElement('div');
+        note.className = 'spell-effect-note';
+        note.textContent = `※ ${card.note}`;
+        bodyEl.appendChild(note);
+    }
+
+    popover.style.display = 'block';
+    popover.style.visibility = 'hidden';
+    activeRelicEffectAnchor = anchorEl;
+    requestAnimationFrame(() => {
+        positionRelicEffectPopover(activeRelicEffectAnchor);
+        popover.style.visibility = 'visible';
+    });
+}
+
+function updateRelicSlotVisual(slot) {
+    if (!slot) return;
+    const select = slot.querySelector('.card-select');
+    const cardId = select?.value || '';
+    const card = CARD_INDEX[cardId];
+    const thumb = slot.querySelector('.card-relic-thumb');
+    const name = slot.querySelector('.card-relic-name');
+    const sub = slot.querySelector('.card-relic-sub');
+    const media = slot.querySelector('.card-relic-media');
+    const bg = slot.querySelector('.card-relic-bg');
+    const gradeHost = slot.querySelector('.card-relic-grade-host');
+    const placeholder = slot.querySelector('.card-relic-placeholder');
+    const costValue = slot.querySelector('.card-relic-cost-value');
+    const costFill = slot.querySelector('.card-relic-cost-fill');
+    const effectBtn = slot.querySelector('.card-relic-effect-btn');
+    const removeBtn = slot.querySelector('.card-relic-remove-btn');
+    const effectState = getRelicEffectState(slot, card);
+
+    if (media) {
+        media.classList.remove('rarity-legendary', 'rarity-unique', 'rarity-rare', 'rarity-signature', 'is-empty');
+    }
+    if (bg) {
+        bg.removeAttribute('src');
+        bg.style.display = 'none';
+    }
+    if (card && media) {
+        const frameClass = getCardFrameClass(card);
+        if (frameClass) media.classList.add(frameClass);
+        const rarityBg = getCardRarityBadgePath(card);
+        if (rarityBg && bg) {
+            bg.src = rarityBg;
+            bg.style.display = 'block';
+        }
+    } else if (media) {
+        media.classList.add('is-empty');
+    }
+
+    if (thumb) {
+        if (card) {
+            thumb.src = getCardImagePath(card);
+            thumb.alt = card.name;
+            thumb.style.display = 'block';
+            if (placeholder) placeholder.style.display = 'none';
+        } else {
+            thumb.removeAttribute('src');
+            thumb.alt = '';
+            thumb.style.display = 'none';
+            if (placeholder) placeholder.style.display = 'flex';
+        }
+    }
+
+    if (name) name.textContent = card ? card.name : '未装備';
+    if (sub) sub.textContent = card ? '' : '遺物カードを選択';
+    if (costValue) {
+        const costText = card ? String(getCardCost(card, parseInt(slot.dataset.star || '1', 10) || 1)) : '';
+        costValue.textContent = costText;
+        if (costFill) costFill.textContent = costText;
+        costValue.parentElement.style.display = card ? 'inline-flex' : 'none';
+    }
+    if (effectBtn) {
+        effectBtn.style.display = card ? 'inline-flex' : 'none';
+        if (card) {
+            const toggleEffects = (card.conditionalEffects || []).filter(effect => effect.type === 'toggle');
+            const enabledCount = toggleEffects.filter(effect => effectState[effect.id]).length;
+            effectBtn.textContent = enabledCount > 0 ? `効果 ${enabledCount}` : (toggleEffects.length > 0 ? '切替' : '効果');
+            effectBtn.classList.toggle('has-toggle', toggleEffects.length > 0);
+            effectBtn.classList.toggle('active', enabledCount > 0);
+        } else {
+            effectBtn.classList.remove('has-toggle');
+            effectBtn.classList.remove('active');
+        }
+    }
+    if (removeBtn) {
+        removeBtn.style.display = card ? 'inline-flex' : 'none';
+    }
+
+    if (gradeHost) {
+        gradeHost.innerHTML = '';
+        if (card) {
+            const currentStar = parseInt(slot.dataset.star || '1', 10) || 1;
+            const picker = createGradePicker(currentStar, (value) => {
+                slot.dataset.star = String(value);
+                updateRelicSlotVisual(slot);
+                updateUI();
+                saveState();
+            });
+            picker.classList.add('card-relic-grade-picker');
+            gradeHost.appendChild(picker);
+        }
+    }
+}
+
+function createRelicSlot(side, selection = {}) {
+    const slot = document.createElement('div');
+    slot.className = 'card-relic-slot';
+    slot.dataset.side = side;
+    slot.dataset.kind = 'artifact';
+    slot.dataset.star = String(selection.star || 1);
+    slot.dataset.effects = JSON.stringify(selection.effects || {});
+
+    const mediaWrap = document.createElement('div');
+    mediaWrap.className = 'card-relic-media-wrap';
+
+    const media = document.createElement('div');
+    media.className = 'card-relic-media is-empty';
+
+    const bg = document.createElement('img');
+    bg.className = 'card-relic-bg';
+    bg.alt = '';
+
+    const placeholder = document.createElement('div');
+    placeholder.className = 'card-relic-placeholder';
+    placeholder.textContent = '+';
+
+    const thumb = document.createElement('img');
+    thumb.className = 'card-relic-thumb';
+    thumb.style.display = 'none';
+    const thumbClip = document.createElement('div');
+    thumbClip.className = 'card-relic-thumb-clip';
+    thumbClip.appendChild(thumb);
+
+    const gradeHost = document.createElement('div');
+    gradeHost.className = 'card-relic-grade-host';
+
+    const info = document.createElement('div');
+    info.className = 'card-relic-info';
+    info.innerHTML = `
+        <div class="card-relic-name-row">
+            <span class="card-relic-cost-inline" style="display:none;">
+                <img src="img/Card/cost.webp" alt="" class="card-relic-cost-icon">
+                <span class="card-relic-cost-fill"></span>
+                <span class="card-relic-cost-value"></span>
+            </span>
+            <div class="card-relic-name">未装備</div>
+            <button type="button" class="card-relic-effect-btn" title="効果を見る">効果</button>
+        </div>
+        <div class="card-relic-sub">遺物カードを選択</div>
+        <div class="card-relic-grade-row">
+            <button type="button" class="card-relic-remove-btn" title="外す" aria-label="外す">×</button>
+        </div>
+    `;
+    info.querySelector('.card-relic-grade-row')?.appendChild(gradeHost);
+
+    media.appendChild(bg);
+    media.appendChild(placeholder);
+    media.appendChild(thumbClip);
+
+    const selectWrap = document.createElement('div');
+    selectWrap.className = 'card-relic-select-wrap';
+    selectWrap.style.display = 'none';
+
+    const select = document.createElement('select');
+    select.className = 'card-select relic-slot-select';
+    select.dataset.side = side;
+    select.dataset.kind = 'artifact';
+    populateCardSelectOptions(select, 'artifact');
+    select.value = selection.cardId || '';
+    selectWrap.appendChild(select);
+
+    mediaWrap.appendChild(media);
+    slot.appendChild(mediaWrap);
+    slot.appendChild(info);
+    slot.appendChild(selectWrap);
+
+    const effectBtn = slot.querySelector('.card-relic-effect-btn');
+    const removeBtn = slot.querySelector('.card-relic-remove-btn');
+
+    media.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openRelicPicker(slot);
+    });
+
+    effectBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openRelicEffectPopover(slot, effectBtn);
+    });
+
+    removeBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        select.value = '';
+        slot.dataset.star = '1';
+        setRelicEffectState(slot, null, {});
+        updateRelicSlotVisual(slot);
+        updateUI();
+        saveState();
+    });
+
+    select.addEventListener('change', () => {
+        const nextCard = CARD_INDEX[select.value || ''];
+        setRelicEffectState(slot, nextCard, {});
+        updateRelicSlotVisual(slot);
+        updateUI();
+        saveState();
+    });
+
+    updateRelicSlotVisual(slot);
+    return slot;
+}
+
+function getRelicEffectState(slot, card = null) {
+    const currentCard = card || CARD_INDEX[slot?.querySelector('.card-select')?.value || ''];
+    const baseState = createEmptyCardEffectState(currentCard);
+    let saved = {};
+    try {
+        saved = JSON.parse(slot?.dataset.effects || '{}') || {};
+    } catch {
+        saved = {};
+    }
+    Object.keys(baseState).forEach(effectId => {
+        if (Object.prototype.hasOwnProperty.call(saved, effectId)) {
+            baseState[effectId] = !!saved[effectId];
+        }
+    });
+    return baseState;
+}
+
+function setRelicEffectState(slot, card, nextState) {
+    if (!slot) return;
+    const currentCard = card || CARD_INDEX[slot.querySelector('.card-select')?.value || ''];
+    const baseState = createEmptyCardEffectState(currentCard);
+    Object.keys(baseState).forEach(effectId => {
+        if (nextState && Object.prototype.hasOwnProperty.call(nextState, effectId)) {
+            baseState[effectId] = !!nextState[effectId];
+        }
+    });
+    slot.dataset.effects = JSON.stringify(baseState);
+}
+
+function setRelicEffectToggle(slot, effectId, enabled) {
+    const card = CARD_INDEX[slot?.querySelector('.card-select')?.value || ''];
+    if (!card?.conditionalEffects?.some(effect => effect.id === effectId && effect.type === 'toggle')) return;
+    const nextState = getRelicEffectState(slot, card);
+    nextState[effectId] = !!enabled;
+    setRelicEffectState(slot, card, nextState);
+    updateRelicSlotVisual(slot);
+    updateUI();
+    if (activeRelicEffectAnchor) {
+        openRelicEffectPopover(slot, activeRelicEffectAnchor);
+    }
+    saveState();
+}
+
+function createRelicEffectToggle(slot, card, effect, enabled, star = 1) {
+    const wrap = document.createElement('div');
+    wrap.className = 'spell-effect-row';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'spell-effect-toggle';
+    toggle.classList.toggle('active', enabled);
+    toggle.textContent = enabled ? 'ON' : 'OFF';
+    toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setRelicEffectToggle(slot, effect.id, !enabled);
+    });
+
+    const content = document.createElement('div');
+    content.className = 'spell-effect-info-content';
+
+    const label = createEffectLabelNode(effect.label, 'spell-effect-info-label');
+    content.appendChild(label);
+
+    const bonusText = formatEffectBonusText(effect, star);
+    if (bonusText) {
+        const desc = document.createElement('span');
+        desc.className = 'spell-effect-info-desc';
+        desc.textContent = bonusText;
+        content.appendChild(desc);
+    }
+    const infoText = getSpellEffectInfoText(effect, star);
+    if (infoText) {
+        const desc = document.createElement('span');
+        desc.className = 'spell-effect-info-desc';
+        desc.textContent = infoText;
+        content.appendChild(desc);
+    }
+
+    wrap.appendChild(toggle);
+    wrap.appendChild(content);
+    return wrap;
+}
+
+function createCardRow(side, kind, selection = {}) {
+    if (kind === 'artifact') {
+        return createRelicSlot(side, selection);
+    }
+    const row = document.createElement('div');
+    row.className = `card-row ${kind}-row`;
+
+    const select = document.createElement('select');
+    select.className = 'card-select';
+    select.dataset.side = side;
+    select.dataset.kind = kind;
+    populateCardSelectOptions(select, kind);
+    select.value = selection.cardId || '';
+
+    const starSelect = document.createElement('select');
+    starSelect.className = 'card-star-select';
+    starSelect.dataset.side = side;
+    starSelect.dataset.kind = kind;
+    for (let i = 1; i <= 5; i++) {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = `★${i}`;
+        starSelect.appendChild(opt);
+    }
+    starSelect.value = String(selection.star || 1);
+
+    select.addEventListener('change', updateUI);
+    starSelect.addEventListener('change', updateUI);
+
+    row.appendChild(select);
+    row.appendChild(starSelect);
+
+    if (kind === 'spell') {
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'card-remove-btn';
+        removeBtn.textContent = '−';
+        removeBtn.title = 'スペルカード行を削除';
+        removeBtn.addEventListener('click', () => {
+            row.remove();
+            if (!document.querySelector(`#${side}-spell-slots .card-row`)) {
+                addSpellCardRow(side);
+            }
+            updateUI();
+            saveState();
+        });
+        row.appendChild(removeBtn);
+    } else {
+        const spacer = document.createElement('span');
+        spacer.className = 'phase-action-spacer';
+        spacer.setAttribute('aria-hidden', 'true');
+        row.appendChild(spacer);
+    }
+
+    return row;
+}
+
+function initializeCardUI() {
+    ensureEffectPopoverLayer();
+    ['self'].forEach(side => {
+        const relicContainer = document.getElementById(`${side}-relic-slots`);
+        if (!relicContainer) return;
+
+        relicContainer.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            relicContainer.appendChild(createRelicSlot(side));
+        }
+    });
+
+    const relicPickerClose = document.getElementById('relic-picker-close');
+    if (relicPickerClose && !relicPickerClose.dataset.bound) {
+        relicPickerClose.dataset.bound = '1';
+        relicPickerClose.addEventListener('click', closeRelicPicker);
+    }
+
+    const relicEffectClose = document.getElementById('relic-effect-popover-close');
+    if (relicEffectClose && !relicEffectClose.dataset.bound) {
+        relicEffectClose.dataset.bound = '1';
+        relicEffectClose.addEventListener('click', closeRelicEffectPopover);
+    }
+
+    const relicPickerBackdrop = document.getElementById('relic-picker-backdrop');
+    if (relicPickerBackdrop && !relicPickerBackdrop.dataset.bound) {
+        relicPickerBackdrop.dataset.bound = '1';
+        relicPickerBackdrop.addEventListener('click', closeRelicPicker);
+    }
+
+    const clearAllBtn = document.getElementById('self-artifact-clear-all');
+    if (clearAllBtn && !clearAllBtn.dataset.bound) {
+        clearAllBtn.dataset.bound = '1';
+        clearAllBtn.addEventListener('click', () => {
+            const rows = Array.from(document.querySelectorAll('#self-relic-slots .card-relic-slot'));
+            rows.forEach(row => {
+                const select = row.querySelector('.card-select');
+                if (select) select.value = '';
+                row.dataset.star = '1';
+                setRelicEffectState(row, null, {});
+                updateRelicSlotVisual(row);
+            });
+            closeRelicEffectPopover();
+            closeRelicPicker();
+            updateUI();
+            saveState();
+        });
+    }
+
+    if (!document.body.dataset.relicPickerBound) {
+        document.body.dataset.relicPickerBound = '1';
+        document.addEventListener('click', (e) => {
+            const popover = document.getElementById('relic-picker-popover');
+            if (!popover || popover.style.display === 'none') return;
+            if (popover.contains(e.target)) return;
+            closeRelicPicker();
+        });
+        document.addEventListener('click', (e) => {
+            const popover = document.getElementById('relic-effect-popover');
+            if (!popover || popover.style.display === 'none') return;
+            if (popover.contains(e.target) || e.target.closest('.card-relic-effect-btn')) return;
+            closeRelicEffectPopover();
+        });
+    }
+
+    syncRelicPickerSafeArea();
+}
+
+function normalizeSpellSelections(raw = {}) {
+    const normalized = {};
+    getSpellCards().forEach(card => {
+        normalized[card.id] = normalizeSpellEntry(card, raw[card.id] || {});
+    });
+    return normalized;
+}
+
+function collectCardSelections(side) {
+    const artifactRows = Array.from(document.querySelectorAll(`#${side}-relic-slots .card-relic-slot`));
+    const readRow = row => ({
+        cardId: row.querySelector('.card-select')?.value || '',
+        star: parseInt(row.dataset.star || '1', 10) || 1,
+        effects: getRelicEffectState(row, CARD_INDEX[row.querySelector('.card-select')?.value || ''])
+    });
+    return {
+        artifacts: artifactRows.map(readRow),
+        spells: side === 'self' ? normalizeSpellSelections(spellSelections) : {}
+    };
+}
+
+function restoreCardSelections(side, state = {}) {
+    const relicContainer = document.getElementById(`${side}-relic-slots`);
+    if (!relicContainer) return;
+
+    const artifacts = Array.isArray(state.artifacts) ? state.artifacts : (Array.isArray(state.relics) ? state.relics : []);
+    Array.from(relicContainer.querySelectorAll('.card-relic-slot')).forEach((row, idx) => {
+        const saved = artifacts[idx] || {};
+        const select = row.querySelector('.card-select');
+        if (select) {
+            populateCardSelectOptions(select, 'artifact');
+            select.value = saved.cardId || '';
+        }
+        row.dataset.star = String(saved.star || 1);
+        row.dataset.effects = JSON.stringify(saved.effects || {});
+        updateRelicSlotVisual(row);
+    });
+    if (side === 'self') {
+        if (Array.isArray(state.spells)) {
+            const migrated = {};
+            state.spells.forEach(selection => {
+                if (!selection?.cardId) return;
+                const current = migrated[selection.cardId] || { star: 1, qty: 0 };
+                current.star = parseInt(selection.star || current.star, 10) || 1;
+                current.qty += 1;
+                migrated[selection.cardId] = current;
+            });
+            spellSelections = normalizeSpellSelections(migrated);
+        } else {
+            spellSelections = normalizeSpellSelections(state.spells || {});
+        }
+    }
+}
+
+function getCardBonusFromSelection(selection, context = {}) {
+    if (!selection?.cardId) return null;
+    const card = CARD_INDEX[selection.cardId];
+    if (!card) return null;
+    const starIndex = Math.max(0, Math.min(4, (selection.star || 1) - 1));
+    const baseBonus = card.bonusesByStar?.[starIndex];
+    if (!baseBonus) return null;
+    const resolved = {
+        ...baseBonus,
+        note: card.note ? `${card.name}: ${card.note}` : ''
+    };
+    const effects = card.conditionalEffects || [];
+    const effectState = selection.effects || {};
+    const appliedNonStackingEffects = context.appliedNonStackingEffects;
+    effects.forEach(effect => {
+        if (effect.type !== 'toggle' || !effectState[effect.id]) return;
+        if (effect.onlyWhenDmgType && context.dmgType && effect.onlyWhenDmgType !== context.dmgType) return;
+        if (effect.nonStacking && appliedNonStackingEffects?.has(effect.id)) return;
+        const effectBonus = effect.bonusesByStar?.[starIndex];
+        if (!effectBonus) return;
+        accumulateCardBonus(resolved, effectBonus);
+        if (effect.nonStacking && appliedNonStackingEffects) {
+            appliedNonStackingEffects.add(effect.id);
+        }
+    });
+    return resolved;
+}
+
+function getCardBonusesForSide(side, includeSpellBonuses = false, context = {}) {
+    const selections = collectCardSelections(side);
+    const total = createEmptyCardBonus();
+    const nextContext = {
+        ...context,
+        appliedNonStackingEffects: context.appliedNonStackingEffects || new Set()
+    };
+    (selections.artifacts || selections.relics || []).forEach(selection => {
+        const resolved = getCardBonusFromSelection(selection, nextContext);
+        if (!resolved) return;
+        accumulateCardBonus(total, resolved);
+    });
+    if (side === 'self' && includeSpellBonuses) {
+        Object.entries(selections.spells || {}).forEach(([cardId, entry]) => {
+            const qty = entry?.qty || 0;
+            if (qty <= 0) return;
+            for (let i = 0; i < qty; i++) {
+                const resolved = getCardBonusFromSelection({ cardId, star: entry.star, effects: entry.effects }, nextContext);
+                if (!resolved) continue;
+                accumulateCardBonus(total, resolved);
+            }
+        });
+    }
+    return total;
+}
+
+function formatCardSummaryParts(bonus) {
+    const parts = [];
+    if (bonus.hpP) parts.push(`HP ${formatSignedPercent(bonus.hpP)}`);
+    if (bonus.atkP) parts.push(`攻撃 ${formatSignedPercent(bonus.atkP)}`);
+    if (bonus.defP) parts.push(`防御 ${formatSignedPercent(bonus.defP)}`);
+    if (bonus.enemyDefDownP) parts.push(`敵防御減 ${formatSignedPercent(bonus.enemyDefDownP)}`);
+    if (bonus.critRateP) parts.push(`会心率 ${formatSignedPercent(bonus.critRateP)}`);
+    if (bonus.critDmgP) parts.push(`会心DMG ${formatSignedPercent(bonus.critDmgP)}`);
+    if (bonus.critResP) parts.push(`被会心率減 ${formatSignedPercent(bonus.critResP)}`);
+    if (bonus.critDmgResP) parts.push(`会心被DMG減 ${formatSignedPercent(bonus.critDmgResP)}`);
+    if (bonus.enemyCritResDownP) parts.push(`敵被会心率減 ${formatSignedPercent(bonus.enemyCritResDownP)}`);
+    if (bonus.enemyCritDmgResDownP) parts.push(`敵会心被DMG減 ${formatSignedPercent(bonus.enemyCritDmgResDownP)}`);
+    if (bonus.addP) parts.push(`与ダメ増 ${formatSignedPercent(bonus.addP)}`);
+    if (bonus.takenDmgP) parts.push(`被ダメ減 ${formatSignedPercent(bonus.takenDmgP)}`);
+    if (bonus.specialP) parts.push(`特殊 ${formatSignedPercent(bonus.specialP)}`);
+    if (bonus.otherP) parts.push(`その他 ${formatSignedPercent(bonus.otherP)}`);
+    if (bonus.hasteP) parts.push(`攻撃速度 ${formatSignedPercent(bonus.hasteP)}`);
+    return parts;
+}
+
+function formatMultiplierPercent(value) {
+    return `${(value * 100).toFixed(1)}%`;
+}
+
+function formatSignedPercent(value) {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+}
+
+function getWeaknessAddBonus(v) {
+    if (v.perspective !== 'self') return 0;
+    const enemyPresetVal = inputs.enemy.preset.value;
+    if (!enemyPresetVal || !enemyPresetVal.startsWith('e_')) return 0;
+    const key = enemyPresetVal.substring(2);
+    const preset = ENEMY_PRESETS[key];
+    if (!preset?.weakness?.[v.dmgType]?.add) return 0;
+    return preset.weakness[v.dmgType].add || 0;
+}
+
+function createModifierChip(label, value, variant = 'multiplier') {
+    return `<span class="final-modifier-chip ${variant}">${label} ${value}</span>`;
+}
+
+function updateFinalModifierSummary(v, overrideSelf = null) {
+    const perspectiveEl = document.getElementById('final-modifier-perspective');
+    const coreListEl = document.getElementById('final-core-chip-list');
+    const multiplierListEl = document.getElementById('final-multiplier-chip-list');
+    const statListEl = document.getElementById('final-stat-chip-list');
+    const enemyDebuffListEl = document.getElementById('final-enemy-debuff-chip-list');
+    if (!perspectiveEl || !coreListEl || !multiplierListEl || !statListEl) return;
+
+    perspectiveEl.textContent = v.perspective === 'self' ? '自キャラ攻撃時' : '敵攻撃時';
+
+    const selfStats = overrideSelf || v.self;
+    const enemyStats = v.enemy;
+    const attacker = v.perspective === 'self' ? selfStats : enemyStats;
+    const defender = v.perspective === 'self' ? enemyStats : selfStats;
+    const finalAtk = attacker.atk * (1 + v.common.atkP / 100);
+    const finalDef = defender.def * (1 + (v.common.defP - v.common.enemyDefDownP) / 100);
+
+    const weaknessAdd = getWeaknessAddBonus(v);
+    const poisonAddPenalty = (v.common.attackerDmgDownP || 0) / 100;
+    const takenDmgPenalty = (v.common.takenDmgP || 0) / 100;
+    const finalAdd = Math.max(0, v.common.add + weaknessAdd / 100 - poisonAddPenalty - takenDmgPenalty);
+    const attackerLabel = v.perspective === 'self' ? '自キャラ' : '敵キャラ';
+    const defenderLabel = v.perspective === 'self' ? '敵キャラ' : '自キャラ';
+    const coreChips = [
+        createModifierChip(`${attackerLabel} 最終攻撃力`, Math.floor(finalAtk).toLocaleString(), 'core'),
+        createModifierChip(`${defenderLabel} 最終防御力`, Math.floor(finalDef).toLocaleString(), 'core')
+    ];
+
+    const multiplierChips = [
+        createModifierChip('スキル倍率', formatMultiplierPercent(v.common.skill)),
+        createModifierChip('与被DMG増減', formatMultiplierPercent(finalAdd)),
+        createModifierChip('属性相性', formatMultiplierPercent(v.common.type)),
+        createModifierChip('特殊', formatMultiplierPercent(v.common.special)),
+        createModifierChip('その他', formatMultiplierPercent(v.common.other))
+    ];
+
+    if (weaknessAdd) {
+        multiplierChips.push(createModifierChip('弱点補正', formatSignedPercent(weaknessAdd), 'muted'));
+    }
+    if (v.common.takenDmgP) {
+        multiplierChips.push(createModifierChip('被ダメ減', formatSignedPercent(v.common.takenDmgP), 'muted'));
+    }
+    if (v.common.attackerDmgDownP) {
+        multiplierChips.push(createModifierChip('毒', formatSignedPercent(-v.common.attackerDmgDownP), 'muted'));
+    }
+
+    const statPairs = [
+        ['攻撃', v.common.atkP],
+        ['会心率', v.common.critRateP],
+        ['会心DMG', v.common.critDmgP],
+        ['防御', v.common.defP],
+        ['被会心率減', v.common.critResP],
+        ['会心被DMG減', v.common.critDmgResP]
+    ];
+    const statChips = statPairs
+        .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'stat'));
+
+    const enemyDebuffPairs = [
+        ['敵防御減', v.common.enemyDefDownP],
+        ['敵被会心率減', v.common.enemyCritResDownP],
+        ['敵会心被DMG減', v.common.enemyCritDmgResDownP]
+    ];
+    const enemyDebuffChips = enemyDebuffPairs
+        .filter(([, value]) => value)
+        .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'muted'));
+
+    coreListEl.innerHTML = coreChips.join('');
+    multiplierListEl.innerHTML = multiplierChips.join('');
+    statListEl.innerHTML = statChips.join('');
+    if (enemyDebuffListEl) {
+        enemyDebuffListEl.innerHTML = enemyDebuffChips.join('');
+    }
+}
+
+function formatEffectBonusParts(bonus) {
+    const parts = [];
+    if (bonus.hpP) parts.push(`HP ${formatSignedPercent(bonus.hpP)}`);
+    if (bonus.atkP) parts.push(`攻撃 ${formatSignedPercent(bonus.atkP)}`);
+    if (bonus.defP) parts.push(`防御 ${formatSignedPercent(bonus.defP)}`);
+    if (bonus.enemyDefDownP) parts.push(`敵防御減 ${formatSignedPercent(bonus.enemyDefDownP)}`);
+    if (bonus.critRateP) parts.push(`会心率 ${formatSignedPercent(bonus.critRateP)}`);
+    if (bonus.critDmgP) parts.push(`会心DMG ${formatSignedPercent(bonus.critDmgP)}`);
+    if (bonus.critResP) parts.push(`被会心率減 ${formatSignedPercent(bonus.critResP)}`);
+    if (bonus.critDmgResP) parts.push(`会心被DMG減 ${formatSignedPercent(bonus.critDmgResP)}`);
+    if (bonus.enemyCritResDownP) parts.push(`敵被会心率減 ${formatSignedPercent(bonus.enemyCritResDownP)}`);
+    if (bonus.enemyCritDmgResDownP) parts.push(`敵会心被DMG減 ${formatSignedPercent(bonus.enemyCritDmgResDownP)}`);
+    if (bonus.addP) parts.push(`与ダメ増 ${formatSignedPercent(bonus.addP)}`);
+    if (bonus.takenDmgP) parts.push(`被ダメ減 ${formatSignedPercent(bonus.takenDmgP)}`);
+    if (bonus.specialP) parts.push(`特殊 ${formatSignedPercent(bonus.specialP)}`);
+    if (bonus.otherP) parts.push(`その他 ${formatSignedPercent(bonus.otherP)}`);
+    if (bonus.hasteP) parts.push(`攻撃速度 ${formatSignedPercent(bonus.hasteP)}`);
+    return parts;
+}
+
+function formatEffectBonusText(effect, star) {
+    const bonuses = effect?.bonusesByStar;
+    if (!Array.isArray(bonuses) || bonuses.length === 0) return '';
+    const idx = Math.max(0, Math.min(bonuses.length - 1, (parseInt(star, 10) || 1) - 1));
+    const parts = formatEffectBonusParts(bonuses[idx] || {});
+    return parts.join(' / ');
+}
+
+function getSpellEffectInfoText(effect, star) {
+    const idx = Math.max(0, Math.min(4, (parseInt(star, 10) || 1) - 1));
+    if (Array.isArray(effect?.descriptionByStar) && effect.descriptionByStar.length > 0) {
+        return effect.descriptionByStar[Math.min(idx, effect.descriptionByStar.length - 1)] || '';
+    }
+
+    const text = effect?.description || '';
+    const simpleSlashPattern = /^\s*([0-9]+(?:\.[0-9]+)?)(?:\/([0-9]+(?:\.[0-9]+)?)){4}([^\d].*)?\s*$/;
+    if (simpleSlashPattern.test(text)) {
+        const match = text.match(/([0-9]+(?:\.[0-9]+)?)/g);
+        if (match && match.length >= 5) {
+            const unitMatch = text.match(/(?:[0-9]+(?:\.[0-9]+)?\/){4}[0-9]+(?:\.[0-9]+)?(.*)$/);
+            const unit = unitMatch ? unitMatch[1] : '';
+            return `${match[idx]}${unit}`;
+        }
+    }
+
+    return text;
+}
+
+function extractPercentValue(text) {
+    const match = String(text || '').match(/([0-9]+(?:\.[0-9]+)?)%/);
+    return match ? parseFloat(match[1]) || 0 : 0;
+}
+
+function updateCardSummary(side) {
+    const summaryEl = document.getElementById(`${side}-card-summary`);
+    if (!summaryEl) return;
+    if (side === 'self') {
+        const totalCost = getArtifactSelectionCost(side);
+        const costValueEl = document.getElementById('self-artifact-cost-value');
+        const costFillEl = document.getElementById('self-artifact-cost-fill');
+        if (costValueEl) costValueEl.textContent = String(totalCost);
+        if (costFillEl) costFillEl.textContent = String(totalCost);
+    }
+    const bonus = getCardBonusesForSide(side, side === 'self' && isSpellApplyEnabled(), { dmgType: inputs.dmgType.value });
+    const parts = formatCardSummaryParts(bonus);
+    if (parts.length === 0) {
+        summaryEl.className = 'card-summary card-summary-empty';
+        summaryEl.innerHTML = '<span class="card-summary-title">カード補正</span><span class="card-summary-empty-text">なし</span>';
+        return;
+    }
+    summaryEl.className = 'card-summary card-summary-active';
+    const chips = parts.map(part => `<span class="card-summary-chip">${part}</span>`).join('');
+    const noteText = bonus.notes.length ? `<div class="card-summary-note">※ ${bonus.notes[0]}</div>` : '';
+    summaryEl.innerHTML = `
+        <span class="card-summary-title">カード補正</span>
+        <div class="card-summary-chip-list">${chips}</div>
+        ${noteText}
+    `;
+}
+
+function getSpellCards() {
+    return CARD_LIBRARY.spells || [];
+}
+
+function getSpellEntry(cardId) {
+    if (!spellSelections[cardId]) {
+        const card = CARD_INDEX[cardId];
+        spellSelections[cardId] = normalizeSpellEntry(card, {});
+    }
+    return spellSelections[cardId];
+}
+
+function getSpellSelectionCost() {
+    return Object.entries(spellSelections).reduce((sum, [cardId, entry]) => {
+        const card = CARD_INDEX[cardId];
+        return sum + (getCardCost(card || {}, entry?.star || 1) * (entry?.qty || 0));
+    }, 0);
+}
+
+function getSpellBonusesSummary() {
+    const total = createEmptyCardBonus();
+    const notes = [];
+    Object.entries(spellSelections).forEach(([cardId, entry]) => {
+        const qty = entry?.qty || 0;
+        if (qty <= 0) return;
+        const resolved = getCardBonusFromSelection({ cardId, star: entry.star });
+        if (!resolved) return;
+        for (let i = 0; i < qty; i++) {
+            accumulateCardBonus(total, resolved);
+        }
+        (CARD_INDEX[cardId]?.conditionalEffects || []).forEach(effect => {
+            if (effect.type !== 'info') return;
+            if (isSignatureInfoEffect(effect)) return;
+            const value = extractPercentValue(getSpellEffectInfoText(effect, entry.star));
+            if (!value) return;
+            if (effect.label.includes('最大HP増加')) total.hpP += value * qty;
+            if (effect.label.includes('攻撃速度増加')) total.hasteP += value * qty;
+        });
+        if (resolved.note) {
+            notes.push(`${CARD_INDEX[cardId]?.name} x${qty}: ${CARD_INDEX[cardId]?.note || ''}`);
+        }
+    });
+    total.notes = notes;
+    return total;
+}
+
+function getTotalSelectedSpellCount() {
+    return Object.values(spellSelections).reduce((sum, entry) => sum + (entry?.qty || 0), 0);
+}
+
+function getSpellQtyTierClass(qty) {
+    const value = Math.max(0, parseInt(qty, 10) || 0);
+    if (value === 0) return 'qty-zero';
+    if (value === 1) return 'qty-one';
+    if (value === 2) return 'qty-two';
+    return 'qty-many';
+}
+
+function syncSpellLibraryVisual(cardId) {
+    const entry = getSpellEntry(cardId);
+    document.querySelectorAll(`.grade-picker[data-card-id="${cardId}"]`).forEach(picker => {
+        paintGradePicker(picker, entry.star);
+    });
+    document.querySelectorAll(`.spell-qty-value[data-card-id="${cardId}"]`).forEach(el => {
+        el.textContent = String(entry.qty || 0);
+        el.classList.remove('qty-zero', 'qty-one', 'qty-two', 'qty-many');
+        el.classList.add(getSpellQtyTierClass(entry.qty));
+    });
+    document.querySelectorAll(`.spell-cost-badge-value[data-card-id="${cardId}"]`).forEach(el => {
+        const card = CARD_INDEX[cardId];
+        if (card) el.textContent = String(getCardCost(card, entry.star));
+    });
+    document.querySelectorAll(`.spell-cost-badge-fill[data-card-id="${cardId}"]`).forEach(el => {
+        const card = CARD_INDEX[cardId];
+        if (card) el.textContent = String(getCardCost(card, entry.star));
+    });
+}
+
+function syncAllSpellLibraryVisuals() {
+    Object.keys(spellSelections).forEach(cardId => {
+        syncSpellLibraryVisual(cardId);
+    });
+}
+
+function setSpellSelectedPanelOpen(open) {
+    isSpellSelectedPanelOpen = open;
+    const panel = document.getElementById('spell-selected-panel');
+    const toggleBtn = document.getElementById('spell-toggle-selected');
+    if (panel) panel.style.display = open ? 'block' : 'none';
+    if (toggleBtn) {
+        toggleBtn.classList.toggle('active', open);
+        toggleBtn.textContent = open ? '選択中を隠す' : '選択中を表示';
+    }
+    saveSpellSelectionsState();
+}
+
+function updateSpellSelectedSummary() {
+    const summaryEl = document.getElementById('spell-selected-summary');
+    if (!summaryEl) return;
+    const count = getTotalSelectedSpellCount();
+    if (count === 0) {
+        summaryEl.textContent = '未選択';
+    } else {
+        summaryEl.textContent = `${count}枚選択中`;
+    }
+}
+
+function updateSpellTotalCost() {
+    const totalEl = document.getElementById('spell-total-cost');
+    const totalFillEl = document.getElementById('spell-total-cost-fill');
+    if (!totalEl) return;
+    const totalText = getSpellSelectionCost().toLocaleString();
+    totalEl.textContent = totalText;
+    if (totalFillEl) totalFillEl.textContent = totalText;
+    updateSpellSelectedSummary();
+    updateSpellBonusSummary();
+}
+
+function updateSpellBonusSummary() {
+    const summaryEl = document.getElementById('spell-bonus-summary');
+    if (!summaryEl) return;
+    const bonus = getSpellBonusesSummary();
+    const parts = formatCardSummaryParts(bonus);
+    if (parts.length === 0) {
+        summaryEl.innerHTML = '<span class="spell-bonus-title">補正合計</span><span class="spell-bonus-empty">なし</span>';
+        return;
+    }
+    const chips = parts.map(part => `<span class="spell-bonus-chip">${part}</span>`).join('');
+    summaryEl.innerHTML = `<span class="spell-bonus-title">補正合計</span><div class="spell-bonus-chip-list">${chips}</div>`;
+}
+
+function setSpellQuantity(cardId, nextQty, nextStar = null) {
+    const entry = getSpellEntry(cardId);
+    entry.qty = Math.max(0, nextQty);
+    if (nextStar !== null) {
+        entry.star = Math.max(1, Math.min(5, parseInt(nextStar, 10) || 1));
+    }
+    syncSpellLibraryVisual(cardId);
+    renderSelectedSpellList();
+    updateSpellTotalCost();
+    updateUI();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function setSpellEffectToggle(cardId, effectId, enabled) {
+    const entry = getSpellEntry(cardId);
+    const card = CARD_INDEX[cardId];
+    if (!card?.conditionalEffects?.some(effect => effect.id === effectId && effect.type === 'toggle')) return;
+    entry.effects = entry.effects || createEmptyCardEffectState(card);
+    entry.effects[effectId] = !!enabled;
+    renderSpellLibrary();
+    renderSelectedSpellList();
+    updateSpellTotalCost();
+    updateUI();
+    const currentBadge = document.querySelector(`.spell-effect-badge[data-card-id="${cardId}"]`);
+    if (activeSpellEffectPopoverCardId === cardId && currentBadge) {
+        openSpellEffectPopover(cardId, currentBadge);
+    }
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function createEffectLabelNode(text, className = 'spell-effect-info-label') {
+    const label = document.createElement('div');
+    label.className = className;
+    const levelMatch = text?.match(/^(?:愛用\s*)?Lv\.?\s*(\d+)\s*(.*)$/);
+    if (levelMatch) {
+        const levelTag = document.createElement('span');
+        levelTag.className = 'spell-effect-level-tag';
+        levelTag.textContent = `Lv.${levelMatch[1]}`;
+        label.appendChild(levelTag);
+
+        if (levelMatch[2]) {
+            const labelText = document.createElement('span');
+            labelText.className = 'spell-effect-info-label-text';
+            labelText.textContent = levelMatch[2].trim();
+            label.appendChild(labelText);
+        }
+    } else {
+        label.textContent = text || '';
+    }
+    return label;
+}
+
+function createSpellEffectToggle(cardId, effect, enabled, compact = false, disabled = false, star = 1) {
+    const wrap = document.createElement('div');
+    wrap.className = compact ? 'spell-effect-row spell-effect-row-compact' : 'spell-effect-row';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = compact ? 'spell-effect-toggle spell-effect-toggle-compact' : 'spell-effect-toggle';
+    toggle.classList.toggle('active', enabled);
+    if (disabled) toggle.classList.add('disabled');
+    toggle.textContent = enabled ? 'ON' : 'OFF';
+    toggle.disabled = !!disabled;
+    toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (disabled) return;
+        setSpellEffectToggle(cardId, effect.id, !enabled);
+    });
+
+    const content = document.createElement('div');
+    content.className = 'spell-effect-info-content';
+
+    const label = createEffectLabelNode(
+        compact ? (effect.shortLabel || effect.label) : effect.label,
+        compact ? 'spell-effect-label spell-effect-label-compact' : 'spell-effect-info-label'
+    );
+
+    content.appendChild(label);
+    const bonusText = formatEffectBonusText(effect, star);
+    if (bonusText) {
+        const desc = document.createElement('span');
+        desc.className = 'spell-effect-info-desc';
+        desc.textContent = bonusText;
+        content.appendChild(desc);
+    }
+    const infoText = getSpellEffectInfoText(effect, star);
+    if (infoText) {
+        const desc = document.createElement('span');
+        desc.className = 'spell-effect-info-desc';
+        desc.textContent = infoText;
+        content.appendChild(desc);
+    }
+    wrap.appendChild(toggle);
+    wrap.appendChild(content);
+    return wrap;
+}
+
+function createSpellEffectInfo(effect, star = 1) {
+    const wrap = document.createElement('div');
+    wrap.className = 'spell-effect-row spell-effect-row-info';
+
+    const switchDummy = document.createElement('span');
+    switchDummy.className = 'spell-effect-toggle spell-effect-toggle-dummy';
+    switchDummy.textContent = 'INFO';
+
+    const content = document.createElement('div');
+    content.className = 'spell-effect-info-content';
+
+    const label = createEffectLabelNode(effect.label, 'spell-effect-info-label');
+
+    const desc = document.createElement('span');
+    desc.className = 'spell-effect-info-desc';
+    desc.textContent = getSpellEffectInfoText(effect, star);
+
+    content.appendChild(label);
+    if (desc.textContent) content.appendChild(desc);
+    wrap.appendChild(switchDummy);
+    wrap.appendChild(content);
+    return wrap;
+}
+
+function createSpellBaseInfo(text) {
+    const wrap = document.createElement('div');
+    wrap.className = 'spell-effect-row spell-effect-row-base';
+
+    const tag = document.createElement('span');
+    tag.className = 'spell-effect-toggle spell-effect-toggle-dummy spell-effect-toggle-base';
+    tag.textContent = 'BASE';
+
+    const content = document.createElement('div');
+    content.className = 'spell-effect-info-content';
+
+    const label = document.createElement('span');
+    label.className = 'spell-effect-info-label';
+    label.textContent = text;
+
+    content.appendChild(label);
+    wrap.appendChild(tag);
+    wrap.appendChild(content);
+    return wrap;
+}
+
+function isSignatureEffect(effect) {
+    if (!effect) return false;
+    return effect.id?.includes('signature')
+        || effect.label?.includes('愛用')
+        || effect.label?.includes('専用');
+}
+
+function isSignatureInfoEffect(effect) {
+    return !!effect && effect.type === 'info' && isSignatureEffect(effect);
+}
+
+function getArtifactSignatureDisplayEffect(effect) {
+    if (!effect) return effect;
+    if (effect.id === 'signature_skill' && effect.label === '愛用遺物効果') return null;
+    if (/^Lv\.\d/.test(effect.label) || /^愛用 Lv\.\d/.test(effect.label)) return effect;
+    return {
+        ...effect,
+        label: `Lv.1 ${effect.label}`
+    };
+}
+
+function getSignatureGroupTitle(card) {
+    return card?.kind === 'artifact' ? '愛用遺物効果' : '愛用効果';
+}
+
+function appendSpellEffectGroup(bodyEl, title, effects, renderer, extraClass = '', metaText = '') {
+    if (!effects.length) return;
+    const section = document.createElement('div');
+    section.className = `spell-effect-group${extraClass ? ` ${extraClass}` : ''}`;
+
+    const heading = document.createElement('div');
+    heading.className = 'spell-effect-group-title';
+    heading.textContent = title;
+    if (metaText) {
+        const meta = document.createElement('span');
+        meta.className = 'spell-effect-group-meta';
+        meta.textContent = metaText;
+        heading.appendChild(meta);
+    }
+    section.appendChild(heading);
+
+    effects.forEach(effect => {
+        section.appendChild(renderer(effect));
+    });
+
+    bodyEl.appendChild(section);
+}
+
+function appendSignatureEffectGroup(bodyEl, card, toggleEffects, infoEffects, toggleRenderer, infoRenderer) {
+    if (!toggleEffects.length && !infoEffects.length) return;
+    const section = document.createElement('div');
+    section.className = 'spell-effect-group spell-effect-group-signature';
+
+    const heading = document.createElement('div');
+    heading.className = 'spell-effect-group-title';
+    heading.textContent = getSignatureGroupTitle(card);
+    if (card.favoriteCharacter) {
+        const meta = document.createElement('span');
+        meta.className = 'spell-effect-group-meta';
+        meta.textContent = `愛用使徒: ${card.favoriteCharacter}`;
+        heading.appendChild(meta);
+    }
+    section.appendChild(heading);
+
+    toggleEffects.forEach(effect => section.appendChild(toggleRenderer(effect)));
+    infoEffects.forEach(effect => section.appendChild(infoRenderer(effect)));
+
+    bodyEl.appendChild(section);
+}
+
+function createSpellEffectBadge(cardId, card, entry) {
+    const effects = card.conditionalEffects?.filter(effect => effect.type === 'toggle') || [];
+    const enabledCount = effects.filter(effect => !!entry.effects?.[effect.id]).length;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'spell-effect-badge';
+    btn.dataset.cardId = cardId;
+    if (effects.length > 0) btn.classList.add('has-toggle');
+    if (enabledCount > 0) btn.classList.add('active');
+    btn.textContent = enabledCount > 0 ? `効果 ${enabledCount}` : (effects.length > 0 ? '切替' : '効果');
+    btn.title = 'カード効果を確認';
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSpellEffectPopover(cardId, btn);
+    });
+    return btn;
+}
+
+function closeSpellEffectPopover() {
+    activeSpellEffectPopoverCardId = null;
+    activeSpellEffectPopoverAnchor = null;
+    const popover = document.getElementById('spell-effect-popover');
+    if (popover) popover.style.display = 'none';
+}
+
+function positionSpellEffectPopover(anchorEl) {
+    const popover = document.getElementById('spell-effect-popover');
+    const bottomBar = document.querySelector('.bottom-result-bar');
+    if (!popover || !anchorEl) return;
+    const rect = anchorEl.getBoundingClientRect();
+    const popRect = popover.getBoundingClientRect();
+    const maxLeft = Math.max(12, window.innerWidth - popRect.width - 12);
+    const desiredLeft = rect.left;
+    const left = Math.min(Math.max(12, desiredLeft), maxLeft);
+
+    const desiredTop = rect.bottom + 8;
+    const bottomBarRect = bottomBar?.getBoundingClientRect();
+    const bottomLimit = bottomBarRect ? (bottomBarRect.top - 12) : (window.innerHeight - 12);
+    let top = desiredTop;
+    if (top + popRect.height > bottomLimit) {
+        top = rect.top - popRect.height - 8;
+    }
+    const maxTop = Math.max(12, window.innerHeight - popRect.height - 12);
+    top = Math.min(Math.max(12, top), maxTop);
+
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function openSpellEffectPopover(cardId, anchorEl) {
+    const card = CARD_INDEX[cardId];
+    const entry = getSpellEntry(cardId);
+    const popover = document.getElementById('spell-effect-popover');
+    const titleEl = document.getElementById('spell-effect-popover-title');
+    const bodyEl = document.getElementById('spell-effect-popover-body');
+    if (!card || !popover || !titleEl || !bodyEl) return;
+
+    titleEl.textContent = `${card.name} の効果`;
+    bodyEl.innerHTML = '';
+
+    const starIndex = Math.max(0, Math.min(4, (entry.star || 1) - 1));
+    const baseBonus = card.bonusesByStar?.[starIndex] || {};
+    const bonusParts = formatCardSummaryParts(baseBonus);
+    appendSpellEffectGroup(
+        bodyEl,
+        '基本補正',
+        bonusParts.length ? bonusParts : ['なし'],
+        (text) => createSpellBaseInfo(text)
+    );
+
+    const effects = card.conditionalEffects || [];
+    const toggleEffects = effects.filter(effect => effect.type === 'toggle');
+    const infoEffects = effects.filter(effect => effect.type === 'info');
+    const signatureToggleEffects = toggleEffects.filter(isSignatureEffect);
+    const miscToggleEffects = toggleEffects.filter(effect => !isSignatureEffect(effect));
+    const signatureInfoEffects = infoEffects
+        .filter(isSignatureInfoEffect)
+        .map(getArtifactSignatureDisplayEffect)
+        .filter(Boolean);
+    const miscInfoEffects = infoEffects.filter(effect => !isSignatureInfoEffect(effect));
+
+    const shouldShowGenericNote = !!card.note && effects.length === 0;
+    if (shouldShowGenericNote) {
+        const note = document.createElement('div');
+        note.className = 'spell-effect-note';
+        note.textContent = `※ ${card.note}`;
+        bodyEl.appendChild(note);
+    }
+
+    appendSpellEffectGroup(
+        bodyEl,
+        '切替効果',
+        miscToggleEffects,
+        (effect) => {
+            const enabled = !!entry.effects?.[effect.id];
+            return createSpellEffectToggle(cardId, effect, enabled, false, false, entry.star || 1);
+        }
+    );
+
+    appendSpellEffectGroup(
+        bodyEl,
+        '補足効果',
+        miscInfoEffects,
+        (effect) => createSpellEffectInfo(effect, entry.star || 1)
+    );
+
+    appendSignatureEffectGroup(
+        bodyEl,
+        card,
+        signatureToggleEffects,
+        signatureInfoEffects,
+        (effect) => {
+            const enabled = !!entry.effects?.[effect.id];
+            return createSpellEffectToggle(cardId, effect, enabled, false, false, entry.star || 1);
+        },
+        (effect) => createSpellEffectInfo(effect, entry.star || 1)
+    );
+
+    popover.style.display = 'block';
+    activeSpellEffectPopoverCardId = cardId;
+    activeSpellEffectPopoverAnchor = anchorEl;
+    positionSpellEffectPopover(anchorEl);
+}
+
+function toggleSpellEffectPopover(cardId, anchorEl) {
+    if (activeSpellEffectPopoverCardId === cardId) {
+        closeSpellEffectPopover();
+        return;
+    }
+    openSpellEffectPopover(cardId, anchorEl);
+}
+
+function updateSpellStar(cardId, star) {
+    const entry = getSpellEntry(cardId);
+    entry.star = Math.max(1, Math.min(5, parseInt(star, 10) || 1));
+    syncSpellLibraryVisual(cardId);
+    renderSelectedSpellList();
+    updateSpellTotalCost();
+    updateUI();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function setAllSpellStars(star) {
+    const nextStar = Math.max(1, Math.min(5, parseInt(star, 10) || 1));
+    getSpellCards().forEach(card => {
+        const entry = getSpellEntry(card.id);
+        entry.star = nextStar;
+    });
+    renderSpellLibrary();
+    renderSelectedSpellList();
+    syncAllSpellLibraryVisuals();
+    updateSpellTotalCost();
+    updateUI();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function clearSpellSelections() {
+    spellSelections = normalizeSpellSelections();
+    renderSelectedSpellList();
+    renderSpellLibrary();
+    updateSpellTotalCost();
+    updateUI();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function renderSpellLibrary() {
+    const grid = document.getElementById('spell-library-grid');
+    const rarityFilter = document.getElementById('spell-rarity-filter')?.value || '';
+    if (!grid) return;
+
+    const cards = getSpellCards().filter(card => !rarityFilter || card.rarity === rarityFilter);
+    grid.innerHTML = '';
+
+    cards.forEach(card => {
+        const tile = document.createElement('div');
+        tile.className = 'spell-card-tile';
+        const frameClass = getCardFrameClass(card);
+        const entry = getSpellEntry(card.id);
+
+        const media = document.createElement('div');
+        media.className = 'spell-card-media';
+        if (frameClass) media.classList.add(frameClass);
+
+        const img = document.createElement('img');
+        img.className = 'spell-card-thumb';
+        img.src = getCardImagePath(card);
+        img.alt = card.name;
+
+        const costBadge = document.createElement('div');
+        costBadge.className = 'spell-cost-badge';
+        costBadge.innerHTML = `
+            <img src="img/Card/cost.webp" alt="" class="spell-cost-badge-img">
+            <span class="spell-cost-badge-value" data-card-id="${card.id}">${getCardCost(card, entry.star || 1)}</span>
+            <span class="spell-cost-badge-fill" data-card-id="${card.id}">${getCardCost(card, entry.star || 1)}</span>
+        `;
+
+        const meta = document.createElement('div');
+        meta.className = 'spell-card-meta';
+        meta.innerHTML = `
+            <div class="spell-card-name">${card.name}</div>
+        `;
+
+        const actions = document.createElement('div');
+        actions.className = 'spell-card-actions';
+        const gradePicker = createGradePicker(entry.star || 1, (value) => updateSpellStar(card.id, value), card.id);
+        gradePicker.classList.add('grade-picker-overlay');
+        const qtyControls = document.createElement('div');
+        qtyControls.className = 'spell-qty-controls';
+
+        const minusBtn = document.createElement('button');
+        minusBtn.type = 'button';
+        minusBtn.className = 'spell-qty-btn';
+        minusBtn.textContent = '−';
+        minusBtn.addEventListener('click', () => setSpellQuantity(card.id, (getSpellEntry(card.id).qty || 0) - 1, getSpellEntry(card.id).star));
+
+        const qty = document.createElement('span');
+        qty.className = 'spell-qty-value';
+        qty.dataset.cardId = card.id;
+        qty.textContent = String(entry.qty || 0);
+        qty.classList.add(getSpellQtyTierClass(entry.qty));
+
+        const plusBtn = document.createElement('button');
+        plusBtn.type = 'button';
+        plusBtn.className = 'spell-qty-btn';
+        plusBtn.textContent = '+';
+        plusBtn.addEventListener('click', () => setSpellQuantity(card.id, (getSpellEntry(card.id).qty || 0) + 1, getSpellEntry(card.id).star));
+
+        actions.appendChild(gradePicker);
+        qtyControls.appendChild(minusBtn);
+        qtyControls.appendChild(qty);
+        qtyControls.appendChild(plusBtn);
+        actions.appendChild(qtyControls);
+
+        media.appendChild(img);
+        media.appendChild(costBadge);
+        media.appendChild(gradePicker);
+        const effectBadge = createSpellEffectBadge(card.id, card, entry);
+        if (effectBadge) media.appendChild(effectBadge);
+        tile.appendChild(media);
+        tile.appendChild(meta);
+        tile.appendChild(actions);
+        grid.appendChild(tile);
+    });
+}
+
+function renderSelectedSpellList() {
+    const list = document.getElementById('spell-selected-list');
+    if (!list) return;
+    const selections = Object.entries(spellSelections).filter(([, entry]) => (entry?.qty || 0) > 0);
+    list.innerHTML = '';
+
+    if (selections.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'spell-empty';
+        empty.textContent = 'まだスペルカードは選択されていません。';
+        list.appendChild(empty);
+        updateSpellTotalCost();
+        return;
+    }
+
+    selections.forEach(([cardId, entry]) => {
+        const card = CARD_INDEX[cardId];
+        if (!card) return;
+
+        const item = document.createElement('div');
+        item.className = 'spell-selected-item';
+        const frameClass = getCardFrameClass(card);
+
+        const media = document.createElement('div');
+        media.className = 'spell-selected-media';
+        if (frameClass) media.classList.add(frameClass);
+
+        const img = document.createElement('img');
+        img.className = 'spell-selected-thumb';
+        img.src = getCardImagePath(card);
+        img.alt = card.name;
+
+        const costBadge = document.createElement('div');
+        costBadge.className = 'spell-cost-badge spell-cost-badge-small';
+        costBadge.innerHTML = `
+            <img src="img/Card/cost.webp" alt="" class="spell-cost-badge-img">
+            <span class="spell-cost-badge-value" data-card-id="${card.id}">${getCardCost(card, entry.star || 1)}</span>
+            <span class="spell-cost-badge-fill" data-card-id="${card.id}">${getCardCost(card, entry.star || 1)}</span>
+        `;
+
+        const info = document.createElement('div');
+        info.className = 'spell-selected-info';
+        info.innerHTML = `
+            <div class="spell-selected-name">${card.name}</div>
+            <div class="spell-selected-sub-row">
+                <div class="spell-selected-sub ${getSpellQtyTierClass(entry.qty)}">個数 ${entry.qty}</div>
+            </div>
+        `;
+
+        if (card.conditionalEffects?.length) {
+            const effectsWrap = document.createElement('div');
+            effectsWrap.className = 'spell-effect-list';
+            card.conditionalEffects.forEach(effect => {
+                if (effect.type !== 'toggle') return;
+                const enabled = !!entry.effects?.[effect.id];
+                effectsWrap.appendChild(createSpellEffectToggle(cardId, effect, enabled, false, false, entry.star || 1));
+            });
+            if (effectsWrap.childElementCount > 0) {
+                info.appendChild(effectsWrap);
+            }
+        }
+
+        if (card.note) {
+            const note = document.createElement('div');
+            note.className = 'spell-selected-note';
+            note.textContent = `※ ${card.note}`;
+            info.appendChild(note);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'spell-selected-actions';
+        const gradeDisplay = createGradeDisplay(entry.star || 1);
+        gradeDisplay.classList.add('grade-picker-overlay', 'grade-picker-small', 'grade-picker-selected-readonly');
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'spell-remove-btn';
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', () => setSpellQuantity(cardId, 0));
+
+        actions.appendChild(removeBtn);
+
+        media.appendChild(img);
+        media.appendChild(costBadge);
+        media.appendChild(gradeDisplay);
+        item.appendChild(media);
+        item.appendChild(info);
+        item.appendChild(actions);
+        list.appendChild(item);
+    });
+
+    updateSpellTotalCost();
+}
+
+function initializeSpellTab() {
+    ensureEffectPopoverLayer();
+    const filter = document.getElementById('spell-rarity-filter');
+    if (filter && !filter.dataset.bound) {
+        filter.dataset.bound = '1';
+        filter.addEventListener('change', renderSpellLibrary);
+    }
+
+    const clearBtn = document.getElementById('spell-clear-all');
+    if (clearBtn && !clearBtn.dataset.bound) {
+        clearBtn.dataset.bound = '1';
+        clearBtn.addEventListener('click', clearSpellSelections);
+    }
+
+    const toggleBtn = document.getElementById('spell-toggle-selected');
+    if (toggleBtn && !toggleBtn.dataset.bound) {
+        toggleBtn.dataset.bound = '1';
+        toggleBtn.addEventListener('click', () => setSpellSelectedPanelOpen(!isSpellSelectedPanelOpen));
+    }
+
+    const popoverCloseBtn = document.getElementById('spell-effect-popover-close');
+    if (popoverCloseBtn && !popoverCloseBtn.dataset.bound) {
+        popoverCloseBtn.dataset.bound = '1';
+        popoverCloseBtn.addEventListener('click', closeSpellEffectPopover);
+    }
+
+    const applyToggle = document.getElementById('spell-apply-toggle');
+    if (applyToggle && !applyToggle.dataset.bound) {
+        applyToggle.dataset.bound = '1';
+        applyToggle.addEventListener('change', () => {
+            updateUI();
+            saveSpellSelectionsState();
+            saveState();
+        });
+    }
+
+    const bulkGradeActions = document.getElementById('spell-bulk-grade-actions');
+    if (bulkGradeActions && !bulkGradeActions.dataset.bound) {
+        bulkGradeActions.dataset.bound = '1';
+        bulkGradeActions.querySelectorAll('.spell-bulk-grade-btn').forEach(btn => {
+            btn.addEventListener('click', () => setAllSpellStars(btn.dataset.star));
+        });
+    }
+
+    loadSpellSelectionsState();
+    spellSelections = normalizeSpellSelections(spellSelections);
+    isSpellSelectedPanelOpen = false;
+    renderSpellLibrary();
+    renderSelectedSpellList();
+    syncAllSpellLibraryVisuals();
+    updateSpellTotalCost();
+    setSpellSelectedPanelOpen(isSpellSelectedPanelOpen);
 }
 
 function getValues() {
@@ -280,6 +2160,10 @@ function getValues() {
 
     const perspective = Array.from(inputs.perspective).find(r => r.checked)?.value || 'self';
     const crayonBoard = getCrayonBoardBonuses();
+    const cardBonuses = {
+        self: getCardBonusesForSide('self', isSpellApplyEnabled(), { dmgType: inputs.dmgType.value }),
+        enemy: getCardBonusesForSide('enemy', false, { dmgType: inputs.dmgType.value })
+    };
 
     return {
         perspective,
@@ -288,10 +2172,13 @@ function getValues() {
         self: getSideStats('self'),
         enemy: getSideStats('enemy'),
         crayonBonuses: crayonBoard,
+        cardBonuses,
         common: (() => {
             const isSelfAttacker = perspective === 'self';
             const att = isSelfAttacker ? inputs.self : inputs.enemy;
             const def = isSelfAttacker ? inputs.enemy : inputs.self;
+            const attCard = isSelfAttacker ? cardBonuses.self : cardBonuses.enemy;
+            const defCard = isSelfAttacker ? cardBonuses.enemy : cardBonuses.self;
             
             const rawAdd = parseFloat(att.mult.add?.value || 100);
             let addM = (rawAdd === 0 ? 0 : rawAdd) / 100;
@@ -299,16 +2186,23 @@ function getValues() {
             
             return {
                 skill: (parseFloat(att.mult.skill?.value) === 0 ? 0 : (parseFloat(att.mult.skill?.value) || 100)) / 100,
-                add: addM,
+                add: addM + (attCard.addP || 0) / 100,
                 type: (parseFloat(att.mult.type?.value) === 0 ? 0 : (parseFloat(att.mult.type?.value) || 100)) / 100,
-                special: (parseFloat(att.mult.special?.value) === 0 ? 0 : (parseFloat(att.mult.special?.value) || 100)) / 100,
-                other: (parseFloat(att.mult.other?.value) === 0 ? 0 : (parseFloat(att.mult.other?.value) || 100)) / 100,
-                atkP: parseFloat(att.adds.atkP?.value) || 0,
-                critRateP: parseFloat(att.adds.critRateP?.value) || 0,
-                critDmgP: parseFloat(att.adds.critDmgP?.value) || 0,
-                defP: parseFloat(def.adds.defP?.value) || 0,
-                critResP: parseFloat(def.adds.critResP?.value) || 0,
-                critDmgResP: parseFloat(def.adds.critDmgResP?.value) || 0
+                special: ((parseFloat(att.mult.special?.value) === 0 ? 0 : (parseFloat(att.mult.special?.value) || 100)) + (attCard.specialP || 0)) / 100,
+                other: ((parseFloat(att.mult.other?.value) === 0 ? 0 : (parseFloat(att.mult.other?.value) || 100)) + (attCard.otherP || 0)) / 100,
+                atkP: (parseFloat(att.adds.atkP?.value) || 0) + (attCard.atkP || 0),
+                critRateP: (parseFloat(att.adds.critRateP?.value) || 0) + (attCard.critRateP || 0),
+                critDmgP: (parseFloat(att.adds.critDmgP?.value) || 0) + (attCard.critDmgP || 0),
+                defP: (parseFloat(def.adds.defP?.value) || 0) + (defCard.defP || 0),
+                critResP: (parseFloat(def.adds.critResP?.value) || 0) + (defCard.critResP || 0),
+                critDmgResP: (parseFloat(def.adds.critDmgResP?.value) || 0) + (defCard.critDmgResP || 0),
+                enemyDefDownP: attCard.enemyDefDownP || 0,
+                enemyCritResDownP: attCard.enemyCritResDownP || 0,
+                enemyCritDmgResDownP: attCard.enemyCritDmgResDownP || 0,
+                takenDmgP: defCard.takenDmgP || 0,
+                attackerDmgDownP: perspective === 'enemy'
+                    ? Math.max(0, Math.min(9, parseInt(inputs.enemy.debuffs.poisonStacks?.value || '0', 10) || 0)) * 11
+                    : 0
             };
         })()
     };
@@ -322,7 +2216,7 @@ function calculateAll(v, overrideSelf = null) {
     const defender = v.perspective === 'self' ? e : s;
 
     const finalAtk = attacker.atk * (1 + v.common.atkP / 100);
-    const finalDef = defender.def * (1 + v.common.defP / 100);
+    const finalDef = defender.def * (1 + (v.common.defP - v.common.enemyDefDownP) / 100);
     const rate = calcBaseDamageRate(finalAtk, finalDef);
     const baseDamage = finalAtk * rate;
     
@@ -340,14 +2234,17 @@ function calculateAll(v, overrideSelf = null) {
             }
         }
     }
+    finalAdd -= (v.common.attackerDmgDownP || 0) / 100;
+    finalAdd -= (v.common.takenDmgP || 0) / 100;
+    finalAdd = Math.max(0, finalAdd);
     
     const normalDamage = baseDamage * v.common.skill * finalAdd * v.common.type * v.common.special * v.common.other;
 
     const baseCritRate = calcCritRate(attacker.crit, defender.critRes);
-    const finalCritRate = Math.max(0.05, Math.min(0.8, baseCritRate + (v.common.critRateP - v.common.critResP) / 100));
+    const finalCritRate = Math.max(0.05, Math.min(0.8, baseCritRate + (v.common.critRateP - v.common.critResP + v.common.enemyCritResDownP) / 100));
 
     const baseCritMult = calcCritMultiplier(attacker.critDmg, defender.critDmgRes);
-    const finalCritMult = Math.max(1.2, Math.min(2.5, baseCritMult + (v.common.critDmgP - v.common.critDmgResP) / 100));
+    const finalCritMult = Math.max(1.2, Math.min(2.5, baseCritMult + (v.common.critDmgP - v.common.critDmgResP + v.common.enemyCritDmgResDownP) / 100));
 
     const criticalDamage = normalDamage * finalCritMult;
     const expectedDamage = normalDamage * (1 - finalCritRate) + criticalDamage * finalCritRate;
@@ -449,6 +2346,8 @@ function updateDamageTypeIcon() {
 function updateUI() {
     updateDamageTypeIcon();
     updateWeaknessBadge();
+    updateCardSummary('self');
+    updateCardSummary('enemy');
     const v = getValues(); const oldRes = calculateAll(v); let res = oldRes; let newSelf = null;
     if (v.isCrayon) {
         newSelf = { ...v.self };
@@ -481,6 +2380,7 @@ function updateUI() {
         document.getElementById('crayon-stats-display').style.display = 'none';
         Object.values(impTexts).forEach(el => { if (el) el.style.display = 'none'; });
     }
+    updateFinalModifierSummary(v, v.isCrayon ? newSelf : null);
     results.normal.textContent = Math.floor(res.normal).toLocaleString(); 
     results.critDmg.textContent = Math.floor(res.crit).toLocaleString(); 
     results.expected.textContent = Math.floor(res.expected).toLocaleString(); 
@@ -571,6 +2471,19 @@ function loadCustomPresets() {
     }
 }
 
+function setDeleteButtonVisible(side, visible) {
+    const btn = inputs[side]?.delBtn;
+    if (!btn) return;
+    btn.classList.toggle('preset-action-hidden', !visible);
+}
+
+function syncDeleteButtonVisibility() {
+    ['self', 'enemy'].forEach(side => {
+        const presetValue = inputs[side]?.preset?.value || '';
+        setDeleteButtonVisible(side, presetValue.startsWith('c_'));
+    });
+}
+
 function saveCustomPreset(side) {
     const name = prompt(side === 'self' ? 'キャラクタープリセット名を入力してください:' : 'エネミープリセット名を入力してください:');
     if (!name) return;
@@ -582,9 +2495,7 @@ function saveCustomPreset(side) {
     
     populatePresets();
     inputs[side].preset.value = 'c_' + name;
-    if (inputs[side].delBtn) {
-        inputs[side].delBtn.style.display = 'inline-block';
-    }
+    setDeleteButtonVisible(side, true);
     saveState();
 }
 
@@ -675,7 +2586,7 @@ function applyPreset(side, value, shouldSave = true) {
         };
         // Special case: Enemy Phase
         if (side === 'enemy' && p.phases) {
-            inputs.enemy.phaseGroup.style.display = 'block';
+            inputs.enemy.phaseGroup.style.display = 'grid';
             inputs.enemy.phase.innerHTML = p.phases.map((ph, i) => `<option value="${i}">${ph.name}</option>`).join('');
             inputs.enemy.phase.dataset.currentPreset = key;
             syncPhaseSpacer();
@@ -861,11 +2772,13 @@ function updatePerspectiveUI() {
 }
 
 function updateTabUI(activeTab) {
+    document.documentElement.dataset.initialTab = activeTab || 'calc';
     const circle = document.getElementById('perspective-toggle-circle');
     if (circle) circle.style.display = activeTab === 'calc' ? '' : 'none';
 
     const bottomBar = document.querySelector('.bottom-result-bar');
     if (bottomBar) bottomBar.style.display = activeTab === 'est' ? 'none' : '';
+    syncBottomBarSafeArea();
 
     if (activeTab === 'calc') {
         syncToggleCirclePosition();
@@ -905,13 +2818,21 @@ inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI
     });
     if (inputs.swapBtn) inputs.swapBtn.addEventListener('click', swapRoles);
     
-    const detailsBtn = document.getElementById('toggle-details-btn');
+const detailsBtn = document.getElementById('toggle-details-btn');
     if (detailsBtn) {
         detailsBtn.addEventListener('click', () => {
             detailsBtn.classList.toggle('active');
             const panel = document.getElementById('bottom-details-panel');
             if (panel) panel.classList.toggle('collapsed');
+            requestAnimationFrame(syncBottomBarSafeArea);
+            setTimeout(syncBottomBarSafeArea, 220);
+            setTimeout(syncBottomBarSafeArea, 420);
         });
+    }
+
+    const bottomDetailsPanel = document.getElementById('bottom-details-panel');
+    if (bottomDetailsPanel) {
+        bottomDetailsPanel.addEventListener('transitionend', syncBottomBarSafeArea);
     }
 
     const followCurCb = document.getElementById('cb-follow-cur');
@@ -949,12 +2870,12 @@ inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI
     inputs.self.preset.addEventListener('change', (e) => {
         saveStatePatch({ selfPreset: e.target.value });
         applyPreset('self', e.target.value);
-        if (inputs.self.delBtn) inputs.self.delBtn.style.display = e.target.value.startsWith('c_') ? 'inline-block' : 'none';
+        setDeleteButtonVisible('self', e.target.value.startsWith('c_'));
     });
     inputs.enemy.preset.addEventListener('change', (e) => {
         saveStatePatch({ enemyPreset: e.target.value, enemyPhase: '' });
         applyPreset('enemy', e.target.value);
-        if (inputs.enemy.delBtn) inputs.enemy.delBtn.style.display = e.target.value.startsWith('c_') ? 'inline-block' : 'none';
+        setDeleteButtonVisible('enemy', e.target.value.startsWith('c_'));
     });
     
     ['self', 'enemy'].forEach(side => {
@@ -970,7 +2891,7 @@ inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI
                     localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(custom));
                     populatePresets();
                     inputs[side].preset.value = "";
-                    inputs[side].delBtn.style.display = 'none';
+                    setDeleteButtonVisible(side, false);
                     saveState();
                 }
             });
@@ -1024,6 +2945,22 @@ inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI
             }
         });
     });
+
+    const spellHelpToggle = document.getElementById('spell-help-toggle');
+    const spellHelpText = document.getElementById('spell-help-text');
+    if (spellHelpToggle && spellHelpText && !spellHelpToggle.dataset.bound) {
+        spellHelpToggle.dataset.bound = '1';
+        spellHelpToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            spellHelpText.style.display = spellHelpText.style.display === 'none' ? 'block' : 'none';
+        });
+        document.addEventListener('click', (e) => {
+            if (spellHelpText.style.display === 'none') return;
+            if (spellHelpText.contains(e.target) || spellHelpToggle.contains(e.target)) return;
+            spellHelpText.style.display = 'none';
+        });
+    }
 }
 
 // --- Estimator Logic ---
@@ -1318,6 +3255,41 @@ function estimateDefSide(rows, common) {
 
 // --- Persistence & Initialization ---
 const STORAGE_KEY = 'trickcal_calc_state_v1.8';
+const SPELL_STORAGE_KEY = `${STORAGE_KEY}:spell`;
+
+function saveSpellSelectionsState() {
+    try {
+        localStorage.setItem(SPELL_STORAGE_KEY, JSON.stringify({
+            selections: normalizeSpellSelections(spellSelections),
+            panelOpen: isSpellSelectedPanelOpen,
+            applyEnabled: isSpellApplyEnabled()
+        }));
+    } catch (e) {
+        console.error("Spell save failed", e);
+    }
+}
+
+function loadSpellSelectionsState() {
+    try {
+        const raw = localStorage.getItem(SPELL_STORAGE_KEY);
+        if (!raw) return false;
+        const state = JSON.parse(raw);
+        if (state?.selections) {
+            spellSelections = normalizeSpellSelections(state.selections);
+        }
+        if (typeof state?.panelOpen === 'boolean') {
+            isSpellSelectedPanelOpen = state.panelOpen;
+        }
+        if (typeof state?.applyEnabled === 'boolean') {
+            const applyToggle = document.getElementById('spell-apply-toggle');
+            if (applyToggle) applyToggle.checked = state.applyEnabled;
+        }
+        return true;
+    } catch (e) {
+        console.error("Spell load failed", e);
+        return false;
+    }
+}
 
 function getActiveTab() {
     return document.querySelector('.tab-btn.active')?.dataset.tab
@@ -1359,6 +3331,7 @@ function saveStatePatch(patch) {
 function saveState() {
     if (isRestoringState) return;
     const v = getValues();
+    const normalizedSpellSelections = normalizeSpellSelections(spellSelections);
     const state = {
         perspective: v.perspective,
         isCrayon: v.isCrayon,
@@ -1367,6 +3340,13 @@ function saveState() {
         selfPreset: inputs.self.preset.value,
         enemyPreset: inputs.enemy.preset.value,
         enemyPhase: inputs.enemy.phase.value,
+        spellSelectedPanelOpen: isSpellSelectedPanelOpen,
+        spellApplyEnabled: isSpellApplyEnabled(),
+        spellSelections: normalizedSpellSelections,
+        cards: {
+            self: collectCardSelections('self'),
+            enemy: collectCardSelections('enemy')
+        },
         self_mult: Object.fromEntries(Object.entries(inputs.self.mult).map(([k,v]) => [k, v?.value || ''])),
         self_adds: Object.fromEntries(Object.entries(inputs.self.adds).map(([k,v]) => [k, v?.value || ''])),
         enemy_mult: Object.fromEntries(Object.entries(inputs.enemy.mult).map(([k,v]) => [k, v?.value || ''])),
@@ -1462,6 +3442,23 @@ function loadState() {
                 if (el) el.value = val;
             });
         }
+
+        const hasDedicatedSpellState = loadSpellSelectionsState();
+
+        if (state.cards) {
+            restoreCardSelections('self', state.cards.self);
+            restoreCardSelections('enemy', state.cards.enemy);
+        }
+        if (!hasDedicatedSpellState && state.spellSelections) {
+            spellSelections = normalizeSpellSelections(state.spellSelections);
+        }
+        if (typeof state.spellSelectedPanelOpen === 'boolean') {
+            isSpellSelectedPanelOpen = state.spellSelectedPanelOpen;
+        }
+        if (typeof state.spellApplyEnabled === 'boolean') {
+            const spellApplyToggle = document.getElementById('spell-apply-toggle');
+            if (spellApplyToggle) spellApplyToggle.checked = state.spellApplyEnabled;
+        }
         
         if (state.samples) {
             estimator.samplesList.innerHTML = '';
@@ -1489,14 +3486,15 @@ function loadState() {
 
         updatePerspectiveUI();
         updateUI();
+        renderSpellLibrary();
+        renderSelectedSpellList();
+        syncAllSpellLibraryVisuals();
+        updateSpellTotalCost();
+        setSpellSelectedPanelOpen(isSpellSelectedPanelOpen);
         runEstimation();
         
         // Update delete buttons visibility on load
-        ['self', 'enemy'].forEach(side => {
-            if (inputs[side].delBtn) {
-                inputs[side].delBtn.style.display = inputs[side].preset.value.startsWith('c_') ? 'inline-block' : 'none';
-            }
-        });
+        syncDeleteButtonVisibility();
     } catch (e) {
         console.error("Load failed", e);
     } finally {
@@ -1546,15 +3544,45 @@ document.addEventListener('change', (e) => {
 
 // Initialize Everything
 populatePresets();
+initializeCardUI();
+initializeSpellTab();
 loadState();
 initListeners();
 updateHeaders();
 if (estimator.samplesList.children.length === 0) estimator.samplesList.appendChild(createSampleRow());
 updateMainSkillList('self');
 updateMainSkillList('enemy');
+syncDeleteButtonVisibility();
+syncBottomBarSafeArea();
+requestAnimationFrame(syncDeleteButtonVisibility);
+requestAnimationFrame(syncBottomBarSafeArea);
 
 window.addEventListener('beforeunload', saveState);
 window.addEventListener('pagehide', saveState);
+window.addEventListener('resize', syncRelicPickerSafeArea);
+window.addEventListener('resize', syncBottomBarSafeArea);
+window.addEventListener('resize', () => {
+    if (activeRelicEffectAnchor) positionRelicEffectPopover(activeRelicEffectAnchor);
+});
+window.addEventListener('resize', () => {
+    if (activeSpellEffectPopoverCardId && activeSpellEffectPopoverAnchor) {
+        positionSpellEffectPopover(activeSpellEffectPopoverAnchor);
+    } else {
+        closeSpellEffectPopover();
+    }
+});
+window.addEventListener('scroll', () => {
+    if (activeSpellEffectPopoverCardId && activeSpellEffectPopoverAnchor) {
+        positionSpellEffectPopover(activeSpellEffectPopoverAnchor);
+    }
+}, true);
+
+document.addEventListener('click', (e) => {
+    const popover = document.getElementById('spell-effect-popover');
+    if (!popover || popover.style.display === 'none') return;
+    if (e.target.closest('#spell-effect-popover') || e.target.closest('.spell-effect-badge')) return;
+    closeSpellEffectPopover();
+});
 
 // Keep toggle circle outside .panel so position:fixed works consistently,
 // and align it to the actual center line between the two side panels.
@@ -1588,3 +3616,4 @@ window.addEventListener('pagehide', saveState);
     window.addEventListener('resize', () => syncToggleCirclePosition());
     window.addEventListener('scroll', () => syncToggleCirclePosition(), { passive: true });
 })();
+

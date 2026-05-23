@@ -4,10 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trickcal Damage Calculator</title>
-    <link rel="icon" href="ico.webp?v=2.0.1" type="image/webp">
-    <link rel="stylesheet" href="style.css?v=2.0.1">
+    <link rel="icon" href="ico.webp?v=2.4.0" type="image/webp">
+    <link rel="stylesheet" href="style.css?v=2.4.0">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J8GXV74KQY"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-J8GXV74KQY');
+    </script>
     <script>
         try {
             const raw = localStorage.getItem('trickcal_calc_state_v1.8');
@@ -58,7 +67,7 @@
         }
         .reset-danger-btn:hover { background: #dc2626; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 820px) {
             header { height: auto !important; padding-top: 0 !important; }
             header h1 { display: none; }
             .header-content {
@@ -69,9 +78,12 @@
                 gap: 0;
             }
             .header-actions { position: static !important; }
-            #reset-btn { position: static !important; margin-left: 10px; }
+            #reset-btn { position: static !important; margin-left: 6px; }
             .header-tabs { margin: 0 !important; flex: 1; min-width: auto !important; }
-            .tab-btn { padding: 6px 10px !important; font-size: 13px !important; }
+            .tab-btn { padding: 6px 8px !important; font-size: 12px !important; }
+            .header-social-link { width: 1.55rem !important; height: 1.55rem !important; }
+            .header-social-link.note-link { position: static !important; }
+            .header-social-icon { width: 0.78rem !important; height: 0.78rem !important; }
         }
     </style>
 </head>
@@ -79,7 +91,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.5em; opacity: 0.7;">v2.0</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.4</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>カード</button>
@@ -87,6 +99,9 @@
                     <button class="tab-btn" data-tab="est">ステータス<br>推定</button>
                 </div>
                 <div class="header-actions">
+                    <a class="header-social-link note-link" href="https://note.com/innocentroad" target="_blank" rel="noopener noreferrer" aria-label="note: innocentroad" title="note: innocentroad">
+                        <img src="img/icon/note.svg" alt="" class="header-social-icon">
+                    </a>
                     <button type="button" id="reset-btn" class="reset-danger-btn">リセット×</button>
                 </div>
             </div>
@@ -116,6 +131,10 @@
         }
     } catch (e) {}
 </script>
+
+<div class="mobile-side-switch" id="mobile-side-switch" aria-label="スマホ表示切替">
+    <button type="button" class="mobile-side-switch-btn" data-side="enemy" aria-label="敵キャラを表示">敵</button>
+</div>
 
 <div class="side-panels">
                             <!-- Perspective Toggle Circle (between panels) -->
@@ -265,18 +284,49 @@
 
                                 <div class="card-section card-section-bottom" id="self-card-section">
                                     <div class="card-section-header">
-                                        <h3 class="stat-cat-header">遺物カード</h3>
+                                        <div class="card-section-heading-inline">
+                                            <h3 class="stat-cat-header">遺物カード</h3>
+                                        </div>
                                         <div class="card-section-header-meta">
-                                            <span class="card-section-cost-label">合計コスト</span>
-                                            <span class="card-section-cost-inline" id="self-artifact-cost-inline">
-                                                <img src="img/Card/cost.webp" alt="" class="card-section-cost-icon">
-                                                <span class="card-section-cost-fill" id="self-artifact-cost-fill">0</span>
-                                                <span class="card-section-cost-value" id="self-artifact-cost-value">0</span>
+                                            <span class="card-section-cost-unit card-section-cost-trigger" id="self-artifact-cost-label" role="button" tabindex="0" title="コスト詳細を見る">
+                                                <span class="card-section-cost-label">合計コスト</span>
+                                                <span class="card-section-cost-inline" id="self-artifact-cost-inline">
+                                                    <img src="img/Card/cost.webp" alt="" class="card-section-cost-icon">
+                                                    <span class="card-section-cost-fill" id="self-artifact-cost-fill">0</span>
+                                                    <span class="card-section-cost-value" id="self-artifact-cost-value">0</span>
+                                                </span>
                                             </span>
-                                            <button type="button" id="self-artifact-clear-all" class="card-section-clear-btn" title="装備を外す">装備を外す</button>
+                                            <span class="card-section-cost-unit card-section-cost-trigger" id="self-artifact-total-cost-label" role="button" tabindex="0" title="コスト詳細を見る">
+                                                <span class="card-section-cost-label">総合コスト</span>
+                                                <span class="card-section-cost-inline" id="self-artifact-total-cost-inline">
+                                                    <img src="img/Card/cost.webp" alt="" class="card-section-cost-icon">
+                                                    <span class="card-section-cost-fill" id="self-total-cost-fill">0</span>
+                                                    <span class="card-section-cost-value" id="self-total-cost-value">0</span>
+                                                </span>
+                                            </span>
                                         </div>
                                     </div>
-                                    <div class="card-group">
+                                    <div class="artifact-preset-bar" id="self-artifact-preset-bar">
+                                        <span class="artifact-preset-label">プリセット</span>
+                                        <div class="artifact-preset-decks">
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="1">1</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="2">2</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="3">3</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="4">4</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="5">5</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="6">6</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="7">7</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="8">8</button>
+                                            <button type="button" class="artifact-preset-btn artifact-preset-load" data-slot="9">9</button>
+                                        </div>
+                                        <div class="artifact-preset-actions">
+                                            <button type="button" id="artifact-preset-save-trigger" class="artifact-preset-icon-btn artifact-preset-save" title="保存先を選ぶ" aria-label="保存先を選ぶ">💾</button>
+                                            <button type="button" id="artifact-preset-delete-trigger" class="artifact-preset-icon-btn artifact-preset-delete" title="削除する番号を選ぶ" aria-label="削除する番号を選ぶ">✕</button>
+                                        </div>
+                                    </div>
+                                    <div class="artifact-preset-costs" id="self-artifact-preset-costs"></div>
+                                    <div class="card-group artifact-slots-group">
+                                        <button type="button" id="self-artifact-clear-all" class="card-section-clear-btn artifact-clear-slots-btn" title="装備を外す">装備を外す</button>
                                         <div id="self-relic-slots" class="card-slots"></div>
                                     </div>
                                     <div class="card-summary" id="self-card-summary">カード補正: なし</div>
@@ -286,6 +336,48 @@
                                             <button type="button" id="relic-effect-popover-close" class="spell-effect-popover-close" aria-label="閉じる">×</button>
                                         </div>
                                         <div id="relic-effect-popover-body" class="spell-effect-popover-body"></div>
+                                    </div>
+                                </div>
+
+                                <div class="card-section card-section-bottom calc-spell-card-section" id="self-spell-card-section">
+                                    <div class="card-section-header">
+                                        <div class="card-section-heading-inline">
+                                            <h3 class="stat-cat-header">スペルカード</h3>
+                                        </div>
+                                        <div class="card-section-header-meta">
+                                            <span class="card-section-cost-unit card-section-cost-trigger" id="self-spell-cost-label" role="button" tabindex="0" title="コスト詳細を見る">
+                                                <span class="card-section-cost-label">合計コスト</span>
+                                                <span class="card-section-cost-inline" id="self-spell-cost-inline">
+                                                    <img src="img/Card/cost.webp" alt="" class="card-section-cost-icon">
+                                                    <span class="card-section-cost-fill" id="self-spell-cost-fill">0</span>
+                                                    <span class="card-section-cost-value" id="self-spell-cost-value">0</span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="spell-preset-bar spell-preset-bar-inline" id="self-spell-preset-bar">
+                                        <span class="spell-preset-label">プリセット</span>
+                                        <div class="spell-preset-decks">
+                                            <button type="button" class="spell-preset-btn spell-preset-load" data-slot="1">1</button>
+                                            <button type="button" class="spell-preset-btn spell-preset-load" data-slot="2">2</button>
+                                            <button type="button" class="spell-preset-btn spell-preset-load" data-slot="3">3</button>
+                                            <button type="button" class="spell-preset-btn spell-preset-load" data-slot="4">4</button>
+                                            <button type="button" class="spell-preset-btn spell-preset-load" data-slot="5">5</button>
+                                            <button type="button" class="spell-preset-btn spell-preset-load" data-slot="6">6</button>
+                                            <button type="button" class="spell-preset-btn spell-preset-load" data-slot="7">7</button>
+                                        </div>
+                                        <div class="spell-preset-actions">
+                                            <button type="button" id="self-spell-preset-save-trigger" class="spell-preset-icon-btn spell-preset-save" title="保存先を選ぶ" aria-label="保存先を選ぶ">💾</button>
+                                            <button type="button" id="self-spell-preset-delete-trigger" class="spell-preset-icon-btn spell-preset-delete" title="削除する番号を選ぶ" aria-label="削除する番号を選ぶ">✕</button>
+                                        </div>
+                                    </div>
+                                    <div class="calc-spell-preview-row">
+                                        <div id="self-spell-deck-preview" class="calc-spell-deck-preview"></div>
+                                        <button type="button" id="self-spell-toggle-selected" class="secondary-btn calc-spell-detail-btn">スペル詳細</button>
+                                    </div>
+                                    <div class="card-summary" id="self-spell-card-summary">スペルカード: なし</div>
+                                    <div class="spell-selected-panel calc-spell-selected-panel" id="self-spell-selected-panel" style="display: none;">
+                                        <div id="self-spell-selected-list" class="spell-selected-list"></div>
                                     </div>
                                 </div>
 
@@ -420,11 +512,40 @@
         </div>
 
         <div class="dynamic-section enemy-debuff-section">
-            <h3 class="stat-cat-header">デバフ</h3>
+            <h3 class="stat-cat-header">バフ / デバフ</h3>
             <div class="multipliers-grid">
                 <div class="input-group">
-                    <label>毒スタック</label>
-                    <input type="number" id="enemy-debuff-poison-stacks" min="0" max="9" value="0">
+                    <label>毒</label>
+                    <select id="enemy-debuff-poison">
+                        <option value="0">0%</option>
+                        <option value="-11">-11%</option>
+                        <option value="-22">-22%</option>
+                        <option value="-33">-33%</option>
+                        <option value="-44">-44%</option>
+                        <option value="-55">-55%</option>
+                        <option value="-66">-66%</option>
+                        <option value="-77">-77%</option>
+                        <option value="-88">-88%</option>
+                        <option value="-99">-99%</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>ノイズ</label>
+                    <select id="enemy-debuff-noise">
+                        <option value="0">0%</option>
+                        <option value="-50">-50%</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>怒り</label>
+                    <select id="enemy-debuff-anger">
+                        <option value="0">0%</option>
+                        <option value="40">40%</option>
+                        <option value="80">80%</option>
+                        <option value="120">120%</option>
+                        <option value="160">160%</option>
+                        <option value="200">200%</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -458,24 +579,45 @@
                                 <div class="spell-help-anchor">
                                     <span class="help-icon" id="spell-help-toggle" title="ヘルプ">i</span>
                                     <div id="spell-help-text" class="spell-help-popover" style="display:none;">
-                                        画像一覧から選択して、選択中のスペルカードと合計コストを管理します。
+                                        画像一覧から選択して、選択中のスペルカードと合計コストを管理します。<br>
+                                        合計コストをクリックすると遺物と合算した数値を確認できます。<br><br>
+                                        カード上の効果ボタンを押すと効果内容が確認できます。<br>
+                                        切替ボタンの場合は条件によって適用される効果が存在しており、手動で効果のオンオフを設定できます。<br><br>
+                                        カード上の★でレア度切替ができます。★5の場合+0を押すとはんだ効果の切替ができます。
                                     </div>
                                 </div>
                             </div>
                             <div class="spell-header-actions">
                                 <button type="button" id="spell-toggle-selected" class="secondary-btn spell-toggle-btn">選択スペルを表示</button>
                                 <label class="spell-apply-toggle">
-                                    <input type="checkbox" id="spell-apply-toggle">
-                                    <span>計算結果に反映</span>
+                                    <input type="checkbox" id="spell-apply-toggle" checked>
+                                    <span>計算に反映</span>
                                 </label>
-                                <div class="spell-cost-box">
+                                <div class="spell-cost-box card-section-cost-trigger" id="spell-tab-cost-label" role="button" tabindex="0" title="コスト詳細を見る">
                                     <span>合計コスト</span>
-                                    <span class="spell-header-cost-inline">
+                                    <span class="spell-header-cost-inline" id="spell-tab-cost-inline">
                                         <img src="img/Card/cost.webp" alt="" class="spell-header-cost-icon">
                                         <span class="spell-header-cost-fill" id="spell-total-cost-fill">0</span>
                                         <span class="spell-header-cost-value" id="spell-total-cost">0</span>
                                     </span>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="spell-preset-bar" id="spell-preset-bar">
+                            <span class="spell-preset-label">プリセット</span>
+                            <div class="spell-preset-decks">
+                                <button type="button" class="spell-preset-btn spell-preset-load" data-slot="1">1</button>
+                                <button type="button" class="spell-preset-btn spell-preset-load" data-slot="2">2</button>
+                                <button type="button" class="spell-preset-btn spell-preset-load" data-slot="3">3</button>
+                                <button type="button" class="spell-preset-btn spell-preset-load" data-slot="4">4</button>
+                                <button type="button" class="spell-preset-btn spell-preset-load" data-slot="5">5</button>
+                                <button type="button" class="spell-preset-btn spell-preset-load" data-slot="6">6</button>
+                                <button type="button" class="spell-preset-btn spell-preset-load" data-slot="7">7</button>
+                            </div>
+                            <div class="spell-preset-actions">
+                                <button type="button" id="spell-preset-save-trigger" class="spell-preset-icon-btn spell-preset-save" title="保存先を選ぶ" aria-label="保存先を選ぶ">💾</button>
+                                <button type="button" id="spell-preset-delete-trigger" class="spell-preset-icon-btn spell-preset-delete" title="削除する番号を選ぶ" aria-label="削除する番号を選ぶ">✕</button>
                             </div>
                         </div>
 
@@ -531,9 +673,10 @@
                 <div class="crayon-layout">
                     <div class="panel crayon-panel">
                         <div class="crayon-help-anchor">
-                            <span class="help-icon" id="crayon-help-toggle" title="ヘルプ">?</span>
+                            <span class="help-icon" id="crayon-help-toggle" title="ヘルプ">i</span>
                             <div id="crayon-help-text" class="help-text crayon-help-popover" style="display:none;">
-                                現在のボード塗り状況と、目標（比較用）の塗り状況を入力してください。ダメージ計算タブへの差分反映は、目標側の「計算結果に反映」をオンにした時だけ行われます。
+                                現在のボード塗り状況と、目標（比較用）の塗り状況を入力してください。ダメージ計算タブへの差分反映は、目標側の「計算結果に反映」をオンにした時だけ行われます。<br>
+                                オンになっている場合、現在から目標へ変更した場合のダメージ増減等が確認できます。
                             </div>
                         </div>
                         <div class="crayon-columns">
@@ -684,7 +827,7 @@
                                     <span>目標</span>
                                     <div class="crayon-target-actions">
                                         <label class="crayon-apply-toggle">
-                                            <input type="checkbox" id="crayon-apply-toggle">
+                                            <input type="checkbox" id="crayon-apply-toggle" checked>
                                             <span>計算結果に反映</span>
                                         </label>
                                         <button id="btn-sync-crayon" class="crayon-sync-btn">現在値を反映</button>
@@ -1010,9 +1153,11 @@
                     </div>
                 </div>
             </div>
-    <script src="presets.js?v=2.0.1"></script>
-    <script src="cards.js?v=2.0.1"></script>
-    <script src="script.js?v=2.0.1"></script>
+        </div>
+    </div>
+    <script src="presets.js?v=2.4.0"></script>
+    <script src="cards.js?v=2.4.0"></script>
+    <script src="script.js?v=2.4.0"></script>
 </body>
 </html>
 

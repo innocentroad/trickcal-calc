@@ -71,7 +71,9 @@ const inputs = {
             critDmgResP: document.getElementById('enemy-add-crit-dmg-res-p')
         },
         debuffs: {
-            poisonStacks: document.getElementById('enemy-debuff-poison-stacks')
+            poison: document.getElementById('enemy-debuff-poison'),
+            noise: document.getElementById('enemy-debuff-noise'),
+            anger: document.getElementById('enemy-debuff-anger')
         }
     }
 };
@@ -140,6 +142,10 @@ let damageChart = null;
 let isRestoringState = false;
 let syncToggleCirclePosition = () => {};
 let isSpellSelectedPanelOpen = false;
+let isCalcSpellSelectedPanelOpen = false;
+let mobileVisibleSide = 'self';
+let spellApplyEnabled = true;
+let artifactApplyEnabled = true;
 let spellSelections = {};
 let activeSpellEffectPopoverCardId = null;
 let activeSpellEffectPopoverAnchor = null;
@@ -173,7 +179,63 @@ function syncRelicPickerSafeArea() {
 }
 
 function isSpellApplyEnabled() {
-    return !!document.getElementById('spell-apply-toggle')?.checked;
+    const toggle = document.getElementById('spell-apply-toggle') || document.getElementById('self-spell-apply-toggle');
+    return toggle ? !!toggle.checked : spellApplyEnabled;
+}
+
+function isArtifactApplyEnabled() {
+    const toggle = document.getElementById('self-artifact-apply-toggle');
+    return toggle ? !!toggle.checked : artifactApplyEnabled;
+}
+
+function getSpellApplyToggles() {
+    return [
+        document.getElementById('spell-apply-toggle'),
+        document.getElementById('self-spell-apply-toggle')
+    ].filter(Boolean);
+}
+
+function setSpellApplyEnabled(enabled) {
+    spellApplyEnabled = !!enabled;
+    getSpellApplyToggles().forEach(toggle => {
+        toggle.checked = spellApplyEnabled;
+    });
+}
+
+function getArtifactApplyToggles() {
+    return [
+        document.getElementById('self-artifact-apply-toggle')
+    ].filter(Boolean);
+}
+
+function setArtifactApplyEnabled(enabled) {
+    artifactApplyEnabled = !!enabled;
+    getArtifactApplyToggles().forEach(toggle => {
+        toggle.checked = artifactApplyEnabled;
+    });
+}
+
+function bindApplyToggles() {
+    getSpellApplyToggles().forEach(applyToggle => {
+        if (applyToggle.dataset.bound) return;
+        applyToggle.dataset.bound = '1';
+        applyToggle.addEventListener('change', () => {
+            setSpellApplyEnabled(applyToggle.checked);
+            updateUI();
+            saveSpellSelectionsState();
+            saveState();
+        });
+    });
+
+    getArtifactApplyToggles().forEach(applyToggle => {
+        if (applyToggle.dataset.bound) return;
+        applyToggle.dataset.bound = '1';
+        applyToggle.addEventListener('change', () => {
+            setArtifactApplyEnabled(applyToggle.checked);
+            updateUI();
+            saveState();
+        });
+    });
 }
 
 // Formulas
@@ -256,6 +318,17 @@ function normalizeCardSolderLevel(card, rawLevel) {
     return Math.min(level, maxLevel);
 }
 
+function normalizeSolderForStar(card, star, rawLevel) {
+    const normalizedStar = Math.max(1, Math.min(5, parseInt(star || 1, 10) || 1));
+    if (normalizedStar < 5) return 0;
+    return normalizeCardSolderLevel(card, rawLevel || 0);
+}
+
+function getDisplayedSolderLevel(card, star, rawLevel) {
+    const normalizedStar = Math.max(1, Math.min(5, parseInt(star || 1, 10) || 1));
+    return normalizedStar >= 5 ? normalizeCardSolderLevel(card, rawLevel || 0) : 0;
+}
+
 function normalizeSpellEntry(card, rawEntry = {}) {
     const normalized = {
         star: Math.max(1, Math.min(5, parseInt(rawEntry.star || 1, 10) || 1)),
@@ -294,6 +367,42 @@ function getCardRarityBadgePath(card) {
     if (card.rarity === '希少') return 'img/Card/Card_Unique.webp';
     if (card.rarity === '高級') return 'img/Card/Card_Rare.webp';
     return '';
+}
+
+function collectCardImageUrls() {
+    const urls = new Set();
+    const addUrl = (src) => {
+        if (typeof src === 'string' && src.trim()) {
+            urls.add(src.trim());
+        }
+    };
+
+    addUrl('img/Card/cost.webp');
+    addUrl('img/Card/sunshine_token.webp');
+    addUrl('img/Card/Card_Signature.webp');
+    addUrl('img/Card/Card_Legendary.webp');
+    addUrl('img/Card/Card_Unique.webp');
+    addUrl('img/Card/Card_Rare.webp');
+
+    if (window.CARD_LIBRARY) {
+        ['artifacts', 'spells'].forEach((category) => {
+            const collection = CARD_LIBRARY[category];
+            if (!Array.isArray(collection)) return;
+            collection.forEach((card) => {
+                addUrl(getCardImagePath(card));
+                addUrl(getCardRarityBadgePath(card));
+            });
+        });
+    }
+
+    return Array.from(urls);
+}
+
+function preloadCardImages() {
+    collectCardImageUrls().forEach((src) => {
+        const img = new Image();
+        img.src = src;
+    });
 }
 
 function getCardRarityLabel(card) {
@@ -380,9 +489,13 @@ function createSolderButton(card, currentLevel, onOpen, enabled = true) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'solder-pill-btn';
-    btn.textContent = `はんだ +${currentLevel}`;
     btn.dataset.level = String(currentLevel);
     btn.classList.toggle('is-disabled', !enabled);
+    btn.innerHTML = `
+        <img src="img/Card/sunshine_token.webp" alt="" class="solder-token-icon">
+        <span class="solder-token-value-fill">+${currentLevel}</span>
+        <span class="solder-token-value">+${currentLevel}</span>
+    `;
     btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -445,7 +558,14 @@ function openSolderPopover(card, currentLevel, onSelect, anchorEl) {
         btn.className = 'solder-level-option';
         const title = document.createElement('span');
         title.className = 'solder-level-option-title';
-        title.textContent = `+${level}`;
+        title.innerHTML = `
+            <span class="solder-level-option-prefix">はんだ</span>
+            <span class="solder-level-option-token">
+                <img src="img/Card/sunshine_token.webp" alt="" class="solder-token-icon solder-token-icon-small">
+                <span class="solder-token-value-fill solder-token-value-fill-small">+${level}</span>
+                <span class="solder-token-value solder-token-value-small">+${level}</span>
+            </span>
+        `;
         const bonus = level > 0 ? (card.solderBonuses?.[level] || null) : null;
         const parts = bonus ? formatCardSummaryParts(bonus) : [];
         const desc = document.createElement('span');
@@ -796,7 +916,8 @@ function updateRelicSlotVisual(slot) {
         if (card) {
             const currentStar = parseInt(slot.dataset.star || '1', 10) || 1;
             const currentSolder = normalizeCardSolderLevel(card, slot.dataset.solder || 0);
-            const picker = createSolderButton(card, currentSolder, (anchorEl) => {
+            const displaySolder = getDisplayedSolderLevel(card, currentStar, currentSolder);
+            const picker = createSolderButton(card, displaySolder, (anchorEl) => {
                 openSolderPopover(card, currentSolder, (value) => {
                     slot.dataset.solder = String(normalizeCardSolderLevel(card, value));
                     updateRelicSlotVisual(slot);
@@ -821,6 +942,13 @@ function createRelicSlot(side, selection = {}) {
 
     const mediaWrap = document.createElement('div');
     mediaWrap.className = 'card-relic-media-wrap';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'card-relic-remove-btn card-relic-remove-float';
+    removeBtn.title = '外す';
+    removeBtn.setAttribute('aria-label', '外す');
+    removeBtn.textContent = '×';
 
     const media = document.createElement('div');
     media.className = 'card-relic-media is-empty';
@@ -857,11 +985,11 @@ function createRelicSlot(side, selection = {}) {
         </div>
         <div class="card-relic-sub">遺物カードを選択</div>
         <div class="card-relic-grade-row">
-            <button type="button" class="card-relic-remove-btn" title="外す" aria-label="外す">×</button>
+            <div class="card-relic-grade-host-inline"></div>
             <div class="card-relic-solder-host"></div>
         </div>
     `;
-    info.querySelector('.card-relic-grade-row')?.appendChild(gradeHost);
+    info.querySelector('.card-relic-grade-host-inline')?.appendChild(gradeHost);
 
     media.appendChild(bg);
     media.appendChild(placeholder);
@@ -880,12 +1008,12 @@ function createRelicSlot(side, selection = {}) {
     selectWrap.appendChild(select);
 
     mediaWrap.appendChild(media);
+    mediaWrap.appendChild(removeBtn);
     slot.appendChild(mediaWrap);
     slot.appendChild(info);
     slot.appendChild(selectWrap);
 
     const effectBtn = slot.querySelector('.card-relic-effect-btn');
-    const removeBtn = slot.querySelector('.card-relic-remove-btn');
 
     media.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1115,6 +1243,100 @@ function initializeCardUI() {
         });
     }
 
+    document.querySelectorAll('.artifact-preset-load').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', () => {
+            const slot = btn.dataset.slot;
+            const presets = loadArtifactPresets();
+            if (!Array.isArray(presets[slot]) || presets[slot].length === 0) return;
+            loadArtifactPreset(slot);
+        });
+    });
+
+    document.querySelectorAll('.spell-preset-load').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', () => {
+            const slot = btn.dataset.slot;
+            const presets = loadSpellPresets();
+            if (!presets[slot] || typeof presets[slot] !== 'object') return;
+            loadSpellPreset(slot);
+        });
+    });
+
+    const presetSaveTrigger = document.getElementById('artifact-preset-save-trigger');
+    if (presetSaveTrigger && !presetSaveTrigger.dataset.bound) {
+        presetSaveTrigger.dataset.bound = '1';
+        presetSaveTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openArtifactPresetPopover('save', presetSaveTrigger);
+        });
+    }
+
+    const presetDeleteTrigger = document.getElementById('artifact-preset-delete-trigger');
+    if (presetDeleteTrigger && !presetDeleteTrigger.dataset.bound) {
+        presetDeleteTrigger.dataset.bound = '1';
+        presetDeleteTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openArtifactPresetPopover('delete', presetDeleteTrigger);
+        });
+    }
+
+    [
+        document.getElementById('self-artifact-cost-label'),
+        document.getElementById('self-artifact-cost-inline'),
+        document.getElementById('self-artifact-total-cost-label'),
+        document.getElementById('self-artifact-total-cost-inline'),
+        document.getElementById('self-spell-cost-label'),
+        document.getElementById('self-spell-cost-inline'),
+        document.getElementById('spell-tab-cost-label'),
+        document.getElementById('spell-tab-cost-inline')
+    ]
+        .filter(Boolean)
+        .forEach(costTrigger => {
+            if (costTrigger.dataset.bound) return;
+            costTrigger.dataset.bound = '1';
+            const open = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openArtifactCostPopover(costTrigger);
+            };
+            costTrigger.addEventListener('click', open);
+            costTrigger.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                open(e);
+            });
+        });
+
+    [
+        document.getElementById('spell-preset-save-trigger'),
+        document.getElementById('self-spell-preset-save-trigger')
+    ].filter(Boolean).forEach(spellPresetSaveTrigger => {
+        if (spellPresetSaveTrigger.dataset.bound) return;
+        spellPresetSaveTrigger.dataset.bound = '1';
+        spellPresetSaveTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openSpellPresetPopover('save', spellPresetSaveTrigger);
+        });
+    });
+
+    [
+        document.getElementById('spell-preset-delete-trigger'),
+        document.getElementById('self-spell-preset-delete-trigger')
+    ].filter(Boolean).forEach(spellPresetDeleteTrigger => {
+        if (spellPresetDeleteTrigger.dataset.bound) return;
+        spellPresetDeleteTrigger.dataset.bound = '1';
+        spellPresetDeleteTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openSpellPresetPopover('delete', spellPresetDeleteTrigger);
+        });
+    });
+
     if (!document.body.dataset.relicPickerBound) {
         document.body.dataset.relicPickerBound = '1';
         document.addEventListener('click', (e) => {
@@ -1128,6 +1350,40 @@ function initializeCardUI() {
             if (!popover || popover.style.display === 'none') return;
             if (popover.contains(e.target) || e.target.closest('.card-relic-effect-btn')) return;
             closeRelicEffectPopover();
+        });
+        document.addEventListener('click', (e) => {
+            const popover = document.getElementById('artifact-preset-popover');
+            if (!popover || popover.style.display === 'none') return;
+            if (popover.contains(e.target) || e.target.closest('#artifact-preset-save-trigger') || e.target.closest('#artifact-preset-delete-trigger')) return;
+            closeArtifactPresetPopover();
+        });
+        document.addEventListener('click', (e) => {
+            const popover = document.getElementById('artifact-cost-popover');
+            if (!popover || popover.style.display === 'none') return;
+            if (
+                popover.contains(e.target) ||
+                e.target.closest('#self-artifact-cost-label') ||
+                e.target.closest('#self-artifact-cost-inline') ||
+                e.target.closest('#self-artifact-total-cost-label') ||
+                e.target.closest('#self-artifact-total-cost-inline') ||
+                e.target.closest('#self-spell-cost-label') ||
+                e.target.closest('#self-spell-cost-inline') ||
+                e.target.closest('#spell-tab-cost-label') ||
+                e.target.closest('#spell-tab-cost-inline')
+            ) return;
+            closeArtifactCostPopover();
+        });
+        document.addEventListener('click', (e) => {
+            const popover = document.getElementById('spell-preset-popover');
+            if (!popover || popover.style.display === 'none') return;
+            if (
+                popover.contains(e.target) ||
+                e.target.closest('#spell-preset-save-trigger') ||
+                e.target.closest('#spell-preset-delete-trigger') ||
+                e.target.closest('#self-spell-preset-save-trigger') ||
+                e.target.closest('#self-spell-preset-delete-trigger')
+            ) return;
+            closeSpellPresetPopover();
         });
     }
 
@@ -1222,19 +1478,27 @@ function getCardBonusFromSelection(selection, context = {}) {
     return resolved;
 }
 
-function getCardBonusesForSide(side, includeSpellBonuses = false, context = {}) {
+function getCardBonusesForSide(side, options = {}, context = {}) {
+    const normalizedOptions = typeof options === 'boolean'
+        ? { includeArtifacts: true, includeSpells: options }
+        : {
+            includeArtifacts: options.includeArtifacts !== false,
+            includeSpells: !!options.includeSpells
+        };
     const selections = collectCardSelections(side);
     const total = createEmptyCardBonus();
     const nextContext = {
         ...context,
         appliedNonStackingEffects: context.appliedNonStackingEffects || new Set()
     };
-    (selections.artifacts || selections.relics || []).forEach(selection => {
-        const resolved = getCardBonusFromSelection(selection, nextContext);
-        if (!resolved) return;
-        accumulateCardBonus(total, resolved);
-    });
-    if (side === 'self' && includeSpellBonuses) {
+    if (normalizedOptions.includeArtifacts) {
+        (selections.artifacts || selections.relics || []).forEach(selection => {
+            const resolved = getCardBonusFromSelection(selection, nextContext);
+            if (!resolved) return;
+            accumulateCardBonus(total, resolved);
+        });
+    }
+    if (side === 'self' && normalizedOptions.includeSpells) {
         Object.entries(selections.spells || {}).forEach(([cardId, entry]) => {
             const qty = entry?.qty || 0;
             if (qty <= 0) return;
@@ -1272,6 +1536,20 @@ function formatCardSummaryParts(bonus) {
 
 function formatMultiplierPercent(value) {
     return `${(value * 100).toFixed(1)}%`;
+}
+
+function formatClampedMultiplier(rawValue, boundedValue, lowerBound, upperBound = Infinity, options = {}) {
+    const { showNote = true, showRawWhenClamped = true } = options;
+    const isClamped = boundedValue !== rawValue;
+    const textValue = isClamped && showNote && showRawWhenClamped ? rawValue : boundedValue;
+    const text = formatMultiplierPercent(textValue);
+    if (!isClamped || !showNote) {
+        return { text, isClamped, note: '' };
+    }
+
+    const boundary = rawValue < lowerBound ? lowerBound : upperBound;
+    const note = ` (${Math.round(boundary * 100)}%)`;
+    return { text: `${text}${note}`, isClamped, note };
 }
 
 function formatSignedPercent(value) {
@@ -1312,7 +1590,16 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
     const weaknessAdd = getWeaknessAddBonus(v);
     const poisonAddPenalty = (v.common.attackerDmgDownP || 0) / 100;
     const takenDmgPenalty = (v.common.takenDmgP || 0) / 100;
-    const finalAdd = Math.max(0, v.common.add + weaknessAdd / 100 - poisonAddPenalty - takenDmgPenalty);
+    const angerAddBonus = (v.common.attackerAngerP || 0) / 100;
+    const rawFinalAdd = v.common.add + weaknessAdd / 100 - poisonAddPenalty + angerAddBonus - takenDmgPenalty;
+    const boundedFinalAdd = Math.max(0.2, rawFinalAdd);
+    const finalAddInfo = formatClampedMultiplier(rawFinalAdd, boundedFinalAdd, 0.2);
+    const rawFinalCritRate = calcCritRate(attacker.crit, defender.critRes) + (v.common.critRateP - v.common.critResP + v.common.enemyCritResDownP) / 100;
+    const boundedFinalCritRate = Math.max(0.05, Math.min(0.8, rawFinalCritRate));
+    const finalCritRateInfo = formatClampedMultiplier(rawFinalCritRate, boundedFinalCritRate, 0.05, 0.8, { showNote: false });
+    const rawFinalCritMult = calcCritMultiplier(attacker.critDmg, defender.critDmgRes) + (v.common.critDmgP - v.common.critDmgResP + v.common.enemyCritDmgResDownP) / 100;
+    const boundedFinalCritMult = Math.max(1.2, Math.min(2.5, rawFinalCritMult));
+    const finalCritMultInfo = formatClampedMultiplier(rawFinalCritMult, boundedFinalCritMult, 1.2, 2.5, { showNote: false });
     const attackerLabel = v.perspective === 'self' ? '自キャラ' : '敵キャラ';
     const defenderLabel = v.perspective === 'self' ? '敵キャラ' : '自キャラ';
     const coreChips = [
@@ -1322,7 +1609,7 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
 
     const multiplierChips = [
         createModifierChip('スキル倍率', formatMultiplierPercent(v.common.skill)),
-        createModifierChip('与被DMG増減', formatMultiplierPercent(finalAdd)),
+        createModifierChip('与被DMG増減', finalAddInfo.text, `multiplier${finalAddInfo.isClamped ? ' clamped' : ''}`),
         createModifierChip('属性相性', formatMultiplierPercent(v.common.type)),
         createModifierChip('特殊', formatMultiplierPercent(v.common.special)),
         createModifierChip('その他', formatMultiplierPercent(v.common.other))
@@ -1334,8 +1621,14 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
     if (v.common.takenDmgP) {
         multiplierChips.push(createModifierChip('被ダメ減', formatSignedPercent(v.common.takenDmgP), 'muted'));
     }
-    if (v.common.attackerDmgDownP) {
-        multiplierChips.push(createModifierChip('毒', formatSignedPercent(-v.common.attackerDmgDownP), 'muted'));
+    if (v.common.attackerDmgDownPoisonP) {
+        multiplierChips.push(createModifierChip('毒', formatSignedPercent(-v.common.attackerDmgDownPoisonP), 'muted'));
+    }
+    if (v.common.attackerDmgDownNoiseP) {
+        multiplierChips.push(createModifierChip('ノイズ', formatSignedPercent(-v.common.attackerDmgDownNoiseP), 'muted'));
+    }
+    if (v.common.attackerAngerP) {
+        multiplierChips.push(createModifierChip('怒り', formatSignedPercent(v.common.attackerAngerP), 'muted'));
     }
 
     const statPairs = [
@@ -1349,6 +1642,10 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
     const statChips = statPairs
         .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'stat'));
 
+    const finalStatChips = statChips.slice();
+    finalStatChips.push(createModifierChip('最終会心率', finalCritRateInfo.text, `stat${finalCritRateInfo.isClamped ? ' clamped' : ''}`));
+    finalStatChips.push(createModifierChip('最終会心DMG', finalCritMultInfo.text, `stat${finalCritMultInfo.isClamped ? ' clamped' : ''}`));
+
     const enemyDebuffPairs = [
         ['敵防御減', v.common.enemyDefDownP],
         ['敵被会心率減', v.common.enemyCritResDownP],
@@ -1360,7 +1657,7 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
 
     coreListEl.innerHTML = coreChips.join('');
     multiplierListEl.innerHTML = multiplierChips.join('');
-    statListEl.innerHTML = statChips.join('');
+    statListEl.innerHTML = finalStatChips.join('');
     if (enemyDebuffListEl) {
         enemyDebuffListEl.innerHTML = enemyDebuffChips.join('');
     }
@@ -1426,26 +1723,85 @@ function updateCardSummary(side) {
     if (!summaryEl) return;
     if (side === 'self') {
         const totalCost = getArtifactSelectionCost(side);
+        const overallCost = getArtifactPresetTotalCost();
         const costValueEl = document.getElementById('self-artifact-cost-value');
         const costFillEl = document.getElementById('self-artifact-cost-fill');
+        const totalValueEl = document.getElementById('self-total-cost-value');
+        const totalFillEl = document.getElementById('self-total-cost-fill');
         if (costValueEl) costValueEl.textContent = String(totalCost);
         if (costFillEl) costFillEl.textContent = String(totalCost);
+        if (totalValueEl) totalValueEl.textContent = String(overallCost);
+        if (totalFillEl) totalFillEl.textContent = String(overallCost);
+        if (activeArtifactCostPopoverAnchor) {
+            openArtifactCostPopover(activeArtifactCostPopoverAnchor);
+        }
     }
-    const bonus = getCardBonusesForSide(side, side === 'self' && isSpellApplyEnabled(), { dmgType: inputs.dmgType.value });
+    const bonus = getCardBonusesForSide(side, { includeArtifacts: true, includeSpells: false }, { dmgType: inputs.dmgType.value });
     const parts = formatCardSummaryParts(bonus);
+    const title = side === 'self' ? '遺物カード補正' : 'カード補正';
+    const actionHtml = side === 'self'
+        ? `<label class="card-summary-apply-toggle">
+                <input type="checkbox" id="self-artifact-apply-toggle" ${isArtifactApplyEnabled() ? 'checked' : ''}>
+                <span>計算結果に反映</span>
+            </label>`
+        : '';
     if (parts.length === 0) {
         summaryEl.className = 'card-summary card-summary-empty';
-        summaryEl.innerHTML = '<span class="card-summary-title">カード補正</span><span class="card-summary-empty-text">なし</span>';
+        summaryEl.innerHTML = `
+            <div class="card-summary-head">
+                <span class="card-summary-title">${title}</span>
+                ${actionHtml}
+            </div>
+            <span class="card-summary-empty-text">なし</span>
+        `;
+        bindApplyToggles();
         return;
     }
     summaryEl.className = 'card-summary card-summary-active';
     const chips = parts.map(part => `<span class="card-summary-chip">${part}</span>`).join('');
     const noteText = bonus.notes.length ? `<div class="card-summary-note">※ ${bonus.notes[0]}</div>` : '';
     summaryEl.innerHTML = `
-        <span class="card-summary-title">カード補正</span>
+        <div class="card-summary-head">
+            <span class="card-summary-title">${title}</span>
+            ${actionHtml}
+        </div>
         <div class="card-summary-chip-list">${chips}</div>
         ${noteText}
     `;
+    bindApplyToggles();
+}
+
+function updateCalcSpellCardSummary() {
+    const summaryEl = document.getElementById('self-spell-card-summary');
+    if (!summaryEl) return;
+    const bonus = getSpellBonusesSummary();
+    const parts = formatCardSummaryParts(bonus);
+    const actionHtml = `<label class="card-summary-apply-toggle">
+            <input type="checkbox" id="self-spell-apply-toggle" ${isSpellApplyEnabled() ? 'checked' : ''}>
+            <span>計算結果に反映</span>
+        </label>`;
+    if (parts.length === 0) {
+        summaryEl.className = 'card-summary card-summary-empty';
+        summaryEl.innerHTML = `
+            <div class="card-summary-head">
+                <span class="card-summary-title">スペルカード補正</span>
+                ${actionHtml}
+            </div>
+            <span class="card-summary-empty-text">なし</span>
+        `;
+        bindApplyToggles();
+        return;
+    }
+    summaryEl.className = 'card-summary card-summary-active';
+    const chips = parts.map(part => `<span class="card-summary-chip">${part}</span>`).join('');
+    summaryEl.innerHTML = `
+        <div class="card-summary-head">
+            <span class="card-summary-title">スペルカード補正</span>
+            ${actionHtml}
+        </div>
+        <div class="card-summary-chip-list">${chips}</div>
+    `;
+    bindApplyToggles();
 }
 
 function getSpellCards() {
@@ -1498,9 +1854,23 @@ function getTotalSelectedSpellCount() {
     return Object.values(spellSelections).reduce((sum, entry) => sum + (entry?.qty || 0), 0);
 }
 
-function getSpellQtyTierClass(qty) {
+const SPECIAL_SPELL_QTY_COLOR_IDS = new Set([
+    'spell_suspicious_potion',
+    'spell_personality_madness',
+    'spell_personality_lively',
+    'spell_personality_pure',
+    'spell_personality_gloomy',
+    'spell_personality_calm'
+]);
+
+function getSpellQtyTierClass(qty, cardId = '') {
     const value = Math.max(0, parseInt(qty, 10) || 0);
+    const usesEarlyThreshold = SPECIAL_SPELL_QTY_COLOR_IDS.has(cardId);
     if (value === 0) return 'qty-zero';
+    if (usesEarlyThreshold) {
+        if (value === 1) return 'qty-two';
+        return 'qty-many';
+    }
     if (value === 1) return 'qty-one';
     if (value === 2) return 'qty-two';
     return 'qty-many';
@@ -1514,7 +1884,7 @@ function syncSpellLibraryVisual(cardId) {
     document.querySelectorAll(`.spell-qty-value[data-card-id="${cardId}"]`).forEach(el => {
         el.textContent = String(entry.qty || 0);
         el.classList.remove('qty-zero', 'qty-one', 'qty-two', 'qty-many');
-        el.classList.add(getSpellQtyTierClass(entry.qty));
+        el.classList.add(getSpellQtyTierClass(entry.qty, cardId));
     });
     document.querySelectorAll(`.spell-cost-badge-value[data-card-id="${cardId}"]`).forEach(el => {
         const card = CARD_INDEX[cardId];
@@ -1544,6 +1914,17 @@ function setSpellSelectedPanelOpen(open) {
     saveSpellSelectionsState();
 }
 
+function setCalcSpellSelectedPanelOpen(open) {
+    isCalcSpellSelectedPanelOpen = open;
+    const panel = document.getElementById('self-spell-selected-panel');
+    const toggleBtn = document.getElementById('self-spell-toggle-selected');
+    if (panel) panel.style.display = open ? 'block' : 'none';
+    if (toggleBtn) {
+        toggleBtn.classList.toggle('active', open);
+        toggleBtn.textContent = open ? '詳細を隠す' : 'スペル詳細';
+    }
+}
+
 function updateSpellSelectedSummary() {
     const summaryEl = document.getElementById('spell-selected-summary');
     if (!summaryEl) return;
@@ -1558,12 +1939,16 @@ function updateSpellSelectedSummary() {
 function updateSpellTotalCost() {
     const totalEl = document.getElementById('spell-total-cost');
     const totalFillEl = document.getElementById('spell-total-cost-fill');
-    if (!totalEl) return;
+    const calcTotalEl = document.getElementById('self-spell-cost-value');
+    const calcTotalFillEl = document.getElementById('self-spell-cost-fill');
     const totalText = getSpellSelectionCost().toLocaleString();
-    totalEl.textContent = totalText;
+    if (totalEl) totalEl.textContent = totalText;
     if (totalFillEl) totalFillEl.textContent = totalText;
+    if (calcTotalEl) calcTotalEl.textContent = totalText;
+    if (calcTotalFillEl) calcTotalFillEl.textContent = totalText;
     updateSpellSelectedSummary();
     updateSpellBonusSummary();
+    updateCalcSpellCardSummary();
 }
 
 function updateSpellBonusSummary() {
@@ -2018,7 +2403,8 @@ function renderSpellLibrary() {
         gradePicker.classList.add('grade-picker-overlay');
         const qtyControls = document.createElement('div');
         qtyControls.className = 'spell-qty-controls';
-        const solderControls = createSolderButton(card, entry.solder || 0, (anchorEl) => {
+        const displaySolder = getDisplayedSolderLevel(card, entry.star || 1, entry.solder || 0);
+        const solderControls = createSolderButton(card, displaySolder, (anchorEl) => {
             openSolderPopover(card, entry.solder || 0, (value) => updateSpellSolder(card.id, value), anchorEl);
         }, (entry.star || 1) === 5);
         solderControls.classList.add('spell-solder-controls', 'spell-solder-btn-overlay');
@@ -2033,7 +2419,7 @@ function renderSpellLibrary() {
         qty.className = 'spell-qty-value';
         qty.dataset.cardId = card.id;
         qty.textContent = String(entry.qty || 0);
-        qty.classList.add(getSpellQtyTierClass(entry.qty));
+        qty.classList.add(getSpellQtyTierClass(entry.qty, card.id));
 
         const plusBtn = document.createElement('button');
         plusBtn.type = 'button';
@@ -2060,8 +2446,7 @@ function renderSpellLibrary() {
     });
 }
 
-function renderSelectedSpellList() {
-    const list = document.getElementById('spell-selected-list');
+function renderSelectedSpellListInto(list) {
     if (!list) return;
     const selections = Object.entries(spellSelections).filter(([, entry]) => (entry?.qty || 0) > 0);
     list.innerHTML = '';
@@ -2071,7 +2456,6 @@ function renderSelectedSpellList() {
         empty.className = 'spell-empty';
         empty.textContent = 'まだスペルカードは選択されていません。';
         list.appendChild(empty);
-        updateSpellTotalCost();
         return;
     }
 
@@ -2111,12 +2495,12 @@ function renderSelectedSpellList() {
         subRow.className = 'spell-selected-sub-row';
 
         const qtySub = document.createElement('div');
-        qtySub.className = `spell-selected-sub ${getSpellQtyTierClass(entry.qty)}`;
-        qtySub.textContent = `個数 ${entry.qty}`;
+        qtySub.className = `spell-selected-sub ${getSpellQtyTierClass(entry.qty, card.id)}`;
+        qtySub.textContent = `枚数 ${entry.qty}`;
 
         const solderBtn = createSolderButton(
             card,
-            entry.solder || 0,
+            getDisplayedSolderLevel(card, entry.star || 1, entry.solder || 0),
             (anchorEl) => {
                 openSolderPopover(card, entry.solder || 0, (value) => updateSpellSolder(cardId, value), anchorEl);
             },
@@ -2170,7 +2554,14 @@ function renderSelectedSpellList() {
         item.appendChild(actions);
         list.appendChild(item);
     });
+}
 
+function renderSelectedSpellList() {
+    const list = document.getElementById('spell-selected-list');
+    const calcList = document.getElementById('self-spell-selected-list');
+    renderSelectedSpellListInto(list);
+    renderSelectedSpellListInto(calcList);
+    renderCalcSpellDeckPreview();
     updateSpellTotalCost();
 }
 
@@ -2195,21 +2586,19 @@ function initializeSpellTab() {
         toggleBtn.addEventListener('click', () => setSpellSelectedPanelOpen(!isSpellSelectedPanelOpen));
     }
 
+    const calcToggleBtn = document.getElementById('self-spell-toggle-selected');
+    if (calcToggleBtn && !calcToggleBtn.dataset.bound) {
+        calcToggleBtn.dataset.bound = '1';
+        calcToggleBtn.addEventListener('click', () => setCalcSpellSelectedPanelOpen(!isCalcSpellSelectedPanelOpen));
+    }
+
     const popoverCloseBtn = document.getElementById('spell-effect-popover-close');
     if (popoverCloseBtn && !popoverCloseBtn.dataset.bound) {
         popoverCloseBtn.dataset.bound = '1';
         popoverCloseBtn.addEventListener('click', closeSpellEffectPopover);
     }
 
-    const applyToggle = document.getElementById('spell-apply-toggle');
-    if (applyToggle && !applyToggle.dataset.bound) {
-        applyToggle.dataset.bound = '1';
-        applyToggle.addEventListener('change', () => {
-            updateUI();
-            saveSpellSelectionsState();
-            saveState();
-        });
-    }
+    bindApplyToggles();
 
     const bulkGradeActions = document.getElementById('spell-bulk-grade-actions');
     if (bulkGradeActions && !bulkGradeActions.dataset.bound) {
@@ -2226,7 +2615,9 @@ function initializeSpellTab() {
     renderSelectedSpellList();
     syncAllSpellLibraryVisuals();
     updateSpellTotalCost();
+    updateCalcSpellCardSummary();
     setSpellSelectedPanelOpen(isSpellSelectedPanelOpen);
+    setCalcSpellSelectedPanelOpen(isCalcSpellSelectedPanelOpen);
 }
 
 function getValues() {
@@ -2350,8 +2741,8 @@ function getValues() {
     const perspective = Array.from(inputs.perspective).find(r => r.checked)?.value || 'self';
     const crayonBoard = getCrayonBoardBonuses();
     const cardBonuses = {
-        self: getCardBonusesForSide('self', isSpellApplyEnabled(), { dmgType: inputs.dmgType.value }),
-        enemy: getCardBonusesForSide('enemy', false, { dmgType: inputs.dmgType.value })
+        self: getCardBonusesForSide('self', { includeArtifacts: isArtifactApplyEnabled(), includeSpells: isSpellApplyEnabled() }, { dmgType: inputs.dmgType.value }),
+        enemy: getCardBonusesForSide('enemy', { includeArtifacts: true, includeSpells: false }, { dmgType: inputs.dmgType.value })
     };
 
     return {
@@ -2389,9 +2780,20 @@ function getValues() {
                 enemyCritResDownP: attCard.enemyCritResDownP || 0,
                 enemyCritDmgResDownP: attCard.enemyCritDmgResDownP || 0,
                 takenDmgP: defCard.takenDmgP || 0,
-                attackerDmgDownP: perspective === 'enemy'
-                    ? Math.max(0, Math.min(9, parseInt(inputs.enemy.debuffs.poisonStacks?.value || '0', 10) || 0)) * 11
-                    : 0
+                attackerDmgDownPoisonP: perspective === 'enemy'
+                    ? Math.max(0, Math.min(99, -(parseInt(inputs.enemy.debuffs.poison?.value || '0', 10) || 0)))
+                    : 0,
+                attackerDmgDownNoiseP: perspective === 'enemy'
+                    ? Math.max(0, Math.min(50, -(parseInt(inputs.enemy.debuffs.noise?.value || '0', 10) || 0)))
+                    : 0,
+                attackerAngerP: perspective === 'enemy'
+                    ? Math.max(0, Math.min(200, parseInt(inputs.enemy.debuffs.anger?.value || '0', 10) || 0))
+                    : 0,
+                attackerDmgDownP: (perspective === 'enemy'
+                    ? Math.max(0, Math.min(99, -(parseInt(inputs.enemy.debuffs.poison?.value || '0', 10) || 0)))
+                    : 0) + (perspective === 'enemy'
+                    ? Math.max(0, Math.min(50, -(parseInt(inputs.enemy.debuffs.noise?.value || '0', 10) || 0)))
+                    : 0)
             };
         })()
     };
@@ -2424,8 +2826,9 @@ function calculateAll(v, overrideSelf = null) {
         }
     }
     finalAdd -= (v.common.attackerDmgDownP || 0) / 100;
+    finalAdd += (v.common.attackerAngerP || 0) / 100;
     finalAdd -= (v.common.takenDmgP || 0) / 100;
-    finalAdd = Math.max(0, finalAdd);
+    finalAdd = Math.max(0.2, finalAdd);
     
     const normalDamage = baseDamage * v.common.skill * finalAdd * v.common.type * v.common.special * v.common.other;
 
@@ -2537,6 +2940,9 @@ function updateUI() {
     updateWeaknessBadge();
     updateCardSummary('self');
     updateCardSummary('enemy');
+    updateCalcSpellCardSummary();
+    renderArtifactPresetButtons();
+    renderSpellPresetButtons();
     const v = getValues(); const oldRes = calculateAll(v); let res = oldRes; let newSelf = null;
     if (v.isCrayon) {
         newSelf = { ...v.self };
@@ -2877,6 +3283,82 @@ function applyEnemyPhaseSelection(shouldSave = true) {
     }
 }
 
+function updateMobileSideUI(side = mobileVisibleSide) {
+    mobileVisibleSide = side === 'enemy' ? 'enemy' : 'self';
+    document.documentElement.dataset.mobileSide = mobileVisibleSide;
+    const isSelfAttacker = document.getElementById('perspective-self')?.checked !== false;
+    const targetSide = mobileVisibleSide === 'self' ? 'enemy' : 'self';
+    const targetIsAttacker = targetSide === 'self' ? isSelfAttacker : !isSelfAttacker;
+    document.querySelectorAll('.mobile-side-switch-btn').forEach(btn => {
+        btn.dataset.side = targetSide;
+        btn.textContent = targetSide === 'self' ? '自' : '敵';
+        btn.setAttribute('aria-label', `${targetSide === 'self' ? '自キャラ' : '敵キャラ'}を表示`);
+        btn.classList.toggle('target-attacker', targetIsAttacker);
+        btn.classList.toggle('target-defender', !targetIsAttacker);
+    });
+}
+
+function updatePerspectiveUI() {
+    const isSelf = document.getElementById('perspective-self').checked;
+    document.documentElement.dataset.initialPerspective = isSelf ? 'self' : 'enemy';
+
+    const selfSide = document.querySelector('.self-side');
+    const enemySide = document.querySelector('.enemy-side');
+    if (!selfSide || !enemySide) return;
+
+    selfSide.classList.toggle('is-attacker', isSelf);
+    selfSide.classList.toggle('is-defender', !isSelf);
+    enemySide.classList.toggle('is-attacker', !isSelf);
+    enemySide.classList.toggle('is-defender', isSelf);
+
+    const selfBadge = selfSide.querySelector('.role-badge');
+    const enemyBadge = enemySide.querySelector('.role-badge');
+    if (selfBadge) selfBadge.textContent = isSelf ? 'Attacker' : 'Defender';
+    if (enemyBadge) enemyBadge.textContent = isSelf ? 'Defender' : 'Attacker';
+
+    const toggleCircle = document.getElementById('perspective-toggle-circle');
+    if (toggleCircle) {
+        toggleCircle.classList.toggle('defender', !isSelf);
+    }
+
+    const selfMult = document.querySelector('.self-mult-section');
+    const selfAtkAdds = document.querySelector('.self-atk-adds-section');
+    const selfDefAdds = document.querySelector('.self-def-adds-section');
+    if (selfMult) selfMult.classList.toggle('disabled-section', !isSelf);
+    if (selfAtkAdds) selfAtkAdds.classList.toggle('disabled-section', !isSelf);
+    if (selfDefAdds) selfDefAdds.classList.toggle('disabled-section', isSelf);
+
+    const enemyMult = document.querySelector('.enemy-mult-section');
+    const enemyAtkAdds = document.querySelector('.enemy-atk-adds-section');
+    const enemyDefAdds = document.querySelector('.enemy-def-adds-section');
+    if (enemyMult) enemyMult.classList.toggle('disabled-section', isSelf);
+    if (enemyAtkAdds) enemyAtkAdds.classList.toggle('disabled-section', isSelf);
+    if (enemyDefAdds) enemyDefAdds.classList.toggle('disabled-section', !isSelf);
+    updateMobileSideUI(mobileVisibleSide);
+    updateUI();
+}
+
+function updateTabUI(activeTab) {
+    document.documentElement.dataset.initialTab = activeTab || 'calc';
+    const circle = document.getElementById('perspective-toggle-circle');
+    if (circle) circle.style.display = activeTab === 'calc' ? '' : 'none';
+
+    const mobileSwitch = document.getElementById('mobile-side-switch');
+    if (mobileSwitch) mobileSwitch.style.display = activeTab === 'calc' ? '' : 'none';
+
+    const bottomBar = document.querySelector('.bottom-result-bar');
+    if (bottomBar) bottomBar.style.display = activeTab === 'est' ? 'none' : '';
+    syncBottomBarSafeArea();
+
+    if (activeTab === 'calc') {
+        syncToggleCirclePosition();
+    }
+
+    if (activeTab === 'est') {
+        runEstimation();
+    }
+}
+
 function initListeners() {
     // Basic inputs
     const allNumeric = document.querySelectorAll('input[type="number"], select:not(.preset-select)');
@@ -2912,74 +3394,16 @@ function initListeners() {
         });
     }
 
-    
-function updatePerspectiveUI() {
-    const isSelf = document.getElementById('perspective-self').checked;
-    document.documentElement.dataset.initialPerspective = isSelf ? 'self' : 'enemy';
-    
-    const selfSide = document.querySelector('.self-side');
-    const enemySide = document.querySelector('.enemy-side');
-    
-    // Update classes
-    selfSide.classList.toggle('is-attacker', isSelf);
-    selfSide.classList.toggle('is-defender', !isSelf);
-    
-    enemySide.classList.toggle('is-attacker', !isSelf);
-    enemySide.classList.toggle('is-defender', isSelf);
-    
-    // Update Badges
-    const selfBadge = selfSide.querySelector('.role-badge');
-    const enemyBadge = enemySide.querySelector('.role-badge');
-    if (selfBadge) selfBadge.textContent = isSelf ? 'Attacker' : 'Defender';
-    if (enemyBadge) enemyBadge.textContent = isSelf ? 'Defender' : 'Attacker';
-    
-    // Update perspective toggle circle arrow colors
-    const toggleCircle = document.getElementById('perspective-toggle-circle');
-    if (toggleCircle) {
-        toggleCircle.classList.toggle('defender', !isSelf);
-    }
-    
-    // Toggle Disabled Sections (Gray-out)
-    // Self
-    const selfMult = document.querySelector('.self-mult-section');
-    const selfAtkAdds = document.querySelector('.self-atk-adds-section');
-    const selfDefAdds = document.querySelector('.self-def-adds-section');
-    
-    if (selfMult) selfMult.classList.toggle('disabled-section', !isSelf);
-    if (selfAtkAdds) selfAtkAdds.classList.toggle('disabled-section', !isSelf);
-    if (selfDefAdds) selfDefAdds.classList.toggle('disabled-section', isSelf);
-    
-    // Enemy
-    const enemyMult = document.querySelector('.enemy-mult-section');
-    const enemyAtkAdds = document.querySelector('.enemy-atk-adds-section');
-    const enemyDefAdds = document.querySelector('.enemy-def-adds-section');
-    
-    if (enemyMult) enemyMult.classList.toggle('disabled-section', isSelf);
-    if (enemyAtkAdds) enemyAtkAdds.classList.toggle('disabled-section', isSelf);
-    if (enemyDefAdds) enemyDefAdds.classList.toggle('disabled-section', !isSelf);
-    updateUI();
-}
-
-function updateTabUI(activeTab) {
-    document.documentElement.dataset.initialTab = activeTab || 'calc';
-    const circle = document.getElementById('perspective-toggle-circle');
-    if (circle) circle.style.display = activeTab === 'calc' ? '' : 'none';
-
-    const bottomBar = document.querySelector('.bottom-result-bar');
-    if (bottomBar) bottomBar.style.display = activeTab === 'est' ? 'none' : '';
-    syncBottomBarSafeArea();
-
-    if (activeTab === 'calc') {
-        syncToggleCirclePosition();
-    }
-
-    if (activeTab === 'est') {
-        runEstimation();
-    }
-}
-
-
 inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI));
+
+    document.querySelectorAll('.mobile-side-switch-btn').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', () => {
+            updateMobileSideUI(btn.dataset.side);
+            saveState();
+        });
+    });
 
     // Perspective toggle circle click handler
     const toggleCircle = document.getElementById('perspective-toggle-circle');
@@ -3445,13 +3869,671 @@ function estimateDefSide(rows, common) {
 // --- Persistence & Initialization ---
 const STORAGE_KEY = 'trickcal_calc_state_v1.8';
 const SPELL_STORAGE_KEY = `${STORAGE_KEY}:spell`;
+const ARTIFACT_PRESETS_KEY = `${STORAGE_KEY}:artifact-presets`;
+const SPELL_PRESETS_KEY = `${STORAGE_KEY}:spell-presets`;
+const ARTIFACT_PRESET_SLOT_COUNT = 9;
+let activeArtifactPresetSlotId = '';
+let activeSpellPresetSlotId = '';
+
+function loadArtifactPresets() {
+    try {
+        const raw = localStorage.getItem(ARTIFACT_PRESETS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        if (!parsed || typeof parsed !== 'object') return {};
+        return parsed;
+    } catch (e) {
+        console.error("Artifact preset load failed", e);
+        return {};
+    }
+}
+
+function renderCalcSpellDeckPreview() {
+    const previewEl = document.getElementById('self-spell-deck-preview');
+    if (!previewEl) return;
+    previewEl.innerHTML = '';
+    const selections = Object.entries(spellSelections).filter(([, entry]) => (entry?.qty || 0) > 0);
+    if (selections.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'calc-spell-deck-empty';
+        empty.textContent = '未選択';
+        previewEl.appendChild(empty);
+        return;
+    }
+    selections.forEach(([cardId, entry]) => {
+        const card = CARD_INDEX[cardId];
+        if (!card) return;
+        const qty = Math.max(0, entry?.qty || 0);
+        for (let i = 0; i < qty; i++) {
+            const mini = document.createElement('div');
+            mini.className = 'calc-spell-mini-card';
+            const frameClass = getCardFrameClass(card);
+            if (frameClass) mini.classList.add(frameClass);
+            mini.title = `${card.name} (${i + 1}/${qty})`;
+            const img = document.createElement('img');
+            img.src = getCardImagePath(card);
+            img.alt = card.name;
+            mini.appendChild(img);
+            previewEl.appendChild(mini);
+        }
+    });
+}
+
+function loadSpellPresets() {
+    try {
+        const raw = localStorage.getItem(SPELL_PRESETS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        if (!parsed || typeof parsed !== 'object') return {};
+        return parsed;
+    } catch (e) {
+        console.error("Spell preset load failed", e);
+        return {};
+    }
+}
+
+function saveSpellPresets(presets) {
+    try {
+        localStorage.setItem(SPELL_PRESETS_KEY, JSON.stringify(presets));
+    } catch (e) {
+        console.error("Spell preset save failed", e);
+    }
+}
+
+function saveArtifactPresets(presets) {
+    try {
+        localStorage.setItem(ARTIFACT_PRESETS_KEY, JSON.stringify(presets));
+    } catch (e) {
+        console.error("Artifact preset save failed", e);
+    }
+}
+
+function normalizeArtifactPresetSelection(selection = []) {
+    return (Array.isArray(selection) ? selection : []).slice(0, 3).map(item => {
+        const cardId = item?.cardId || '';
+        const card = CARD_INDEX[cardId];
+        const star = Math.max(1, Math.min(5, parseInt(item?.star || 1, 10) || 1));
+        const solder = normalizeCardSolderLevel(card, item?.solder || 0);
+        const effectState = item?.effects && typeof item.effects === 'object' ? item.effects : {};
+        const baseEffects = createEmptyCardEffectState(card);
+        const mergedEffects = { ...baseEffects };
+        Object.keys(effectState).forEach(key => {
+            mergedEffects[key] = !!effectState[key];
+        });
+        const orderedEffects = {};
+        Object.keys(mergedEffects).sort().forEach(key => {
+            orderedEffects[key] = !!mergedEffects[key];
+        });
+        return { cardId, star, solder, effects: orderedEffects };
+    });
+}
+
+function getCurrentArtifactPresetSelection() {
+    return normalizeArtifactPresetSelection(collectCardSelections('self').artifacts || []);
+}
+
+function getArtifactPresetSelectionCost(selection = []) {
+    return normalizeArtifactPresetSelection(selection).reduce((sum, item) => {
+        const card = CARD_INDEX[item.cardId || ''];
+        if (!card) return sum;
+        return sum + getCardCost(card, item.star || 1);
+    }, 0);
+}
+
+function getArtifactPresetTotalCost(presets = loadArtifactPresets()) {
+    let total = 0;
+    for (let slot = 1; slot <= ARTIFACT_PRESET_SLOT_COUNT; slot++) {
+        const saved = presets[String(slot)];
+        if (!Array.isArray(saved) || saved.length === 0) continue;
+        total += getArtifactPresetSelectionCost(saved);
+    }
+    return total;
+}
+
+function normalizeSpellPresetSelection(selection = {}) {
+    return normalizeSpellSelections(selection && typeof selection === 'object' ? selection : {});
+}
+
+function getSpellPresetSelectionCost(selection = {}) {
+    return Object.entries(normalizeSpellPresetSelection(selection)).reduce((sum, [cardId, entry]) => {
+        const card = CARD_INDEX[cardId];
+        if (!card) return sum;
+        return sum + (getCardCost(card, entry?.star || 1) * (entry?.qty || 0));
+    }, 0);
+}
+
+function getCurrentSpellPresetSelection() {
+    return normalizeSpellPresetSelection(spellSelections);
+}
+
+function hasArtifactPresetUnsavedChanges(slot = activeArtifactPresetSlotId) {
+    const key = slot ? String(slot) : '';
+    if (!key) return false;
+    const presets = loadArtifactPresets();
+    const saved = presets[key];
+    if (!Array.isArray(saved) || saved.length === 0) return false;
+    const current = JSON.stringify(getCurrentArtifactPresetSelection());
+    return JSON.stringify(normalizeArtifactPresetSelection(saved)) !== current;
+}
+
+function hasSpellPresetUnsavedChanges(slot = activeSpellPresetSlotId) {
+    const key = slot ? String(slot) : '';
+    if (!key) return false;
+    const presets = loadSpellPresets();
+    const saved = presets[key];
+    if (!saved || typeof saved !== 'object') return false;
+    const current = JSON.stringify(getCurrentSpellPresetSelection());
+    return JSON.stringify(normalizeSpellPresetSelection(saved)) !== current;
+}
+
+function getMatchingArtifactPresetSlot(preferredSlot = '') {
+    const presets = loadArtifactPresets();
+    const current = JSON.stringify(getCurrentArtifactPresetSelection());
+    const preferredKey = preferredSlot ? String(preferredSlot) : '';
+    if (preferredKey) {
+        const preferredSaved = presets[preferredKey];
+        if (Array.isArray(preferredSaved) && preferredSaved.length > 0) {
+            if (JSON.stringify(normalizeArtifactPresetSelection(preferredSaved)) === current) {
+                return preferredKey;
+            }
+        }
+    }
+    for (let slot = 1; slot <= ARTIFACT_PRESET_SLOT_COUNT; slot++) {
+        const saved = presets[String(slot)];
+        if (!Array.isArray(saved) || saved.length === 0) continue;
+        if (JSON.stringify(normalizeArtifactPresetSelection(saved)) === current) {
+            return String(slot);
+        }
+    }
+    return '';
+}
+
+function getMatchingSpellPresetSlot(preferredSlot = '') {
+    const presets = loadSpellPresets();
+    const current = JSON.stringify(getCurrentSpellPresetSelection());
+    const preferredKey = preferredSlot ? String(preferredSlot) : '';
+    if (preferredKey) {
+        const preferredSaved = presets[preferredKey];
+        if (preferredSaved && typeof preferredSaved === 'object') {
+            if (JSON.stringify(normalizeSpellPresetSelection(preferredSaved)) === current) {
+                return preferredKey;
+            }
+        }
+    }
+    for (let slot = 1; slot <= 7; slot++) {
+        const saved = presets[String(slot)];
+        if (!saved || typeof saved !== 'object') continue;
+        if (JSON.stringify(normalizeSpellPresetSelection(saved)) === current) {
+            return String(slot);
+        }
+    }
+    return '';
+}
+
+function renderArtifactPresetButtons() {
+    const presets = loadArtifactPresets();
+    let activeSlot = '';
+    if (activeArtifactPresetSlotId) {
+        const saved = presets[String(activeArtifactPresetSlotId)];
+        if (Array.isArray(saved) && saved.length > 0) {
+            activeSlot = String(activeArtifactPresetSlotId);
+        }
+    }
+    if (!activeSlot) {
+        activeSlot = getMatchingArtifactPresetSlot('');
+        activeArtifactPresetSlotId = activeSlot;
+    }
+    const isDirty = hasArtifactPresetUnsavedChanges(activeSlot);
+    document.querySelectorAll('.artifact-preset-load').forEach(btn => {
+        const slot = btn.dataset.slot;
+        const hasPreset = Array.isArray(presets[slot]) && presets[slot].length > 0;
+        const cost = hasPreset ? getArtifactPresetSelectionCost(presets[slot]) : 0;
+        btn.classList.toggle('is-filled', hasPreset);
+        btn.classList.toggle('is-empty', !hasPreset);
+        btn.classList.toggle('is-active', activeSlot === slot);
+        btn.classList.toggle('is-dirty', isDirty && activeSlot === slot);
+        btn.title = hasPreset
+            ? (isDirty && activeSlot === slot ? `遺物プリセット${slot}を編集中（未保存の変更あり / 合計コスト ${cost}）` : `遺物プリセット${slot}を読み込む（合計コスト ${cost}）`)
+            : `遺物プリセット${slot}は未保存`;
+    });
+    document.querySelectorAll('.artifact-preset-delete').forEach(btn => {
+        const slot = btn.dataset.slot;
+        const hasPreset = Array.isArray(presets[slot]) && presets[slot].length > 0;
+        btn.classList.toggle('is-empty', !hasPreset);
+        btn.title = hasPreset ? `プリセット${slot}を削除` : `プリセット${slot}は未保存`;
+    });
+    const costsEl = document.getElementById('self-artifact-preset-costs');
+    if (costsEl) {
+        costsEl.innerHTML = '';
+        for (let slot = 1; slot <= ARTIFACT_PRESET_SLOT_COUNT; slot++) {
+            const key = String(slot);
+            const saved = presets[key];
+            const hasPreset = Array.isArray(saved) && saved.length > 0;
+            const chip = document.createElement('div');
+            chip.className = 'artifact-preset-cost-chip';
+            chip.classList.toggle('is-empty', !hasPreset);
+            chip.classList.toggle('is-active', activeSlot === key);
+            chip.classList.toggle('is-dirty', isDirty && activeSlot === key);
+            const costText = hasPreset ? String(getArtifactPresetSelectionCost(saved)) : '—';
+            chip.innerHTML = `<span class="artifact-preset-cost-slot">${key}</span><span class="artifact-preset-cost-label">コスト</span><span>${costText}</span>`;
+            costsEl.appendChild(chip);
+        }
+    }
+    const totalCost = getArtifactPresetTotalCost(presets);
+    const totalValueEl = document.getElementById('self-total-cost-value');
+    const totalFillEl = document.getElementById('self-total-cost-fill');
+    if (totalValueEl) totalValueEl.textContent = String(totalCost);
+    if (totalFillEl) totalFillEl.textContent = String(totalCost);
+}
+
+function renderSpellPresetButtons() {
+    const presets = loadSpellPresets();
+    let activeSlot = '';
+    if (activeSpellPresetSlotId) {
+        const saved = presets[String(activeSpellPresetSlotId)];
+        if (saved && typeof saved === 'object') {
+            activeSlot = String(activeSpellPresetSlotId);
+        }
+    }
+    if (!activeSlot) {
+        activeSlot = getMatchingSpellPresetSlot('');
+        activeSpellPresetSlotId = activeSlot;
+    }
+    const isDirty = hasSpellPresetUnsavedChanges(activeSlot);
+    document.querySelectorAll('.spell-preset-load').forEach(btn => {
+        const slot = btn.dataset.slot;
+        const saved = presets[slot];
+        const hasPreset = !!saved && typeof saved === 'object';
+        btn.classList.toggle('is-filled', hasPreset);
+        btn.classList.toggle('is-empty', !hasPreset);
+        btn.classList.toggle('is-active', activeSlot === slot);
+        btn.classList.toggle('is-dirty', isDirty && activeSlot === slot);
+        btn.title = hasPreset
+            ? (isDirty && activeSlot === slot ? `スペルプリセット${slot}を編集中（未保存の変更あり）` : `スペルプリセット${slot}を読み込む`)
+            : `スペルプリセット${slot}は未保存`;
+    });
+    const hasAnyPreset = Array.from({ length: 7 }, (_, index) => presets[String(index + 1)]).some(saved => !!saved && typeof saved === 'object');
+    [
+        document.getElementById('spell-preset-delete-trigger'),
+        document.getElementById('self-spell-preset-delete-trigger')
+    ].filter(Boolean).forEach(deleteTrigger => {
+        deleteTrigger.classList.toggle('is-empty', !hasAnyPreset);
+    });
+}
+
+function saveArtifactPreset(slot) {
+    const key = String(slot);
+    const presets = loadArtifactPresets();
+    presets[key] = normalizeArtifactPresetSelection(collectCardSelections('self').artifacts || []);
+    saveArtifactPresets(presets);
+    activeArtifactPresetSlotId = key;
+    renderArtifactPresetButtons();
+}
+
+function saveSpellPreset(slot) {
+    const key = String(slot);
+    const presets = loadSpellPresets();
+    presets[key] = normalizeSpellPresetSelection(spellSelections);
+    saveSpellPresets(presets);
+    activeSpellPresetSlotId = key;
+    renderSpellPresetButtons();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function loadArtifactPreset(slot) {
+    const key = String(slot);
+    const presets = loadArtifactPresets();
+    const selection = Array.isArray(presets[key]) ? presets[key] : null;
+    if (!selection || selection.length === 0) return;
+    const switchingToAnotherPreset = !!activeArtifactPresetSlotId && activeArtifactPresetSlotId !== key;
+    if (switchingToAnotherPreset && hasArtifactPresetUnsavedChanges(activeArtifactPresetSlotId)) {
+        if (!confirm(`プリセット${activeArtifactPresetSlotId}の未保存の変更が失われます。プリセット${key}を読み込みますか？`)) {
+            return;
+        }
+    }
+    activeArtifactPresetSlotId = key;
+    restoreCardSelections('self', { artifacts: selection });
+    updateUI();
+    renderArtifactPresetButtons();
+    saveState();
+}
+
+function loadSpellPreset(slot) {
+    const key = String(slot);
+    const presets = loadSpellPresets();
+    const selection = presets[key];
+    if (!selection || typeof selection !== 'object') return;
+    const switchingToAnotherPreset = !!activeSpellPresetSlotId && activeSpellPresetSlotId !== key;
+    if (switchingToAnotherPreset && hasSpellPresetUnsavedChanges(activeSpellPresetSlotId)) {
+        if (!confirm(`プリセット${activeSpellPresetSlotId}の未保存の変更が失われます。プリセット${key}を読み込みますか？`)) {
+            return;
+        }
+    }
+    activeSpellPresetSlotId = key;
+    spellSelections = normalizeSpellPresetSelection(selection);
+    renderSpellLibrary();
+    renderSelectedSpellList();
+    syncAllSpellLibraryVisuals();
+    updateSpellTotalCost();
+    updateUI();
+    renderSpellPresetButtons();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function deleteArtifactPreset(slot) {
+    const key = String(slot);
+    const presets = loadArtifactPresets();
+    if (!Array.isArray(presets[key]) || presets[key].length === 0) return;
+    delete presets[key];
+    saveArtifactPresets(presets);
+    if (activeArtifactPresetSlotId === key) activeArtifactPresetSlotId = '';
+    renderArtifactPresetButtons();
+}
+
+function deleteSpellPreset(slot) {
+    const key = String(slot);
+    const presets = loadSpellPresets();
+    const saved = presets[key];
+    if (!saved || typeof saved !== 'object') return;
+    delete presets[key];
+    saveSpellPresets(presets);
+    if (activeSpellPresetSlotId === key) activeSpellPresetSlotId = '';
+    renderSpellPresetButtons();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+let activeArtifactPresetPopoverAnchor = null;
+let activeArtifactPresetPopoverMode = null;
+let activeArtifactCostPopoverAnchor = null;
+let activeSpellPresetPopoverAnchor = null;
+let activeSpellPresetPopoverMode = null;
+
+function ensureArtifactPresetPopover() {
+    const appContainer = document.querySelector('.app-container');
+    let popover = document.getElementById('artifact-preset-popover');
+    if (!popover) {
+        popover = document.createElement('div');
+        popover.id = 'artifact-preset-popover';
+        popover.className = 'artifact-preset-popover';
+        popover.style.display = 'none';
+        appContainer?.appendChild(popover);
+    } else if (appContainer && popover.parentElement !== appContainer) {
+        appContainer.appendChild(popover);
+    }
+    return popover;
+}
+
+function ensureArtifactCostPopover() {
+    const appContainer = document.querySelector('.app-container');
+    let popover = document.getElementById('artifact-cost-popover');
+    if (!popover) {
+        popover = document.createElement('div');
+        popover.id = 'artifact-cost-popover';
+        popover.className = 'artifact-cost-popover';
+        popover.style.display = 'none';
+        appContainer?.appendChild(popover);
+    } else if (appContainer && popover.parentElement !== appContainer) {
+        appContainer.appendChild(popover);
+    }
+    return popover;
+}
+
+function ensureSpellPresetPopover() {
+    const appContainer = document.querySelector('.app-container');
+    let popover = document.getElementById('spell-preset-popover');
+    if (!popover) {
+        popover = document.createElement('div');
+        popover.id = 'spell-preset-popover';
+        popover.className = 'spell-preset-popover';
+        popover.style.display = 'none';
+        appContainer?.appendChild(popover);
+    } else if (appContainer && popover.parentElement !== appContainer) {
+        appContainer.appendChild(popover);
+    }
+    return popover;
+}
+
+function closeArtifactPresetPopover() {
+    const popover = document.getElementById('artifact-preset-popover');
+    if (popover) popover.style.display = 'none';
+    activeArtifactPresetPopoverAnchor = null;
+    activeArtifactPresetPopoverMode = null;
+}
+
+function closeArtifactCostPopover() {
+    const popover = document.getElementById('artifact-cost-popover');
+    if (popover) popover.style.display = 'none';
+    activeArtifactCostPopoverAnchor = null;
+}
+
+function closeSpellPresetPopover() {
+    const popover = document.getElementById('spell-preset-popover');
+    if (popover) popover.style.display = 'none';
+    activeSpellPresetPopoverAnchor = null;
+    activeSpellPresetPopoverMode = null;
+}
+
+function positionArtifactPresetPopover(anchorEl) {
+    const popover = document.getElementById('artifact-preset-popover');
+    if (!popover || !anchorEl) return;
+    const rect = anchorEl.getBoundingClientRect();
+    const popRect = popover.getBoundingClientRect();
+    const gap = 8;
+    let left = rect.left + (rect.width / 2) - (popRect.width / 2);
+    let top = rect.bottom + gap;
+    const maxLeft = window.innerWidth - popRect.width - 12;
+    left = Math.max(12, Math.min(maxLeft, left));
+    const maxTop = window.innerHeight - popRect.height - 12;
+    if (top > maxTop) {
+        top = Math.max(12, rect.top - popRect.height - gap);
+    }
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function positionArtifactCostPopover(anchorEl) {
+    const popover = document.getElementById('artifact-cost-popover');
+    if (!popover || !anchorEl) return;
+    const rect = anchorEl.getBoundingClientRect();
+    const popRect = popover.getBoundingClientRect();
+    const gap = 8;
+    let left = rect.left + (rect.width / 2) - (popRect.width / 2);
+    let top = rect.bottom + gap;
+    const maxLeft = window.innerWidth - popRect.width - 12;
+    left = Math.max(12, Math.min(maxLeft, left));
+    const maxTop = window.innerHeight - popRect.height - 12;
+    if (top > maxTop) {
+        top = Math.max(12, rect.top - popRect.height - gap);
+    }
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function positionSpellPresetPopover(anchorEl) {
+    const popover = document.getElementById('spell-preset-popover');
+    if (!popover || !anchorEl) return;
+    const rect = anchorEl.getBoundingClientRect();
+    const popRect = popover.getBoundingClientRect();
+    const gap = 8;
+    let left = rect.left + (rect.width / 2) - (popRect.width / 2);
+    let top = rect.bottom + gap;
+    const maxLeft = window.innerWidth - popRect.width - 12;
+    left = Math.max(12, Math.min(maxLeft, left));
+    const maxTop = window.innerHeight - popRect.height - 12;
+    if (top > maxTop) {
+        top = Math.max(12, rect.top - popRect.height - gap);
+    }
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function openArtifactPresetPopover(mode, anchorEl) {
+    const popover = ensureArtifactPresetPopover();
+    if (!popover || !anchorEl) return;
+    const presets = loadArtifactPresets();
+    const currentSlot = activeArtifactPresetSlotId ? String(activeArtifactPresetSlotId) : '';
+    const currentDirty = hasArtifactPresetUnsavedChanges(currentSlot);
+    popover.innerHTML = '';
+
+    const title = document.createElement('div');
+    title.className = 'artifact-preset-popover-title';
+    title.textContent = mode === 'save' ? '保存先を選択' : '削除する番号を選択';
+    popover.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'artifact-preset-popover-grid';
+    for (let slot = 1; slot <= ARTIFACT_PRESET_SLOT_COUNT; slot++) {
+        const key = String(slot);
+        const hasPreset = Array.isArray(presets[key]) && presets[key].length > 0;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'artifact-preset-popover-btn';
+        btn.textContent = key;
+        btn.classList.toggle('is-current', currentSlot === key);
+        btn.classList.toggle('is-dirty', currentDirty && currentSlot === key);
+        if (!hasPreset && mode === 'delete') btn.classList.add('is-empty');
+        btn.title = mode === 'save'
+            ? `プリセット${key}へ保存`
+            : (hasPreset ? `プリセット${key}を削除` : `プリセット${key}は未保存`);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (mode === 'save') {
+                saveArtifactPreset(key);
+            } else {
+                if (!hasPreset) return;
+                if (!confirm(`遺物プリセット${key}を削除しますか？`)) return;
+                deleteArtifactPreset(key);
+            }
+            closeArtifactPresetPopover();
+        });
+        grid.appendChild(btn);
+    }
+    popover.appendChild(grid);
+    popover.style.display = 'block';
+    activeArtifactPresetPopoverAnchor = anchorEl;
+    activeArtifactPresetPopoverMode = mode;
+    positionArtifactPresetPopover(anchorEl);
+}
+
+function openArtifactCostPopover(anchorEl) {
+    const popover = ensureArtifactCostPopover();
+    if (!popover || !anchorEl) return;
+    const presets = loadArtifactPresets();
+    const spellPresets = loadSpellPresets();
+    const isSpellCostView = !!anchorEl.closest?.('#self-spell-cost-label, #self-spell-cost-inline, #spell-tab-cost-label, #spell-tab-cost-inline');
+    const currentSlot = activeArtifactPresetSlotId ? String(activeArtifactPresetSlotId) : '';
+    const currentDirty = hasArtifactPresetUnsavedChanges(currentSlot);
+    const currentCost = getArtifactSelectionCost('self');
+    const presetTotalCost = getArtifactPresetTotalCost(presets);
+    const spellCost = getSpellSelectionCost();
+    const combinedCost = presetTotalCost + spellCost;
+    popover.innerHTML = '';
+
+    const title = document.createElement('div');
+    title.className = 'artifact-cost-popover-title';
+    title.textContent = isSpellCostView ? 'スペルコスト詳細' : '遺物コスト詳細';
+    popover.appendChild(title);
+
+    const current = document.createElement('div');
+    current.className = 'artifact-cost-current';
+    current.innerHTML = isSpellCostView
+        ? `
+            <span>スペルカード</span><span>${spellCost}</span>
+            <span>遺物総合＋スペル</span><span>${combinedCost}</span>
+        `
+        : `
+            <span>現在の合計</span><span>${currentCost}</span>
+            <span>遺物プリセット総合</span><span>${presetTotalCost}</span>
+            <span>スペルカード</span><span>${spellCost}</span>
+            <span>遺物総合＋スペル</span><span>${combinedCost}</span>
+        `;
+    popover.appendChild(current);
+
+    const list = document.createElement('div');
+    list.className = 'artifact-cost-list';
+    const listCount = isSpellCostView ? 7 : ARTIFACT_PRESET_SLOT_COUNT;
+    for (let slot = 1; slot <= listCount; slot++) {
+        const key = String(slot);
+        const saved = isSpellCostView ? spellPresets[key] : presets[key];
+        const hasPreset = isSpellCostView
+            ? !!saved && typeof saved === 'object'
+            : Array.isArray(saved) && saved.length > 0;
+        const item = document.createElement('div');
+        item.className = 'artifact-cost-item';
+        item.classList.toggle('is-empty', !hasPreset);
+        item.classList.toggle('is-current', (isSpellCostView ? activeSpellPresetSlotId : currentSlot) === key);
+        item.classList.toggle('is-dirty', !isSpellCostView && currentDirty && currentSlot === key);
+        const costText = hasPreset
+            ? String(isSpellCostView ? getSpellPresetSelectionCost(saved) : getArtifactPresetSelectionCost(saved))
+            : '—';
+        item.innerHTML = `<span class="artifact-cost-slot">${key}</span><span class="artifact-cost-value">${costText}</span>`;
+        list.appendChild(item);
+    }
+    popover.appendChild(list);
+    popover.style.display = 'block';
+    activeArtifactCostPopoverAnchor = anchorEl;
+    positionArtifactCostPopover(anchorEl);
+}
+
+function openSpellPresetPopover(mode, anchorEl) {
+    const popover = ensureSpellPresetPopover();
+    if (!popover || !anchorEl) return;
+    const presets = loadSpellPresets();
+    const currentSlot = activeSpellPresetSlotId ? String(activeSpellPresetSlotId) : '';
+    const currentDirty = hasSpellPresetUnsavedChanges(currentSlot);
+    popover.innerHTML = '';
+
+    const title = document.createElement('div');
+    title.className = 'spell-preset-popover-title';
+    title.textContent = mode === 'save' ? '保存先を選択' : '削除する番号を選択';
+    popover.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'spell-preset-popover-grid';
+    for (let slot = 1; slot <= 7; slot++) {
+        const key = String(slot);
+        const hasPreset = !!presets[key] && typeof presets[key] === 'object';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'spell-preset-popover-btn';
+        btn.textContent = key;
+        btn.classList.toggle('is-current', currentSlot === key);
+        btn.classList.toggle('is-dirty', currentDirty && currentSlot === key);
+        if (!hasPreset && mode === 'delete') btn.classList.add('is-empty');
+        btn.title = mode === 'save'
+            ? `プリセット${key}へ保存`
+            : (hasPreset ? `プリセット${key}を削除` : `プリセット${key}は未保存`);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (mode === 'save') {
+                saveSpellPreset(key);
+            } else {
+                if (!hasPreset) return;
+                if (!confirm(`スペルプリセット${key}を削除しますか？`)) return;
+                deleteSpellPreset(key);
+            }
+            closeSpellPresetPopover();
+        });
+        grid.appendChild(btn);
+    }
+    popover.appendChild(grid);
+    popover.style.display = 'block';
+    activeSpellPresetPopoverAnchor = anchorEl;
+    activeSpellPresetPopoverMode = mode;
+    positionSpellPresetPopover(anchorEl);
+}
 
 function saveSpellSelectionsState() {
     try {
         localStorage.setItem(SPELL_STORAGE_KEY, JSON.stringify({
             selections: normalizeSpellSelections(spellSelections),
             panelOpen: isSpellSelectedPanelOpen,
-            applyEnabled: isSpellApplyEnabled()
+            applyEnabled: isSpellApplyEnabled(),
+            artifactApplyEnabled: isArtifactApplyEnabled(),
+            presetSlot: activeSpellPresetSlotId
         }));
     } catch (e) {
         console.error("Spell save failed", e);
@@ -3470,8 +4552,13 @@ function loadSpellSelectionsState() {
             isSpellSelectedPanelOpen = state.panelOpen;
         }
         if (typeof state?.applyEnabled === 'boolean') {
-            const applyToggle = document.getElementById('spell-apply-toggle');
-            if (applyToggle) applyToggle.checked = state.applyEnabled;
+            setSpellApplyEnabled(state.applyEnabled);
+        }
+        if (typeof state?.artifactApplyEnabled === 'boolean') {
+            setArtifactApplyEnabled(state.artifactApplyEnabled);
+        }
+        if (typeof state?.presetSlot === 'string') {
+            activeSpellPresetSlotId = state.presetSlot;
         }
         return true;
     } catch (e) {
@@ -3531,7 +4618,11 @@ function saveState() {
         enemyPhase: inputs.enemy.phase.value,
         spellSelectedPanelOpen: isSpellSelectedPanelOpen,
         spellApplyEnabled: isSpellApplyEnabled(),
+        artifactApplyEnabled: isArtifactApplyEnabled(),
         spellSelections: normalizedSpellSelections,
+        spellPresetSlot: activeSpellPresetSlotId,
+        artifactPresetSlot: activeArtifactPresetSlotId,
+        mobileVisibleSide,
         cards: {
             self: collectCardSelections('self'),
             enemy: collectCardSelections('enemy')
@@ -3641,12 +4732,23 @@ function loadState() {
         if (!hasDedicatedSpellState && state.spellSelections) {
             spellSelections = normalizeSpellSelections(state.spellSelections);
         }
+        if (typeof state.spellPresetSlot === 'string' && !activeSpellPresetSlotId) {
+            activeSpellPresetSlotId = state.spellPresetSlot;
+        }
+        if (typeof state.artifactPresetSlot === 'string') {
+            activeArtifactPresetSlotId = state.artifactPresetSlot;
+        }
+        if (typeof state.mobileVisibleSide === 'string') {
+            updateMobileSideUI(state.mobileVisibleSide);
+        }
         if (typeof state.spellSelectedPanelOpen === 'boolean') {
             isSpellSelectedPanelOpen = state.spellSelectedPanelOpen;
         }
         if (typeof state.spellApplyEnabled === 'boolean') {
-            const spellApplyToggle = document.getElementById('spell-apply-toggle');
-            if (spellApplyToggle) spellApplyToggle.checked = state.spellApplyEnabled;
+            setSpellApplyEnabled(state.spellApplyEnabled);
+        }
+        if (typeof state.artifactApplyEnabled === 'boolean') {
+            setArtifactApplyEnabled(state.artifactApplyEnabled);
         }
         
         if (state.samples) {
@@ -3735,17 +4837,21 @@ document.addEventListener('change', (e) => {
 populatePresets();
 initializeCardUI();
 initializeSpellTab();
+renderArtifactPresetButtons();
 loadState();
+updateMobileSideUI(mobileVisibleSide);
 initListeners();
 updateHeaders();
 if (estimator.samplesList.children.length === 0) estimator.samplesList.appendChild(createSampleRow());
 updateMainSkillList('self');
 updateMainSkillList('enemy');
 syncDeleteButtonVisibility();
+renderArtifactPresetButtons();
 syncBottomBarSafeArea();
 requestAnimationFrame(syncDeleteButtonVisibility);
 requestAnimationFrame(syncBottomBarSafeArea);
 
+window.addEventListener('load', preloadCardImages);
 window.addEventListener('beforeunload', saveState);
 window.addEventListener('pagehide', saveState);
 window.addEventListener('resize', syncRelicPickerSafeArea);
@@ -3762,6 +4868,12 @@ window.addEventListener('resize', () => {
     if (activeSolderPopoverAnchor) {
         positionSolderPopover(activeSolderPopoverAnchor);
     }
+    if (activeArtifactPresetPopoverAnchor) {
+        positionArtifactPresetPopover(activeArtifactPresetPopoverAnchor);
+    }
+    if (activeArtifactCostPopoverAnchor) {
+        positionArtifactCostPopover(activeArtifactCostPopoverAnchor);
+    }
 });
 window.addEventListener('scroll', () => {
     if (activeSpellEffectPopoverCardId && activeSpellEffectPopoverAnchor) {
@@ -3769,6 +4881,9 @@ window.addEventListener('scroll', () => {
     }
     if (activeSolderPopoverAnchor) {
         positionSolderPopover(activeSolderPopoverAnchor);
+    }
+    if (activeArtifactCostPopoverAnchor) {
+        positionArtifactCostPopover(activeArtifactCostPopoverAnchor);
     }
 }, true);
 
@@ -3796,8 +4911,13 @@ document.addEventListener('click', (e) => {
 
     appContainer.appendChild(circle);
 
+    const mobileSideSwitch = document.getElementById('mobile-side-switch');
+    if (mobileSideSwitch && mobileSideSwitch.parentElement !== document.body) {
+        document.body.appendChild(mobileSideSwitch);
+    }
+
     syncToggleCirclePosition = function(attempt = 0) {
-        if (window.matchMedia('(max-width: 700px)').matches) {
+        if (window.matchMedia('(max-width: 820px)').matches) {
             circle.style.left = '';
             circle.style.right = '1rem';
             return;

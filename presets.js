@@ -418,6 +418,23 @@ const ENEMY_PRESETS = {
             { name: "溜めレーザー[AoE/14発hit]", mult: 4200 }
         ]
     },
+    "GTA_24": {
+        name: "[GTA24]バンク蔵-憂鬱",
+        hp: 4231046,
+        atk_p: 1,
+        atk_m: 1,
+        def_p: 114582,
+        def_m: 114582,
+        dmgType: 'phys',
+        crit: 1,
+        critDmg: 1,
+        critRes: 20000,
+        critDmgRes: 1,
+        special: 100,
+        skills: [
+            { name: "通常攻撃", mult: 100 },
+        ]
+    },
     "dummy_enemy": {
         name: "[E] Dummy",
         hp: 1000000,

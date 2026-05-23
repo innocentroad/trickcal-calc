@@ -18,7 +18,6 @@ const CARD_LIBRARY = {
                 { critRateP: 36.8, critDmgP: 19.6 },
                 { critRateP: 42.1, critDmgP: 22.4 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "same_lane_taken_reduction",
@@ -77,7 +76,6 @@ const CARD_LIBRARY = {
                 { atkP: 26.1, hpP: 34.8 },
                 { atkP: 29.8, hpP: 39.8 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "zero_kill_magic_damage",
@@ -125,7 +123,6 @@ const CARD_LIBRARY = {
                 { atkP: 30.6, hasteP: 24.5 },
                 { atkP: 35.0, hasteP: 28.0 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "enhanced_attack_damage",
@@ -176,7 +173,6 @@ const CARD_LIBRARY = {
                 { hpP: 44.9, critDmgResP: 11.2 },
                 { hpP: 51.4, critDmgResP: 12.8 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "normal_stack_defense",
@@ -246,7 +242,6 @@ const CARD_LIBRARY = {
                 { hpP: 29.1, atkP: 23.3 },
                 { hpP: 33.3, atkP: 26.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "low_grade_skill_haste",
@@ -289,7 +284,6 @@ const CARD_LIBRARY = {
                 { hpP: 32.2, defP: 32.2 },
                 { hpP: 36.8, defP: 36.8 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "normal_attack_taken_reduction",
@@ -347,7 +341,6 @@ const CARD_LIBRARY = {
                 { critRateP: 11.6, critDmgP: 7.2 },
                 { critRateP: 13.2, critDmgP: 8.2 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "low_grade_magic_def_down",
@@ -399,7 +392,6 @@ const CARD_LIBRARY = {
                 { atkP: 32.2 },
                 { atkP: 36.8 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "healing_amount_up",
@@ -457,7 +449,6 @@ const CARD_LIBRARY = {
                 { atkP: 36.5, critRateP: 18.9 },
                 { atkP: 44.4, critRateP: 22.2 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "single_enemy_damage_up",
@@ -510,7 +501,6 @@ const CARD_LIBRARY = {
                 { hpP: 34.8, defP: 26.1 },
                 { hpP: 39.8, defP: 29.8 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "after_skill_healing_up",
@@ -553,7 +543,6 @@ const CARD_LIBRARY = {
                 { hpP: 44.9, atkP: 33.7 },
                 { hpP: 51.4, atkP: 38.5 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "same_lane_taken_reduction",
@@ -605,7 +594,6 @@ const CARD_LIBRARY = {
                 { hasteP: 19.7, hpP: 32.8 },
                 { hasteP: 22.5, hpP: 37.5 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "hp50_max_hp_up",
@@ -663,7 +651,6 @@ const CARD_LIBRARY = {
                 { critResP: 24.0, critDmgResP: 13.3 },
                 { critResP: 27.5, critDmgResP: 15.2 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "skill_self_recover",
@@ -712,7 +699,6 @@ const CARD_LIBRARY = {
                 { hasteP: 18.5, defP: 23.1 },
                 { hasteP: 21.2, defP: 26.4 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "same_lane_sp_recover",
@@ -755,7 +741,6 @@ const CARD_LIBRARY = {
                 { hasteP: 34.5, critResP: 25.9 },
                 { hasteP: 39.4, critResP: 29.6 }
             ],
-            source: "user:はんだCSV/効果メモ",
             conditionalEffects: [
                 {
                     id: "shield_taken_reduction",
@@ -805,7 +790,6 @@ const CARD_LIBRARY = {
                 { atkP: 70.5 },
                 { atkP: 80.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "time_haste",
@@ -834,7 +818,6 @@ const CARD_LIBRARY = {
                 { hpP: 42.9, critDmgResP: 10.7 },
                 { hpP: 49.0, critDmgResP: 12.2 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "low_hp_self_heal",
@@ -863,7 +846,6 @@ const CARD_LIBRARY = {
                 { critRateP: 30.6, critDmgP: 16.3 },
                 { critRateP: 35.0, critDmgP: 18.7 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "skill_damage_up",
@@ -917,7 +899,6 @@ const CARD_LIBRARY = {
                 { atkP: 29.1, hasteP: 23.3 },
                 { atkP: 33.3, hasteP: 26.6 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_fuwafuwa_vest",
@@ -932,7 +913,6 @@ const CARD_LIBRARY = {
                 { defP: 46.3 },
                 { defP: 52.9 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_eldain_lamp",
@@ -947,7 +927,6 @@ const CARD_LIBRARY = {
                 { hpP: 28.9 },
                 { hpP: 33.0 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "healing_amount_up",
@@ -976,7 +955,6 @@ const CARD_LIBRARY = {
                 { atkP: 14.5, critRateP: 14.5 },
                 { atkP: 16.6, critRateP: 16.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "blind_effect",
@@ -999,7 +977,6 @@ const CARD_LIBRARY = {
                 { atkP: 24.1 },
                 { atkP: 27.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "attack_speed_bonus",
@@ -1022,7 +999,6 @@ const CARD_LIBRARY = {
                 { hpP: 61.3 },
                 { hpP: 70.0 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "opening_lane_shield",
@@ -1051,7 +1027,6 @@ const CARD_LIBRARY = {
                 { critRateP: 20.7, critDmgP: 11.1 },
                 { critRateP: 23.7, critDmgP: 12.6 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_blue_grimoire",
@@ -1066,7 +1041,6 @@ const CARD_LIBRARY = {
                 { atkP: 41.4 },
                 { atkP: 47.3 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "skill_damage_boost",
@@ -1096,7 +1070,6 @@ const CARD_LIBRARY = {
                 { defP: 17.4 },
                 { defP: 19.8 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "hp_recovery_amount",
@@ -1119,7 +1092,6 @@ const CARD_LIBRARY = {
                 { hpP: 21.7, defP: 16.2 },
                 { hpP: 24.8, defP: 18.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "hp_regen",
@@ -1142,7 +1114,6 @@ const CARD_LIBRARY = {
                 { critDmgP: 8.1, hasteP: 12.1 },
                 { critDmgP: 9.2, hasteP: 13.9 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "normal_hit_sp_recover",
@@ -1165,7 +1136,6 @@ const CARD_LIBRARY = {
                 { defP: 30.3 },
                 { defP: 34.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "shield_received_up",
@@ -1194,7 +1164,6 @@ const CARD_LIBRARY = {
                 { critDmgResP: 9.4 },
                 { critDmgResP: 10.7 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "aoe_fixed_damage",
@@ -1211,7 +1180,6 @@ const CARD_LIBRARY = {
             name: "癒やしのペンダント",
             cost: 14,
             bonusesByStar: [{}, {}, {}, {}, {}],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "heal_amount",
@@ -1252,7 +1220,6 @@ const CARD_LIBRARY = {
                 { atkP: 23.1 },
                 { atkP: 26.4 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "normal_attack_damage_up",
@@ -1282,7 +1249,6 @@ const CARD_LIBRARY = {
                 { critDmgResP: 5.8 },
                 { critDmgResP: 6.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "status_damage_up",
@@ -1311,7 +1277,6 @@ const CARD_LIBRARY = {
                 { critDmgP: 9.2 },
                 { critDmgP: 10.6 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "sp_regen",
@@ -1334,7 +1299,6 @@ const CARD_LIBRARY = {
             name: "エルフ製の杖",
             cost: 11,
             bonusesByStar: [{}, {}, {}, {}, {}],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "hp_recovery_amount",
@@ -1369,7 +1333,6 @@ const CARD_LIBRARY = {
                 { atkP: 7.2, critDmgP: 3.9 },
                 { atkP: 8.3, critDmgP: 4.4 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_thorn_crown",
@@ -1384,7 +1347,6 @@ const CARD_LIBRARY = {
                 { defP: 13.1 },
                 { defP: 14.9 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "skill_damage_up",
@@ -1415,7 +1377,6 @@ const CARD_LIBRARY = {
                 { hasteP: 10.5 },
                 { hasteP: 12.0 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_frost_charm",
@@ -1430,7 +1391,6 @@ const CARD_LIBRARY = {
                 { critResP: 7.8 },
                 { critResP: 9.0 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "debuff_resist",
@@ -1459,7 +1419,6 @@ const CARD_LIBRARY = {
                 { critResP: 7.8 },
                 { critResP: 9.0 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_shining_tiara",
@@ -1474,7 +1433,6 @@ const CARD_LIBRARY = {
                 { hpP: 7.8 },
                 { hpP: 8.9 }
             ],
-            source: "wiki:遺物カード",
             conditionalEffects: [
                 {
                     id: "healing_amount",
@@ -1503,7 +1461,6 @@ const CARD_LIBRARY = {
                 { defP: 11.7 },
                 { defP: 13.4 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_head_towel",
@@ -1518,7 +1475,6 @@ const CARD_LIBRARY = {
                 { hpP: 13.8 },
                 { hpP: 15.7 }
             ],
-            source: "wiki:遺物カード"
         },
         {
             id: "relic_rusty_awl",
@@ -1533,7 +1489,6 @@ const CARD_LIBRARY = {
                 { critRateP: 7.6 },
                 { critRateP: 8.7 }
             ],
-            source: "wiki:遺物カード"
         }
     ],
     spells: [
@@ -1568,7 +1523,7 @@ const CARD_LIBRARY = {
                 { id: "alice_party_sp", type: "info", label: "5秒ごと味方全体SP回復", description: "1〜10回復" },
                 {
                     id: "alice_signature_random_red",
-                    label: "Lv.1 ランダム雷効果 赤: 与ダメ減少",
+                    label: "Lv.1 ランダム効果 赤: 与ダメ減少",
                     shortLabel: "赤カード 与ダメ減",
                     type: "toggle",
                     description: "与ダメ減:5秒 / 魔法ダメ300%",
@@ -1580,11 +1535,10 @@ const CARD_LIBRARY = {
                         { takenDmgP: 30.0 }
                     ]
                 },
-                { id: "alice_signature_random_yellow", type: "info", label: "Lv.1 ランダム雷効果 黄: 気絶", description: "気絶:3秒 / 魔法ダメ300%" },
-                { id: "alice_signature_random", type: "info", label: "Lv.1 ランダム雷効果 青: SP減少", description: "SP減少量:50 / 魔法ダメ300%" },
+                { id: "alice_signature_random_yellow", type: "info", label: "Lv.1 ランダム効果 黄: 気絶", description: "気絶:3秒 / 魔法ダメ300%" },
+                { id: "alice_signature_random", type: "info", label: "Lv.1 ランダム効果 青: SP減少", description: "SP減少量:50 / 魔法ダメ300%" },
                 { id: "alice_signature_lv3", type: "info", label: "Lv.3", description: "毎秒SP回復+10" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_epica_anthem",
@@ -1632,7 +1586,6 @@ const CARD_LIBRARY = {
                 },
                 { id: "epica_signature_lv3", type: "info", label: "Lv.3", description: "ウェーブ開始から15秒間 攻撃速度+50%" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_yiide_dream",
@@ -1681,7 +1634,6 @@ const CARD_LIBRARY = {
                 { id: "yiide_signature_sp", type: "info", label: "Lv.1 定期SP回復", description: "5秒ごと +30" },
                 { id: "yiide_signature_lv3", type: "info", label: "Lv.3", description: "イード回復量増加+30%" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_beauty_is_sin",
@@ -1696,7 +1648,6 @@ const CARD_LIBRARY = {
                 { critRateP: 16.6, critDmgP: 8.9 },
                 { critRateP: 19.0, critDmgP: 10.2 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_suspicious_potion",
@@ -1720,7 +1671,6 @@ const CARD_LIBRARY = {
                     ]
                 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_battle_master",
@@ -1751,7 +1701,6 @@ const CARD_LIBRARY = {
                     ]
                 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_aromatherapy",
@@ -1776,7 +1725,6 @@ const CARD_LIBRARY = {
                 },
                 { id: "aroma_full_sp", type: "info", label: "残りSPが最も低い味方のSP回復", description: "SPを100%まで回復" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_motivation_up",
@@ -1794,7 +1742,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "motivation_haste", type: "info", label: "攻撃速度増加", description: "4.8/6/7.2/8.4/9.6%" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_caring",
@@ -1807,7 +1754,6 @@ const CARD_LIBRARY = {
                 { id: "caring_hp", type: "info", label: "最大HP増加", description: "7.3/9.1/10.9/12.8/14.6%" },
                 { id: "caring_heal", type: "info", label: "HP治癒量増加", description: "4.4/5.5/6.6/7.7/8.8%" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_center_best",
@@ -1850,7 +1796,6 @@ const CARD_LIBRARY = {
                     ]
                 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_frontline",
@@ -1894,7 +1839,6 @@ const CARD_LIBRARY = {
                 },
                 { id: "frontline_haste", type: "info", label: "攻撃速度増加", description: "数値未確認" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_backline",
@@ -1932,7 +1876,6 @@ const CARD_LIBRARY = {
                     ]
                 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_personality_madness",
@@ -1951,7 +1894,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "madness_personality", type: "info", label: "性格『狂気』判定+1", description: "狂気シナジーを1つ追加" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_personality_lively",
@@ -1970,7 +1912,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "lively_personality", type: "info", label: "性格『活発』判定+1", description: "活発シナジーを1つ追加" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_personality_pure",
@@ -1984,7 +1925,6 @@ const CARD_LIBRARY = {
                 { id: "pure_heal", type: "info", label: "HP回復量増加", description: "4.1/5.2/6.2/7.2/8.3%" },
                 { id: "pure_personality", type: "info", label: "性格『純粋』判定+1", description: "純粋シナジーを1つ追加" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_personality_gloomy",
@@ -2003,7 +1943,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "gloomy_personality", type: "info", label: "性格『憂鬱』判定+1", description: "憂鬱シナジーを1つ追加" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_personality_calm",
@@ -2022,7 +1961,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "calm_personality", type: "info", label: "性格『冷静』判定+1", description: "冷静シナジーを1つ追加" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_speedy_movement",
@@ -2040,7 +1978,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "speedy_haste", type: "info", label: "攻撃速度増加", description: "2.9/3.7/4.4/5.1/5.8%" }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_firm_conviction",
@@ -2055,7 +1992,6 @@ const CARD_LIBRARY = {
                 { critResP: 3.6, critDmgResP: 2.0 },
                 { critResP: 4.2, critDmgResP: 2.3 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_critical_strike",
@@ -2070,7 +2006,6 @@ const CARD_LIBRARY = {
                 { critRateP: 5.1, critDmgP: 2.7 },
                 { critRateP: 5.9, critDmgP: 3.1 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_hp_training",
@@ -2088,7 +2023,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "hp_training_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+3.9%", "+4.9%", "+5.9%", "+6.8%", "+7.8%"] }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_bulletproof",
@@ -2106,7 +2040,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "bulletproof_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+3.7%", "+4.6%", "+5.5%", "+6.4%", "+7.3%"] }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_health_best",
@@ -2121,7 +2054,6 @@ const CARD_LIBRARY = {
                 { defP: 8.4 },
                 { defP: 9.6 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_afterimage",
@@ -2133,7 +2065,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "afterimage_haste", type: "info", label: "攻撃速度増加", descriptionByStar: ["+3.3%", "+4.1%", "+5.0%", "+5.8%", "+6.6%"] }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_personal_training",
@@ -2151,7 +2082,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "personal_training_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+2.5%", "+3.2%", "+3.8%", "+4.4%", "+5.0%"] }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_you_can_do_it",
@@ -2166,7 +2096,6 @@ const CARD_LIBRARY = {
                 { atkP: 6.6 },
                 { atkP: 7.6 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_apprentice_mage",
@@ -2181,7 +2110,6 @@ const CARD_LIBRARY = {
                 { atkP: 3.3, critDmgP: 1.8 },
                 { atkP: 3.8, critDmgP: 2.0 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_catch_him",
@@ -2213,7 +2141,6 @@ const CARD_LIBRARY = {
                     ]
                 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_random_coin",
@@ -2237,7 +2164,6 @@ const CARD_LIBRARY = {
                     ]
                 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_tree_bark",
@@ -2255,7 +2181,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "tree_bark_heal", type: "info", label: "HP回復量増加", descriptionByStar: ["+0.9%", "+1.2%", "+1.4%", "+1.6%", "+1.8%"] }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_rookie_fighter",
@@ -2270,7 +2195,6 @@ const CARD_LIBRARY = {
                 { atkP: 2.7, critRateP: 2.7 },
                 { atkP: 3.1, critRateP: 3.1 }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_soda_capsule",
@@ -2288,7 +2212,6 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 { id: "soda_capsule_sp", type: "info", label: "味方全体SP回復", descriptionByStar: ["36回復", "46回復", "56回復", "66回復", "76回復"] }
             ],
-            source: "wiki:スペルカード"
         },
         {
             id: "spell_strawberry_capsule",
@@ -2301,7 +2224,6 @@ const CARD_LIBRARY = {
                 { id: "strawberry_capsule_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+1.6%", "+2.0%", "+2.4%", "+2.8%", "+3.2%"] },
                 { id: "strawberry_capsule_heal", type: "info", label: "味方全体HP回復", descriptionByStar: ["15%回復", "16.5%回復", "18%回復", "19.5%回復", "21%回復"] }
             ],
-            source: "wiki:スペルカード"
         }
     ]
 };

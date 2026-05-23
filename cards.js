@@ -1560,6 +1560,7 @@ const CARD_LIBRARY = {
                     id: "epica_signature_party_buff",
                     label: "Lv.1 全員 与ダメージ+15%",
                     shortLabel: "愛用 与ダメ+15%",
+                    nonStacking: true,
                     type: "toggle",
                     bonusesByStar: [
                         { addP: 15.0 },
@@ -1567,6 +1568,13 @@ const CARD_LIBRARY = {
                         { addP: 15.0 },
                         { addP: 15.0 },
                         { addP: 15.0 }
+                    ],
+                    descriptionByStar: [
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない"
                     ]
                 },
                 { id: "epica_grade_up", type: "info", label: "ウェーブ開始時 学年+1", description: "ランダムな味方1人" },
@@ -1575,6 +1583,7 @@ const CARD_LIBRARY = {
                     id: "epica_signature_guard",
                     label: "Lv.1 味方戦闘不能時 全員 被ダメ減少",
                     shortLabel: "味方落ち 被ダメ減",
+                    nonStacking: true,
                     type: "toggle",
                     bonusesByStar: [
                         { takenDmgP: 15.0 },
@@ -1582,6 +1591,13 @@ const CARD_LIBRARY = {
                         { takenDmgP: 15.0 },
                         { takenDmgP: 15.0 },
                         { takenDmgP: 15.0 }
+                    ],
+                    descriptionByStar: [
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない",
+                        "この効果はスタックしない"
                     ]
                 },
                 { id: "epica_signature_lv3", type: "info", label: "Lv.3", description: "ウェーブ開始から15秒間 攻撃速度+50%" }

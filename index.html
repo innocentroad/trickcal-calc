@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trickcal Damage Calculator</title>
-    <link rel="icon" href="ico.webp?v=2.4.0" type="image/webp">
-    <link rel="stylesheet" href="style.css?v=2.4.0">
+    <link rel="icon" href="ico.webp?v=2.5.0" type="image/webp">
+    <link rel="stylesheet" href="style.css?v=2.5.0">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google tag (gtag.js) -->
@@ -91,7 +91,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.4</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.5</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>カード</button>
@@ -376,7 +376,11 @@
                                         <button type="button" id="self-spell-toggle-selected" class="secondary-btn calc-spell-detail-btn">スペル詳細</button>
                                     </div>
                                     <div class="card-summary" id="self-spell-card-summary">スペルカード: なし</div>
-                                    <div class="spell-selected-panel calc-spell-selected-panel" id="self-spell-selected-panel" style="display: none;">
+                                    <div class="spell-selected-panel calc-spell-selected-panel spell-selected-popover" id="self-spell-selected-panel" style="display: none;">
+                                        <div class="spell-panel-title-row">
+                                            <h3>選択中スペル</h3>
+                                            <button type="button" class="spell-selected-close-btn" data-close-spell-selected="calc">閉じる</button>
+                                        </div>
                                         <div id="self-spell-selected-list" class="spell-selected-list"></div>
                                     </div>
                                 </div>
@@ -588,11 +592,6 @@
                                 </div>
                             </div>
                             <div class="spell-header-actions">
-                                <button type="button" id="spell-toggle-selected" class="secondary-btn spell-toggle-btn">選択スペルを表示</button>
-                                <label class="spell-apply-toggle">
-                                    <input type="checkbox" id="spell-apply-toggle" checked>
-                                    <span>計算に反映</span>
-                                </label>
                                 <div class="spell-cost-box card-section-cost-trigger" id="spell-tab-cost-label" role="button" tabindex="0" title="コスト詳細を見る">
                                     <span>合計コスト</span>
                                     <span class="spell-header-cost-inline" id="spell-tab-cost-inline">
@@ -621,12 +620,20 @@
                             </div>
                         </div>
 
+                        <div class="spell-tab-deck-preview-row">
+                            <div id="spell-tab-deck-preview" class="calc-spell-deck-preview"></div>
+                            <button type="button" id="spell-toggle-selected" class="secondary-btn spell-toggle-btn">選択スペル詳細</button>
+                        </div>
+
                         <div class="spell-grid">
-                            <div class="spell-bonus-summary spell-bonus-summary-top" id="spell-bonus-summary">補正合計: なし</div>
-                            <div class="spell-selected-panel spell-selected-panel-top" id="spell-selected-panel" style="display: none;">
+                            <div class="spell-bonus-summary spell-bonus-summary-top" id="spell-bonus-summary">スペルカード補正合計: なし</div>
+                            <div class="spell-selected-panel spell-selected-panel-top spell-selected-popover" id="spell-selected-panel" style="display: none;">
                                 <div class="spell-panel-title-row">
                                     <h3 id="spell-selected-title">選択中スペル</h3>
-                                    <button type="button" id="spell-clear-all" class="secondary-btn">すべて外す</button>
+                                    <div class="spell-selected-title-actions">
+                                        <span id="spell-selected-summary" class="spell-selected-summary">未選択</span>
+                                        <button type="button" class="spell-selected-close-btn" data-close-spell-selected="spell">閉じる</button>
+                                    </div>
                                 </div>
                                 <div id="spell-selected-list" class="spell-selected-list"></div>
                             </div>
@@ -636,13 +643,20 @@
                                     <h3>カード一覧</h3>
                                     <div class="spell-filter-row">
                                         <div class="spell-bulk-grade-row">
-                                            <span class="spell-bulk-grade-label">全カード★</span>
+                                            <span class="spell-bulk-grade-label">全カード変更</span>
                                             <div class="spell-bulk-grade-actions" id="spell-bulk-grade-actions">
-                                                <button type="button" class="spell-bulk-grade-btn" data-star="1">1</button>
-                                                <button type="button" class="spell-bulk-grade-btn" data-star="2">2</button>
-                                                <button type="button" class="spell-bulk-grade-btn" data-star="3">3</button>
-                                                <button type="button" class="spell-bulk-grade-btn" data-star="4">4</button>
-                                                <button type="button" class="spell-bulk-grade-btn" data-star="5">5</button>
+                                                <button type="button" class="grade-star-btn spell-bulk-grade-btn" data-star="1" title="全カード★1"><img src="img/Grade_on.webp" alt="★1" class="grade-star-icon"></button>
+                                                <button type="button" class="grade-star-btn spell-bulk-grade-btn" data-star="2" title="全カード★2"><img src="img/Grade_on.webp" alt="★2" class="grade-star-icon"></button>
+                                                <button type="button" class="grade-star-btn spell-bulk-grade-btn" data-star="3" title="全カード★3"><img src="img/Grade_on.webp" alt="★3" class="grade-star-icon"></button>
+                                                <button type="button" class="grade-star-btn spell-bulk-grade-btn" data-star="4" title="全カード★4"><img src="img/Grade_on.webp" alt="★4" class="grade-star-icon"></button>
+                                                <button type="button" class="grade-star-btn spell-bulk-grade-btn" data-star="5" title="全カード★5"><img src="img/Grade_on.webp" alt="★5" class="grade-star-icon"></button>
+                                            </div>
+                                            <div class="spell-bulk-solder-actions" id="spell-bulk-solder-actions" title="★5以外でははんだ効果は計算に反映されません">
+                                                <button type="button" class="solder-pill-btn spell-bulk-solder-btn" id="spell-bulk-solder-btn" data-level="0" title="全カードはんだ変更">
+                                                    <img src="img/Card/sunshine_token.webp" alt="" class="solder-token-icon">
+                                                    <span class="solder-token-value-fill"><span class="solder-token-plus">+</span><span class="solder-token-number">0</span></span>
+                                                    <span class="solder-token-value"><span class="solder-token-plus">+</span><span class="solder-token-number">0</span></span>
+                                                </button>
                                             </div>
                                         </div>
                                         <select id="spell-rarity-filter" class="preset-select spell-filter-select">
@@ -651,7 +665,22 @@
                                             <option value="希少">希少</option>
                                             <option value="高級">高級</option>
                                         </select>
-                                        <span id="spell-selected-summary" class="spell-selected-summary">未選択</span>
+                                        <select id="spell-effect-filter" class="preset-select spell-filter-select">
+                                            <option value="">全効果</option>
+                                            <option value="attack">攻撃</option>
+                                            <option value="defense">防御</option>
+                                            <option value="hp">HP</option>
+                                            <option value="critRate">会心率</option>
+                                            <option value="critDmg">会心DMG</option>
+                                            <option value="critRes">被会心率</option>
+                                            <option value="critDmgRes">会心被DMG</option>
+                                            <option value="damageUp">与ダメ増</option>
+                                            <option value="damageReduction">被ダメ減</option>
+                                            <option value="speed">攻撃速度</option>
+                                            <option value="healing">HP治癒量</option>
+                                            <option value="hpRecovery">HP回復量</option>
+                                        </select>
+                                        <button type="button" id="spell-clear-all" class="secondary-btn spell-clear-all-btn">すべて外す</button>
                                     </div>
                                 </div>
                                 <div id="spell-library-grid" class="spell-library-grid"></div>
@@ -1155,9 +1184,9 @@
             </div>
         </div>
     </div>
-    <script src="presets.js?v=2.4.0"></script>
-    <script src="cards.js?v=2.4.0"></script>
-    <script src="script.js?v=2.4.0"></script>
+    <script src="presets.js?v=2.5.0"></script>
+    <script src="cards.js?v=2.5.0"></script>
+    <script src="script.js?v=2.5.0"></script>
 </body>
 </html>
 

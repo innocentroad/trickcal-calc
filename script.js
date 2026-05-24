@@ -153,6 +153,7 @@ let activeRelicPickerSlot = null;
 let activeRelicEffectAnchor = null;
 let activeSolderPopoverAnchor = null;
 let activeSolderPopoverContext = null;
+const preloadedCardImages = new Map();
 
 function syncBottomBarSafeArea() {
     const bottomBar = document.querySelector('.bottom-result-bar');
@@ -384,7 +385,7 @@ function collectCardImageUrls() {
     addUrl('img/Card/Card_Unique.webp');
     addUrl('img/Card/Card_Rare.webp');
 
-    if (window.CARD_LIBRARY) {
+    if (typeof CARD_LIBRARY !== 'undefined') {
         ['artifacts', 'spells'].forEach((category) => {
             const collection = CARD_LIBRARY[category];
             if (!Array.isArray(collection)) return;
@@ -400,9 +401,21 @@ function collectCardImageUrls() {
 
 function preloadCardImages() {
     collectCardImageUrls().forEach((src) => {
+        if (preloadedCardImages.has(src)) return;
         const img = new Image();
+        img.decoding = 'async';
         img.src = src;
+        preloadedCardImages.set(src, img);
     });
+    return preloadedCardImages.size;
+}
+
+function scheduleCardImagePreload() {
+    if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(preloadCardImages, { timeout: 1200 });
+    } else {
+        window.setTimeout(preloadCardImages, 250);
+    }
 }
 
 function getCardRarityLabel(card) {
@@ -491,10 +504,11 @@ function createSolderButton(card, currentLevel, onOpen, enabled = true) {
     btn.className = 'solder-pill-btn';
     btn.dataset.level = String(currentLevel);
     btn.classList.toggle('is-disabled', !enabled);
+    const levelText = String(currentLevel);
     btn.innerHTML = `
         <img src="img/Card/sunshine_token.webp" alt="" class="solder-token-icon">
-        <span class="solder-token-value-fill">+${currentLevel}</span>
-        <span class="solder-token-value">+${currentLevel}</span>
+        <span class="solder-token-value-fill"><span class="solder-token-plus">+</span><span class="solder-token-number">${levelText}</span></span>
+        <span class="solder-token-value"><span class="solder-token-plus">+</span><span class="solder-token-number">${levelText}</span></span>
     `;
     btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -545,10 +559,10 @@ function positionSolderPopover(anchorEl) {
     popover.style.top = `${top}px`;
 }
 
-function openSolderPopover(card, currentLevel, onSelect, anchorEl) {
+function openSolderPopover(card, currentLevel, onSelect, anchorEl, options = {}) {
     const popover = ensureSolderPopoverLayer();
     if (!popover || !card || !anchorEl) return;
-    const maxLevel = getCardSolderMaxLevel(card);
+    const maxLevel = options.maxLevel ?? getCardSolderMaxLevel(card);
     popover.innerHTML = '';
     const list = document.createElement('div');
     list.className = 'solder-level-list';
@@ -556,22 +570,24 @@ function openSolderPopover(card, currentLevel, onSelect, anchorEl) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'solder-level-option';
+        btn.dataset.level = String(level);
         const title = document.createElement('span');
         title.className = 'solder-level-option-title';
         title.innerHTML = `
             <span class="solder-level-option-prefix">はんだ</span>
             <span class="solder-level-option-token">
                 <img src="img/Card/sunshine_token.webp" alt="" class="solder-token-icon solder-token-icon-small">
-                <span class="solder-token-value-fill solder-token-value-fill-small">+${level}</span>
-                <span class="solder-token-value solder-token-value-small">+${level}</span>
+                <span class="solder-token-value-fill solder-token-value-fill-small"><span class="solder-token-plus">+</span><span class="solder-token-number">${level}</span></span>
+                <span class="solder-token-value solder-token-value-small"><span class="solder-token-plus">+</span><span class="solder-token-number">${level}</span></span>
             </span>
         `;
-        const bonus = level > 0 ? (card.solderBonuses?.[level] || null) : null;
-        const parts = bonus ? formatCardSummaryParts(bonus) : [];
+        const parts = typeof options.getDescriptionParts === 'function'
+            ? (options.getDescriptionParts(level) || [])
+            : (level > 0 && card.solderBonuses?.[level] ? formatCardSummaryParts(card.solderBonuses[level]) : []);
         const desc = document.createElement('span');
         desc.className = 'solder-level-option-desc';
         desc.textContent = level === 0
-            ? '追加効果なし'
+            ? (options.zeroText || '追加効果なし')
             : (parts.length ? parts.join(' / ') : '追加効果データなし');
         btn.classList.toggle('active', level === currentLevel);
         btn.appendChild(title);
@@ -587,7 +603,7 @@ function openSolderPopover(card, currentLevel, onSelect, anchorEl) {
     popover.appendChild(list);
     popover.style.display = 'block';
     activeSolderPopoverAnchor = anchorEl;
-    activeSolderPopoverContext = { cardId: card.id };
+    activeSolderPopoverContext = options.context || { cardId: card.id };
     positionSolderPopover(anchorEl);
 }
 
@@ -1248,8 +1264,6 @@ function initializeCardUI() {
         btn.dataset.bound = '1';
         btn.addEventListener('click', () => {
             const slot = btn.dataset.slot;
-            const presets = loadArtifactPresets();
-            if (!Array.isArray(presets[slot]) || presets[slot].length === 0) return;
             loadArtifactPreset(slot);
         });
     });
@@ -1259,8 +1273,6 @@ function initializeCardUI() {
         btn.dataset.bound = '1';
         btn.addEventListener('click', () => {
             const slot = btn.dataset.slot;
-            const presets = loadSpellPresets();
-            if (!presets[slot] || typeof presets[slot] !== 'object') return;
             loadSpellPreset(slot);
         });
     });
@@ -1909,7 +1921,7 @@ function setSpellSelectedPanelOpen(open) {
     if (panel) panel.style.display = open ? 'block' : 'none';
     if (toggleBtn) {
         toggleBtn.classList.toggle('active', open);
-        toggleBtn.textContent = open ? '選択スペルを隠す' : '選択スペルを表示';
+        toggleBtn.textContent = open ? '詳細を隠す' : '選択スペル詳細';
     }
     saveSpellSelectionsState();
 }
@@ -1923,6 +1935,22 @@ function setCalcSpellSelectedPanelOpen(open) {
         toggleBtn.classList.toggle('active', open);
         toggleBtn.textContent = open ? '詳細を隠す' : 'スペル詳細';
     }
+}
+
+function closeSpellSelectedPopovers() {
+    if (isSpellSelectedPanelOpen) setSpellSelectedPanelOpen(false);
+    if (isCalcSpellSelectedPanelOpen) setCalcSpellSelectedPanelOpen(false);
+}
+
+function ensureSpellSelectedPopoverLayers() {
+    const appContainer = document.querySelector('.app-container');
+    if (!appContainer) return;
+    ['spell-selected-panel', 'self-spell-selected-panel'].forEach(id => {
+        const panel = document.getElementById(id);
+        if (panel && panel.parentElement !== appContainer) {
+            appContainer.appendChild(panel);
+        }
+    });
 }
 
 function updateSpellSelectedSummary() {
@@ -1956,12 +1984,26 @@ function updateSpellBonusSummary() {
     if (!summaryEl) return;
     const bonus = getSpellBonusesSummary();
     const parts = formatCardSummaryParts(bonus);
+    const applyToggle = `
+        <label class="card-summary-apply-toggle spell-bonus-apply-toggle">
+            <input type="checkbox" id="spell-apply-toggle" ${isSpellApplyEnabled() ? 'checked' : ''}>
+            <span>計算結果に反映</span>
+        </label>
+    `;
+    const summaryHead = `
+        <div class="spell-bonus-head">
+            <span class="spell-bonus-title">スペルカード補正合計</span>
+            ${applyToggle}
+        </div>
+    `;
     if (parts.length === 0) {
-        summaryEl.innerHTML = '<span class="spell-bonus-title">補正合計</span><span class="spell-bonus-empty">なし</span>';
+        summaryEl.innerHTML = `${summaryHead}<span class="spell-bonus-empty">なし</span>`;
+        bindApplyToggles();
         return;
     }
     const chips = parts.map(part => `<span class="spell-bonus-chip">${part}</span>`).join('');
-    summaryEl.innerHTML = `<span class="spell-bonus-title">補正合計</span><div class="spell-bonus-chip-list">${chips}</div>`;
+    summaryEl.innerHTML = `${summaryHead}<div class="spell-bonus-chip-list">${chips}</div>`;
+    bindApplyToggles();
 }
 
 function setSpellQuantity(cardId, nextQty, nextStar = null) {
@@ -1973,6 +2015,7 @@ function setSpellQuantity(cardId, nextQty, nextStar = null) {
     syncSpellLibraryVisual(cardId);
     renderSelectedSpellList();
     updateSpellTotalCost();
+    updateBulkSolderState();
     updateUI();
     saveSpellSelectionsState();
     saveState();
@@ -1985,6 +2028,7 @@ function updateSpellSolder(cardId, nextLevel) {
     renderSpellLibrary();
     renderSelectedSpellList();
     updateSpellTotalCost();
+    updateBulkSolderState();
     updateUI();
     saveSpellSelectionsState();
     saveState();
@@ -2330,6 +2374,7 @@ function updateSpellStar(cardId, star) {
     renderSpellLibrary();
     renderSelectedSpellList();
     updateSpellTotalCost();
+    updateBulkSolderState();
     updateUI();
     saveSpellSelectionsState();
     saveState();
@@ -2345,27 +2390,132 @@ function setAllSpellStars(star) {
     renderSelectedSpellList();
     syncAllSpellLibraryVisuals();
     updateSpellTotalCost();
+    updateBulkSolderState();
     updateUI();
     saveSpellSelectionsState();
     saveState();
 }
 
+function updateBulkSolderState() {
+    const actions = document.getElementById('spell-bulk-solder-actions');
+    const solderBtn = document.getElementById('spell-bulk-solder-btn');
+    const gradeActions = document.getElementById('spell-bulk-grade-actions');
+    const allStarFive = getSpellCards().every(card => (getSpellEntry(card.id).star || 1) === 5);
+    if (actions) actions.classList.toggle('is-muted', !allStarFive);
+    if (solderBtn) {
+        const solderLevels = getSpellCards().map(card => normalizeCardSolderLevel(card, getSpellEntry(card.id).solder || 0));
+        const firstSolder = solderLevels[0] || 0;
+        const sharedSolder = solderLevels.every(level => level === firstSolder) ? firstSolder : 0;
+        solderBtn.dataset.level = String(sharedSolder);
+        solderBtn.title = sharedSolder
+            ? `全カードはんだ+${sharedSolder}`
+            : '全カードはんだ変更';
+        solderBtn.querySelectorAll('.solder-token-number').forEach(el => {
+            el.textContent = String(sharedSolder);
+        });
+        solderBtn.classList.toggle('is-mixed', solderLevels.some(level => level !== firstSolder));
+    }
+    if (gradeActions) {
+        const stars = getSpellCards().map(card => getSpellEntry(card.id).star || 1);
+        const firstStar = stars[0] || 1;
+        const sharedStar = stars.every(star => star === firstStar) ? firstStar : 0;
+        gradeActions.querySelectorAll('.spell-bulk-grade-btn').forEach(btn => {
+            const value = parseInt(btn.dataset.star, 10) || 1;
+            const img = btn.querySelector('.grade-star-icon');
+            if (img) img.src = sharedStar && value <= sharedStar ? 'img/Grade_on.webp' : 'img/Grade_off.webp';
+            btn.classList.toggle('is-mixed', !sharedStar);
+        });
+    }
+}
+
+function setAllSpellSolder(level) {
+    const nextLevel = Math.max(0, Math.min(2, parseInt(level, 10) || 0));
+    getSpellCards().forEach(card => {
+        const entry = getSpellEntry(card.id);
+        entry.solder = normalizeCardSolderLevel(card, nextLevel);
+    });
+    renderSpellLibrary();
+    renderSelectedSpellList();
+    syncAllSpellLibraryVisuals();
+    updateSpellTotalCost();
+    updateBulkSolderState();
+    updateUI();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function openBulkSpellSolderPopover(anchorEl) {
+    const cards = getSpellCards();
+    const levels = cards.map(card => normalizeCardSolderLevel(card, getSpellEntry(card.id).solder || 0));
+    const firstLevel = levels[0] || 0;
+    const currentLevel = levels.every(level => level === firstLevel) ? firstLevel : 0;
+    openSolderPopover(
+        { id: 'spell_bulk_solder', solderMax: 2 },
+        currentLevel,
+        (value) => setAllSpellSolder(value),
+        anchorEl,
+        {
+            maxLevel: 2,
+            zeroText: '全カードのはんだを+0に変更',
+            context: { bulk: 'spell' },
+            getDescriptionParts: (level) => {
+                if (level <= 0) return [];
+                return [`全カードのはんだを+${level}に変更`];
+            }
+        }
+    );
+}
+
 function clearSpellSelections() {
+    if (!confirm('選択中のスペルカードをすべて外しますか？')) return;
     spellSelections = normalizeSpellSelections();
     renderSelectedSpellList();
     renderSpellLibrary();
     updateSpellTotalCost();
+    updateBulkSolderState();
     updateUI();
     saveSpellSelectionsState();
     saveState();
+}
+
+const SPELL_EFFECT_FILTER_KEYS = {
+    attack: ['atkP'],
+    defense: ['defP', 'critResP', 'critDmgResP', 'takenDmgP'],
+    hp: ['hpP'],
+    critRate: ['critRateP'],
+    critDmg: ['critDmgP'],
+    critRes: ['critResP', 'enemyCritResDownP'],
+    critDmgRes: ['critDmgResP', 'enemyCritDmgResDownP'],
+    damageUp: ['addP', 'specialP', 'otherP', 'enemyDefDownP', 'enemyCritResDownP', 'enemyCritDmgResDownP'],
+    damageReduction: ['takenDmgP'],
+    speed: ['hasteP'],
+    healing: ['healingP'],
+    hpRecovery: ['hpRecoveryP']
+};
+
+function cardHasBonusKeys(card, keys = []) {
+    if (!card || keys.length === 0) return false;
+    const hasKeys = (bonus = {}) => keys.some(key => Number(bonus?.[key] || 0) !== 0);
+    if ((card.bonusesByStar || []).some(hasKeys)) return true;
+    if ((card.solderBonuses && Object.values(card.solderBonuses).some(hasKeys))) return true;
+    return (card.conditionalEffects || []).some(effect => (effect.bonusesByStar || []).some(hasKeys));
+}
+
+function cardMatchesSpellEffectFilter(card, filter) {
+    if (!filter) return true;
+    return cardHasBonusKeys(card, SPELL_EFFECT_FILTER_KEYS[filter] || []);
 }
 
 function renderSpellLibrary() {
     const grid = document.getElementById('spell-library-grid');
     const rarityFilter = document.getElementById('spell-rarity-filter')?.value || '';
+    const effectFilter = document.getElementById('spell-effect-filter')?.value || '';
     if (!grid) return;
 
-    const cards = getSpellCards().filter(card => !rarityFilter || card.rarity === rarityFilter);
+    const cards = getSpellCards().filter(card =>
+        (!rarityFilter || card.rarity === rarityFilter) &&
+        cardMatchesSpellEffectFilter(card, effectFilter)
+    );
     grid.innerHTML = '';
 
     cards.forEach(card => {
@@ -2498,6 +2648,9 @@ function renderSelectedSpellListInto(list) {
         qtySub.className = `spell-selected-sub ${getSpellQtyTierClass(entry.qty, card.id)}`;
         qtySub.textContent = `枚数 ${entry.qty}`;
 
+        const selectedGradePicker = createGradePicker(entry.star || 1, (value) => updateSpellStar(cardId, value), card.id);
+        selectedGradePicker.classList.add('spell-selected-grade-picker');
+
         const solderBtn = createSolderButton(
             card,
             getDisplayedSolderLevel(card, entry.star || 1, entry.solder || 0),
@@ -2509,6 +2662,7 @@ function renderSelectedSpellListInto(list) {
         solderBtn.classList.add('spell-selected-solder-btn');
 
         subRow.appendChild(qtySub);
+        subRow.appendChild(selectedGradePicker);
         subRow.appendChild(solderBtn);
         info.appendChild(nameEl);
         info.appendChild(subRow);
@@ -2535,8 +2689,6 @@ function renderSelectedSpellListInto(list) {
 
         const actions = document.createElement('div');
         actions.className = 'spell-selected-actions';
-        const gradeDisplay = createGradeDisplay(entry.star || 1);
-        gradeDisplay.classList.add('grade-picker-overlay', 'grade-picker-small', 'grade-picker-selected-readonly');
 
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
@@ -2548,7 +2700,6 @@ function renderSelectedSpellListInto(list) {
 
         media.appendChild(img);
         media.appendChild(costBadge);
-        media.appendChild(gradeDisplay);
         item.appendChild(media);
         item.appendChild(info);
         item.appendChild(actions);
@@ -2568,10 +2719,16 @@ function renderSelectedSpellList() {
 function initializeSpellTab() {
     ensureEffectPopoverLayer();
     ensureSolderPopoverLayer();
+    ensureSpellSelectedPopoverLayers();
     const filter = document.getElementById('spell-rarity-filter');
     if (filter && !filter.dataset.bound) {
         filter.dataset.bound = '1';
         filter.addEventListener('change', renderSpellLibrary);
+    }
+    const effectFilter = document.getElementById('spell-effect-filter');
+    if (effectFilter && !effectFilter.dataset.bound) {
+        effectFilter.dataset.bound = '1';
+        effectFilter.addEventListener('change', renderSpellLibrary);
     }
 
     const clearBtn = document.getElementById('spell-clear-all');
@@ -2592,6 +2749,18 @@ function initializeSpellTab() {
         calcToggleBtn.addEventListener('click', () => setCalcSpellSelectedPanelOpen(!isCalcSpellSelectedPanelOpen));
     }
 
+    document.querySelectorAll('[data-close-spell-selected]').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', () => {
+            if (btn.dataset.closeSpellSelected === 'calc') {
+                setCalcSpellSelectedPanelOpen(false);
+            } else {
+                setSpellSelectedPanelOpen(false);
+            }
+        });
+    });
+
     const popoverCloseBtn = document.getElementById('spell-effect-popover-close');
     if (popoverCloseBtn && !popoverCloseBtn.dataset.bound) {
         popoverCloseBtn.dataset.bound = '1';
@@ -2608,6 +2777,15 @@ function initializeSpellTab() {
         });
     }
 
+    const bulkSolderActions = document.getElementById('spell-bulk-solder-actions');
+    if (bulkSolderActions && !bulkSolderActions.dataset.bound) {
+        bulkSolderActions.dataset.bound = '1';
+        const bulkSolderBtn = document.getElementById('spell-bulk-solder-btn');
+        if (bulkSolderBtn) {
+            bulkSolderBtn.addEventListener('click', () => openBulkSpellSolderPopover(bulkSolderBtn));
+        }
+    }
+
     loadSpellSelectionsState();
     spellSelections = normalizeSpellSelections(spellSelections);
     isSpellSelectedPanelOpen = false;
@@ -2616,6 +2794,7 @@ function initializeSpellTab() {
     syncAllSpellLibraryVisuals();
     updateSpellTotalCost();
     updateCalcSpellCardSummary();
+    updateBulkSolderState();
     setSpellSelectedPanelOpen(isSpellSelectedPanelOpen);
     setCalcSpellSelectedPanelOpen(isCalcSpellSelectedPanelOpen);
 }
@@ -3888,15 +4067,20 @@ function loadArtifactPresets() {
 }
 
 function renderCalcSpellDeckPreview() {
-    const previewEl = document.getElementById('self-spell-deck-preview');
-    if (!previewEl) return;
-    previewEl.innerHTML = '';
+    const previewEls = [
+        document.getElementById('self-spell-deck-preview'),
+        document.getElementById('spell-tab-deck-preview')
+    ].filter(Boolean);
+    if (previewEls.length === 0) return;
+    previewEls.forEach(previewEl => { previewEl.innerHTML = ''; });
     const selections = Object.entries(spellSelections).filter(([, entry]) => (entry?.qty || 0) > 0);
     if (selections.length === 0) {
-        const empty = document.createElement('span');
-        empty.className = 'calc-spell-deck-empty';
-        empty.textContent = '未選択';
-        previewEl.appendChild(empty);
+        previewEls.forEach(previewEl => {
+            const empty = document.createElement('span');
+            empty.className = 'calc-spell-deck-empty';
+            empty.textContent = '未選択';
+            previewEl.appendChild(empty);
+        });
         return;
     }
     selections.forEach(([cardId, entry]) => {
@@ -3904,16 +4088,18 @@ function renderCalcSpellDeckPreview() {
         if (!card) return;
         const qty = Math.max(0, entry?.qty || 0);
         for (let i = 0; i < qty; i++) {
-            const mini = document.createElement('div');
-            mini.className = 'calc-spell-mini-card';
-            const frameClass = getCardFrameClass(card);
-            if (frameClass) mini.classList.add(frameClass);
-            mini.title = `${card.name} (${i + 1}/${qty})`;
-            const img = document.createElement('img');
-            img.src = getCardImagePath(card);
-            img.alt = card.name;
-            mini.appendChild(img);
-            previewEl.appendChild(mini);
+            previewEls.forEach(previewEl => {
+                const mini = document.createElement('div');
+                mini.className = 'calc-spell-mini-card';
+                const frameClass = getCardFrameClass(card);
+                if (frameClass) mini.classList.add(frameClass);
+                mini.title = `${card.name} (${i + 1}/${qty})`;
+                const img = document.createElement('img');
+                img.src = getCardImagePath(card);
+                img.alt = card.name;
+                mini.appendChild(img);
+                previewEl.appendChild(mini);
+            });
         }
     });
 }
@@ -3966,6 +4152,16 @@ function normalizeArtifactPresetSelection(selection = []) {
     });
 }
 
+function getArtifactPresetCompareKey(selection = []) {
+    const padded = Array.isArray(selection) ? selection.slice(0, 3) : [];
+    while (padded.length < 3) padded.push({});
+    return JSON.stringify(normalizeArtifactPresetSelection(padded));
+}
+
+function hasArtifactSelectionCards(selection = []) {
+    return normalizeArtifactPresetSelection(selection).some(item => !!item.cardId);
+}
+
 function getCurrentArtifactPresetSelection() {
     return normalizeArtifactPresetSelection(collectCardSelections('self').artifacts || []);
 }
@@ -4009,9 +4205,8 @@ function hasArtifactPresetUnsavedChanges(slot = activeArtifactPresetSlotId) {
     if (!key) return false;
     const presets = loadArtifactPresets();
     const saved = presets[key];
-    if (!Array.isArray(saved) || saved.length === 0) return false;
-    const current = JSON.stringify(getCurrentArtifactPresetSelection());
-    return JSON.stringify(normalizeArtifactPresetSelection(saved)) !== current;
+    const savedSelection = Array.isArray(saved) ? saved : [];
+    return getArtifactPresetCompareKey(savedSelection) !== getArtifactPresetCompareKey(getCurrentArtifactPresetSelection());
 }
 
 function hasSpellPresetUnsavedChanges(slot = activeSpellPresetSlotId) {
@@ -4019,27 +4214,26 @@ function hasSpellPresetUnsavedChanges(slot = activeSpellPresetSlotId) {
     if (!key) return false;
     const presets = loadSpellPresets();
     const saved = presets[key];
-    if (!saved || typeof saved !== 'object') return false;
+    const savedSelection = saved && typeof saved === 'object' ? saved : {};
     const current = JSON.stringify(getCurrentSpellPresetSelection());
-    return JSON.stringify(normalizeSpellPresetSelection(saved)) !== current;
+    return JSON.stringify(normalizeSpellPresetSelection(savedSelection)) !== current;
 }
 
 function getMatchingArtifactPresetSlot(preferredSlot = '') {
     const presets = loadArtifactPresets();
-    const current = JSON.stringify(getCurrentArtifactPresetSelection());
+    const current = getArtifactPresetCompareKey(getCurrentArtifactPresetSelection());
     const preferredKey = preferredSlot ? String(preferredSlot) : '';
     if (preferredKey) {
         const preferredSaved = presets[preferredKey];
-        if (Array.isArray(preferredSaved) && preferredSaved.length > 0) {
-            if (JSON.stringify(normalizeArtifactPresetSelection(preferredSaved)) === current) {
-                return preferredKey;
-            }
+        const preferredSelection = Array.isArray(preferredSaved) ? preferredSaved : [];
+        if (getArtifactPresetCompareKey(preferredSelection) === current) {
+            return preferredKey;
         }
     }
     for (let slot = 1; slot <= ARTIFACT_PRESET_SLOT_COUNT; slot++) {
         const saved = presets[String(slot)];
-        if (!Array.isArray(saved) || saved.length === 0) continue;
-        if (JSON.stringify(normalizeArtifactPresetSelection(saved)) === current) {
+        const selection = Array.isArray(saved) ? saved : [];
+        if (getArtifactPresetCompareKey(selection) === current) {
             return String(slot);
         }
     }
@@ -4052,53 +4246,97 @@ function getMatchingSpellPresetSlot(preferredSlot = '') {
     const preferredKey = preferredSlot ? String(preferredSlot) : '';
     if (preferredKey) {
         const preferredSaved = presets[preferredKey];
-        if (preferredSaved && typeof preferredSaved === 'object') {
-            if (JSON.stringify(normalizeSpellPresetSelection(preferredSaved)) === current) {
-                return preferredKey;
-            }
+        const preferredSelection = preferredSaved && typeof preferredSaved === 'object' ? preferredSaved : {};
+        if (JSON.stringify(normalizeSpellPresetSelection(preferredSelection)) === current) {
+            return preferredKey;
         }
     }
     for (let slot = 1; slot <= 7; slot++) {
         const saved = presets[String(slot)];
-        if (!saved || typeof saved !== 'object') continue;
-        if (JSON.stringify(normalizeSpellPresetSelection(saved)) === current) {
+        const selection = saved && typeof saved === 'object' ? saved : {};
+        if (JSON.stringify(normalizeSpellPresetSelection(selection)) === current) {
             return String(slot);
         }
     }
     return '';
 }
 
+function renderArtifactPresetLoadButtonContent(btn, slot, savedSelection = []) {
+    if (!btn) return;
+    btn.textContent = '';
+    const normalized = normalizeArtifactPresetSelection(savedSelection);
+
+    const numberEl = document.createElement('span');
+    numberEl.className = 'artifact-preset-number';
+    numberEl.textContent = String(slot);
+    btn.appendChild(numberEl);
+
+    const previewEl = document.createElement('span');
+    previewEl.className = 'artifact-preset-preview';
+
+    for (let index = 0; index < 3; index++) {
+        const item = normalized[index] || null;
+        const card = item?.cardId ? CARD_INDEX[item.cardId] : null;
+        const orb = document.createElement('span');
+        orb.className = 'artifact-preset-orb';
+        if (card) {
+            const frameClass = getCardFrameClass(card);
+            if (frameClass) orb.classList.add(frameClass);
+            orb.title = card.name;
+            const bgPath = getCardRarityBadgePath(card);
+            if (bgPath) {
+                const bg = document.createElement('img');
+                bg.className = 'artifact-preset-orb-bg';
+                bg.src = bgPath;
+                bg.alt = '';
+                orb.appendChild(bg);
+            }
+            const img = document.createElement('img');
+            img.className = 'artifact-preset-orb-img';
+            img.src = getCardImagePath(card);
+            img.alt = card.name;
+            orb.appendChild(img);
+        } else {
+            orb.classList.add('is-empty');
+            orb.setAttribute('aria-label', '未装備');
+        }
+        previewEl.appendChild(orb);
+    }
+
+    btn.appendChild(previewEl);
+}
+
 function renderArtifactPresetButtons() {
     const presets = loadArtifactPresets();
     let activeSlot = '';
     if (activeArtifactPresetSlotId) {
-        const saved = presets[String(activeArtifactPresetSlotId)];
-        if (Array.isArray(saved) && saved.length > 0) {
-            activeSlot = String(activeArtifactPresetSlotId);
-        }
+        activeSlot = String(activeArtifactPresetSlotId);
     }
     if (!activeSlot) {
         activeSlot = getMatchingArtifactPresetSlot('');
-        activeArtifactPresetSlotId = activeSlot;
+        activeArtifactPresetSlotId = activeSlot || '1';
+        activeSlot = activeArtifactPresetSlotId;
     }
     const isDirty = hasArtifactPresetUnsavedChanges(activeSlot);
     document.querySelectorAll('.artifact-preset-load').forEach(btn => {
         const slot = btn.dataset.slot;
-        const hasPreset = Array.isArray(presets[slot]) && presets[slot].length > 0;
-        const cost = hasPreset ? getArtifactPresetSelectionCost(presets[slot]) : 0;
-        btn.classList.toggle('is-filled', hasPreset);
-        btn.classList.toggle('is-empty', !hasPreset);
+        const saved = Array.isArray(presets[slot]) ? presets[slot] : [];
+        const hasCards = hasArtifactSelectionCards(saved);
+        const cost = getArtifactPresetSelectionCost(saved);
+        renderArtifactPresetLoadButtonContent(btn, slot, saved);
+        btn.classList.toggle('is-filled', hasCards);
+        btn.classList.toggle('is-empty', !hasCards);
         btn.classList.toggle('is-active', activeSlot === slot);
         btn.classList.toggle('is-dirty', isDirty && activeSlot === slot);
-        btn.title = hasPreset
+        btn.title = hasCards
             ? (isDirty && activeSlot === slot ? `遺物プリセット${slot}を編集中（未保存の変更あり / 合計コスト ${cost}）` : `遺物プリセット${slot}を読み込む（合計コスト ${cost}）`)
-            : `遺物プリセット${slot}は未保存`;
+            : `遺物プリセット${slot}を読み込む（空 / 合計コスト 0）`;
     });
     document.querySelectorAll('.artifact-preset-delete').forEach(btn => {
         const slot = btn.dataset.slot;
-        const hasPreset = Array.isArray(presets[slot]) && presets[slot].length > 0;
-        btn.classList.toggle('is-empty', !hasPreset);
-        btn.title = hasPreset ? `プリセット${slot}を削除` : `プリセット${slot}は未保存`;
+        const hasCards = hasArtifactSelectionCards(Array.isArray(presets[slot]) ? presets[slot] : []);
+        btn.classList.toggle('is-empty', !hasCards);
+        btn.title = hasCards ? `プリセット${slot}を空にする` : `プリセット${slot}は空です`;
     });
     const costsEl = document.getElementById('self-artifact-preset-costs');
     if (costsEl) {
@@ -4106,13 +4344,14 @@ function renderArtifactPresetButtons() {
         for (let slot = 1; slot <= ARTIFACT_PRESET_SLOT_COUNT; slot++) {
             const key = String(slot);
             const saved = presets[key];
-            const hasPreset = Array.isArray(saved) && saved.length > 0;
+            const selection = Array.isArray(saved) ? saved : [];
+            const hasCards = hasArtifactSelectionCards(selection);
             const chip = document.createElement('div');
             chip.className = 'artifact-preset-cost-chip';
-            chip.classList.toggle('is-empty', !hasPreset);
+            chip.classList.toggle('is-empty', !hasCards);
             chip.classList.toggle('is-active', activeSlot === key);
             chip.classList.toggle('is-dirty', isDirty && activeSlot === key);
-            const costText = hasPreset ? String(getArtifactPresetSelectionCost(saved)) : '—';
+            const costText = String(getArtifactPresetSelectionCost(selection));
             chip.innerHTML = `<span class="artifact-preset-cost-slot">${key}</span><span class="artifact-preset-cost-label">コスト</span><span>${costText}</span>`;
             costsEl.appendChild(chip);
         }
@@ -4128,29 +4367,32 @@ function renderSpellPresetButtons() {
     const presets = loadSpellPresets();
     let activeSlot = '';
     if (activeSpellPresetSlotId) {
-        const saved = presets[String(activeSpellPresetSlotId)];
-        if (saved && typeof saved === 'object') {
-            activeSlot = String(activeSpellPresetSlotId);
-        }
+        activeSlot = String(activeSpellPresetSlotId);
     }
     if (!activeSlot) {
         activeSlot = getMatchingSpellPresetSlot('');
-        activeSpellPresetSlotId = activeSlot;
+        activeSpellPresetSlotId = activeSlot || '1';
+        activeSlot = activeSpellPresetSlotId;
     }
     const isDirty = hasSpellPresetUnsavedChanges(activeSlot);
     document.querySelectorAll('.spell-preset-load').forEach(btn => {
         const slot = btn.dataset.slot;
         const saved = presets[slot];
-        const hasPreset = !!saved && typeof saved === 'object';
-        btn.classList.toggle('is-filled', hasPreset);
-        btn.classList.toggle('is-empty', !hasPreset);
+        const selection = saved && typeof saved === 'object' ? normalizeSpellPresetSelection(saved) : {};
+        const hasCards = Object.values(selection).some(entry => (entry?.qty || 0) > 0);
+        btn.classList.toggle('is-filled', hasCards);
+        btn.classList.toggle('is-empty', !hasCards);
         btn.classList.toggle('is-active', activeSlot === slot);
         btn.classList.toggle('is-dirty', isDirty && activeSlot === slot);
-        btn.title = hasPreset
+        btn.title = hasCards
             ? (isDirty && activeSlot === slot ? `スペルプリセット${slot}を編集中（未保存の変更あり）` : `スペルプリセット${slot}を読み込む`)
-            : `スペルプリセット${slot}は未保存`;
+            : `スペルプリセット${slot}を読み込む（空）`;
     });
-    const hasAnyPreset = Array.from({ length: 7 }, (_, index) => presets[String(index + 1)]).some(saved => !!saved && typeof saved === 'object');
+    const hasAnyPreset = Array.from({ length: 7 }, (_, index) => {
+        const saved = presets[String(index + 1)];
+        const selection = saved && typeof saved === 'object' ? normalizeSpellPresetSelection(saved) : {};
+        return Object.values(selection).some(entry => (entry?.qty || 0) > 0);
+    }).some(Boolean);
     [
         document.getElementById('spell-preset-delete-trigger'),
         document.getElementById('self-spell-preset-delete-trigger')
@@ -4179,17 +4421,115 @@ function saveSpellPreset(slot) {
     saveState();
 }
 
-function loadArtifactPreset(slot) {
-    const key = String(slot);
-    const presets = loadArtifactPresets();
-    const selection = Array.isArray(presets[key]) ? presets[key] : null;
-    if (!selection || selection.length === 0) return;
-    const switchingToAnotherPreset = !!activeArtifactPresetSlotId && activeArtifactPresetSlotId !== key;
-    if (switchingToAnotherPreset && hasArtifactPresetUnsavedChanges(activeArtifactPresetSlotId)) {
-        if (!confirm(`プリセット${activeArtifactPresetSlotId}の未保存の変更が失われます。プリセット${key}を読み込みますか？`)) {
+function ensurePresetConflictDialog() {
+    let dialog = document.getElementById('preset-conflict-dialog');
+    if (dialog) return dialog;
+    dialog = document.createElement('div');
+    dialog.id = 'preset-conflict-dialog';
+    dialog.className = 'preset-conflict-dialog';
+    dialog.style.display = 'none';
+    document.querySelector('.app-container')?.appendChild(dialog);
+    return dialog;
+}
+
+function openPresetConflictDialog(kindLabel, currentSlot, targetSlot) {
+    return new Promise(resolve => {
+        const dialog = ensurePresetConflictDialog();
+        if (!dialog) {
+            resolve(null);
             return;
         }
+        dialog.innerHTML = '';
+
+        const panel = document.createElement('div');
+        panel.className = 'preset-conflict-panel';
+
+        const title = document.createElement('div');
+        title.className = 'preset-conflict-title';
+        title.textContent = `${kindLabel}プリセット${currentSlot}に未保存の変更があります`;
+
+        const message = document.createElement('div');
+        message.className = 'preset-conflict-message';
+        message.textContent = `プリセット${targetSlot}を選択する前に、変更の扱いを選んでください。`;
+
+        const actions = document.createElement('div');
+        actions.className = 'preset-conflict-actions';
+
+        const sameSlot = String(currentSlot) === String(targetSlot);
+        const choices = sameSlot
+            ? [
+                { value: 'discard', label: '変更を破棄', className: 'danger' },
+                { value: 'save-current', label: '変更を保存', className: 'primary' },
+                { value: null, label: 'キャンセル', className: 'ghost' }
+            ]
+            : [
+                { value: 'discard', label: `変更を破棄してプリセット${targetSlot}に切り替え`, className: 'danger' },
+                { value: 'save-current', label: `プリセット${currentSlot}に保存してプリセット${targetSlot}に切り替え`, className: 'primary' },
+                { value: 'save-target', label: `プリセット${targetSlot}に変更を保存`, className: 'accent' },
+                { value: null, label: 'キャンセル', className: 'ghost' }
+            ];
+
+        const close = (value) => {
+            dialog.style.display = 'none';
+            dialog.innerHTML = '';
+            resolve(value);
+        };
+
+        choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `preset-conflict-btn ${choice.className}`;
+            btn.textContent = choice.label;
+            btn.addEventListener('click', () => close(choice.value));
+            actions.appendChild(btn);
+        });
+
+        panel.appendChild(title);
+        panel.appendChild(message);
+        panel.appendChild(actions);
+        dialog.appendChild(panel);
+        dialog.style.display = 'flex';
+    });
+}
+
+async function resolveArtifactPresetUnsavedAction(targetSlot) {
+    const currentSlot = activeArtifactPresetSlotId ? String(activeArtifactPresetSlotId) : '';
+    if (!currentSlot || !hasArtifactPresetUnsavedChanges(currentSlot)) return true;
+    const action = await openPresetConflictDialog('遺物', currentSlot, targetSlot);
+    if (action === 'discard') return true;
+    if (action === 'save-current') {
+        saveArtifactPreset(currentSlot);
+        return true;
     }
+    if (action === 'save-target') {
+        saveArtifactPreset(targetSlot);
+        return false;
+    }
+    return false;
+}
+
+async function resolveSpellPresetUnsavedAction(targetSlot) {
+    const currentSlot = activeSpellPresetSlotId ? String(activeSpellPresetSlotId) : '';
+    if (!currentSlot || !hasSpellPresetUnsavedChanges(currentSlot)) return true;
+    const action = await openPresetConflictDialog('スペル', currentSlot, targetSlot);
+    if (action === 'discard') return true;
+    if (action === 'save-current') {
+        saveSpellPreset(currentSlot);
+        return true;
+    }
+    if (action === 'save-target') {
+        saveSpellPreset(targetSlot);
+        return false;
+    }
+    return false;
+}
+
+async function loadArtifactPreset(slot) {
+    const key = String(slot);
+    const presets = loadArtifactPresets();
+    if (!(await resolveArtifactPresetUnsavedAction(key))) return;
+    const nextPresets = loadArtifactPresets();
+    const selection = Array.isArray(nextPresets[key]) ? nextPresets[key] : [];
     activeArtifactPresetSlotId = key;
     restoreCardSelections('self', { artifacts: selection });
     updateUI();
@@ -4197,17 +4537,12 @@ function loadArtifactPreset(slot) {
     saveState();
 }
 
-function loadSpellPreset(slot) {
+async function loadSpellPreset(slot) {
     const key = String(slot);
     const presets = loadSpellPresets();
-    const selection = presets[key];
-    if (!selection || typeof selection !== 'object') return;
-    const switchingToAnotherPreset = !!activeSpellPresetSlotId && activeSpellPresetSlotId !== key;
-    if (switchingToAnotherPreset && hasSpellPresetUnsavedChanges(activeSpellPresetSlotId)) {
-        if (!confirm(`プリセット${activeSpellPresetSlotId}の未保存の変更が失われます。プリセット${key}を読み込みますか？`)) {
-            return;
-        }
-    }
+    if (!(await resolveSpellPresetUnsavedAction(key))) return;
+    const nextPresets = loadSpellPresets();
+    const selection = nextPresets[key] && typeof nextPresets[key] === 'object' ? nextPresets[key] : {};
     activeSpellPresetSlotId = key;
     spellSelections = normalizeSpellPresetSelection(selection);
     renderSpellLibrary();
@@ -4223,21 +4558,29 @@ function loadSpellPreset(slot) {
 function deleteArtifactPreset(slot) {
     const key = String(slot);
     const presets = loadArtifactPresets();
-    if (!Array.isArray(presets[key]) || presets[key].length === 0) return;
-    delete presets[key];
+    presets[key] = [];
     saveArtifactPresets(presets);
-    if (activeArtifactPresetSlotId === key) activeArtifactPresetSlotId = '';
+    if (activeArtifactPresetSlotId === key) {
+        restoreCardSelections('self', { artifacts: [] });
+        updateUI();
+    }
     renderArtifactPresetButtons();
+    saveState();
 }
 
 function deleteSpellPreset(slot) {
     const key = String(slot);
     const presets = loadSpellPresets();
-    const saved = presets[key];
-    if (!saved || typeof saved !== 'object') return;
-    delete presets[key];
+    presets[key] = {};
     saveSpellPresets(presets);
-    if (activeSpellPresetSlotId === key) activeSpellPresetSlotId = '';
+    if (activeSpellPresetSlotId === key) {
+        spellSelections = normalizeSpellPresetSelection({});
+        renderSpellLibrary();
+        renderSelectedSpellList();
+        syncAllSpellLibraryVisuals();
+        updateSpellTotalCost();
+        updateUI();
+    }
     renderSpellPresetButtons();
     saveSpellSelectionsState();
     saveState();
@@ -4385,25 +4728,25 @@ function openArtifactPresetPopover(mode, anchorEl) {
     grid.className = 'artifact-preset-popover-grid';
     for (let slot = 1; slot <= ARTIFACT_PRESET_SLOT_COUNT; slot++) {
         const key = String(slot);
-        const hasPreset = Array.isArray(presets[key]) && presets[key].length > 0;
+        const hasCards = hasArtifactSelectionCards(Array.isArray(presets[key]) ? presets[key] : []);
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'artifact-preset-popover-btn';
         btn.textContent = key;
         btn.classList.toggle('is-current', currentSlot === key);
         btn.classList.toggle('is-dirty', currentDirty && currentSlot === key);
-        if (!hasPreset && mode === 'delete') btn.classList.add('is-empty');
+        if (!hasCards && mode === 'delete') btn.classList.add('is-empty');
         btn.title = mode === 'save'
             ? `プリセット${key}へ保存`
-            : (hasPreset ? `プリセット${key}を削除` : `プリセット${key}は未保存`);
+            : (hasCards ? `プリセット${key}を空にする` : `プリセット${key}は空です`);
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             if (mode === 'save') {
                 saveArtifactPreset(key);
             } else {
-                if (!hasPreset) return;
-                if (!confirm(`遺物プリセット${key}を削除しますか？`)) return;
+                if (!hasCards) return;
+                if (!confirm(`遺物プリセット${key}を空にしますか？`)) return;
                 deleteArtifactPreset(key);
             }
             closeArtifactPresetPopover();
@@ -4459,15 +4802,18 @@ function openArtifactCostPopover(anchorEl) {
         const saved = isSpellCostView ? spellPresets[key] : presets[key];
         const hasPreset = isSpellCostView
             ? !!saved && typeof saved === 'object'
-            : Array.isArray(saved) && saved.length > 0;
+            : Array.isArray(saved);
+        const hasCards = isSpellCostView
+            ? Object.values(normalizeSpellPresetSelection(hasPreset ? saved : {})).some(entry => (entry?.qty || 0) > 0)
+            : hasArtifactSelectionCards(Array.isArray(saved) ? saved : []);
         const item = document.createElement('div');
         item.className = 'artifact-cost-item';
-        item.classList.toggle('is-empty', !hasPreset);
+        item.classList.toggle('is-empty', !hasCards);
         item.classList.toggle('is-current', (isSpellCostView ? activeSpellPresetSlotId : currentSlot) === key);
         item.classList.toggle('is-dirty', !isSpellCostView && currentDirty && currentSlot === key);
         const costText = hasPreset
             ? String(isSpellCostView ? getSpellPresetSelectionCost(saved) : getArtifactPresetSelectionCost(saved))
-            : '—';
+            : '0';
         item.innerHTML = `<span class="artifact-cost-slot">${key}</span><span class="artifact-cost-value">${costText}</span>`;
         list.appendChild(item);
     }
@@ -4494,25 +4840,26 @@ function openSpellPresetPopover(mode, anchorEl) {
     grid.className = 'spell-preset-popover-grid';
     for (let slot = 1; slot <= 7; slot++) {
         const key = String(slot);
-        const hasPreset = !!presets[key] && typeof presets[key] === 'object';
+        const saved = presets[key] && typeof presets[key] === 'object' ? normalizeSpellPresetSelection(presets[key]) : {};
+        const hasCards = Object.values(saved).some(entry => (entry?.qty || 0) > 0);
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'spell-preset-popover-btn';
         btn.textContent = key;
         btn.classList.toggle('is-current', currentSlot === key);
         btn.classList.toggle('is-dirty', currentDirty && currentSlot === key);
-        if (!hasPreset && mode === 'delete') btn.classList.add('is-empty');
+        if (!hasCards && mode === 'delete') btn.classList.add('is-empty');
         btn.title = mode === 'save'
             ? `プリセット${key}へ保存`
-            : (hasPreset ? `プリセット${key}を削除` : `プリセット${key}は未保存`);
+            : (hasCards ? `プリセット${key}を空にする` : `プリセット${key}は空です`);
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             if (mode === 'save') {
                 saveSpellPreset(key);
             } else {
-                if (!hasPreset) return;
-                if (!confirm(`スペルプリセット${key}を削除しますか？`)) return;
+                if (!hasCards) return;
+                if (!confirm(`スペルプリセット${key}を空にしますか？`)) return;
                 deleteSpellPreset(key);
             }
             closeSpellPresetPopover();
@@ -4850,8 +5197,8 @@ renderArtifactPresetButtons();
 syncBottomBarSafeArea();
 requestAnimationFrame(syncDeleteButtonVisibility);
 requestAnimationFrame(syncBottomBarSafeArea);
+scheduleCardImagePreload();
 
-window.addEventListener('load', preloadCardImages);
 window.addEventListener('beforeunload', saveState);
 window.addEventListener('pagehide', saveState);
 window.addEventListener('resize', syncRelicPickerSafeArea);
@@ -4899,6 +5246,24 @@ document.addEventListener('click', (e) => {
     if (!popover || popover.style.display === 'none') return;
     if (popover.contains(e.target) || e.target.closest('.solder-pill-btn')) return;
     closeSolderPopover();
+});
+
+document.addEventListener('click', (e) => {
+    if (!isSpellSelectedPanelOpen && !isCalcSpellSelectedPanelOpen) return;
+    if (
+        e.target.closest('.spell-selected-popover') ||
+        e.target.closest('#spell-toggle-selected') ||
+        e.target.closest('#self-spell-toggle-selected') ||
+        e.target.closest('#solder-level-popover') ||
+        e.target.closest('#spell-effect-popover')
+    ) {
+        return;
+    }
+    closeSpellSelectedPopovers();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSpellSelectedPopovers();
 });
 
 // Keep toggle circle outside .panel so position:fixed works consistently,

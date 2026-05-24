@@ -195,23 +195,28 @@ header h1 {
 .header-tabs {
     margin-bottom: 0;
     background: rgba(0, 0, 0, 0.3);
-    min-width: 280px;
+    min-width: 360px;
 }
 
 .tab-btn {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.6rem;
     border: none;
     background: transparent;
     color: var(--text-muted);
     cursor: pointer;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.86rem;
     font-weight: 600;
     transition: all 0.2s;
     font-family: 'Outfit', sans-serif;
     white-space: nowrap;
     line-height: 1.2;
+    text-align: center;
 }
 
 .tab-btn:hover {
@@ -995,11 +1000,22 @@ select {
     margin-bottom: 0;
 }
 .multipliers-grid .input-group label {
-    display: block;
-    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.08rem;
+    width: 80px;
     margin-bottom: 0.3rem;
     font-size: 0.75rem;
     white-space: nowrap;
+}
+
+.stat-label-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    object-fit: contain;
+    flex: 0 0 auto;
+    transform: translateX(-3px);
 }
 .multipliers-grid .input-group input, 
 .multipliers-grid .input-group select {
@@ -1009,6 +1025,92 @@ select {
     font-size: 0.85rem;
     text-align: center;
     width: 80px;
+}
+
+.stat-input-attack label {
+    color: #fca5a5;
+}
+
+.stat-input-defense label {
+    color: #93c5fd;
+}
+
+.stat-input-attack input {
+    border-color: rgba(248, 113, 113, 0.22);
+    background: rgba(127, 29, 29, 0.14);
+}
+
+.stat-input-defense input {
+    border-color: rgba(96, 165, 250, 0.22);
+    background: rgba(30, 64, 175, 0.13);
+}
+
+.stat-input-attack input:focus {
+    border-color: rgba(248, 113, 113, 0.48);
+}
+
+.stat-input-defense input:focus {
+    border-color: rgba(96, 165, 250, 0.48);
+}
+
+.stat-input-skill label {
+    color: #fcd34d;
+}
+
+.stat-input-damage label {
+    color: #c4b5fd;
+}
+
+.stat-input-type label {
+    color: #86efac;
+}
+
+.stat-input-enemy label {
+    color: #f9a8d4;
+}
+
+.stat-input-skill input,
+.stat-input-skill select {
+    border-color: rgba(250, 204, 21, 0.24);
+    background: rgba(113, 63, 18, 0.14);
+}
+
+.stat-input-damage input,
+.stat-input-damage select {
+    border-color: rgba(167, 139, 250, 0.24);
+    background: rgba(88, 28, 135, 0.14);
+}
+
+.stat-input-type input,
+.stat-input-type select {
+    border-color: rgba(74, 222, 128, 0.24);
+    background: rgba(20, 83, 45, 0.13);
+}
+
+.stat-input-enemy input,
+.stat-input-enemy select {
+    border-color: rgba(244, 114, 182, 0.26);
+    background: rgba(131, 24, 67, 0.14);
+}
+
+.stat-input-skill input:focus,
+.stat-input-skill select:focus {
+    border-color: rgba(250, 204, 21, 0.5);
+}
+
+.stat-input-damage input:focus,
+.stat-input-damage select:focus {
+    border-color: rgba(167, 139, 250, 0.5);
+}
+
+.stat-input-type input:focus,
+.stat-input-type select:focus {
+    border-color: rgba(74, 222, 128, 0.5);
+}
+
+.stat-input-enemy input:focus,
+.stat-input-enemy select:focus {
+    border-color: rgba(244, 114, 182, 0.52);
 }
 
 .results-grid {
@@ -1190,28 +1292,36 @@ select option {
     color: #ffffff !important;
 }
 
-.skill-icon-btn { 
-    display: inline-block; 
-    width: 2.5rem !important; /* 横幅を固定して、スキル名で広がらないようにする */
-    padding: 0 !important; 
-    margin-left: 4px; 
-    background: rgba(255, 255, 255, 0.05) !important; 
-    border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-    border-radius: 2px; 
-    color: var(--text-muted) !important; 
-    font-size: 0.6rem !important; 
-    cursor: pointer; 
-    vertical-align: middle; 
-    transition: all 0.2s; 
-    height: 0.9rem !important;
-    line-height: 0.8rem !important;
+.skill-icon-btn {
+    display: inline-block;
+    width: 2.75rem !important; /* 横幅を固定して、スキル名で広がらないようにする */
+    padding: 0 0.34rem !important;
+    margin-left: 5px;
+    background:
+        linear-gradient(135deg, rgba(250, 204, 21, 0.22), rgba(217, 119, 6, 0.12)) !important;
+    border: 1px solid rgba(250, 204, 21, 0.42) !important;
+    border-radius: 999px;
+    color: #fef3c7 !important;
+    font-size: 0.58rem !important;
+    font-weight: 850;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    height: 0.98rem !important;
+    line-height: 0.88rem !important;
     text-align: center;
+    transform: translateY(-1px);
     appearance: none; /* OS標準の見た目を消す */
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 8px rgba(113, 63, 18, 0.16);
 }
-.skill-icon-btn:hover { 
-    background: rgba(99, 102, 241, 0.2) !important; 
-    color: var(--text-main) !important;
-    border-color: rgba(99, 102, 241, 0.4) !important;
+.skill-icon-btn::after {
+    content: '';
+}
+.skill-icon-btn:hover {
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.32), rgba(217, 119, 6, 0.18)) !important;
+    color: #fff7ed !important;
+    border-color: rgba(250, 204, 21, 0.62) !important;
+    transform: translateY(-2px);
 }
 
 /* --- Perspective Toggle Circle (between panels) --- */
@@ -1352,7 +1462,32 @@ select option {
 
 @media (max-width: 550px) {
     .multipliers-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.45rem;
+    }
+    .multipliers-grid .input-group label {
+        width: 100%;
+        font-size: 0.68rem;
+        white-space: normal;
+        line-height: 1.15;
+        min-height: 1.55rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: left;
+    }
+    .multipliers-grid .input-group input,
+    .multipliers-grid .input-group select {
+        width: 100%;
+        min-width: 0;
+        font-size: 0.78rem;
+        padding: 0 0.12rem;
+    }
+}
+
+@media (max-width: 340px) {
+    .multipliers-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -1402,6 +1537,25 @@ select option {
     .perspective-toggle-circle:active {
         transform: scale(0.93);
     }
+    .disabled-section,
+    #perspective-self:checked ~ .side-panels .self-def-adds-section,
+    #perspective-self:checked ~ .side-panels .enemy-mult-section,
+    #perspective-self:checked ~ .side-panels .enemy-atk-adds-section,
+    #perspective-self:checked ~ .side-panels .enemy-debuff-section,
+    #perspective-enemy:checked ~ .side-panels .self-mult-section,
+    #perspective-enemy:checked ~ .side-panels .self-atk-adds-section,
+    #perspective-enemy:checked ~ .side-panels .self-debuff-section,
+    #perspective-enemy:checked ~ .side-panels .enemy-def-adds-section,
+    html[data-initial-perspective="self"] .self-def-adds-section,
+    html[data-initial-perspective="self"] .enemy-mult-section,
+    html[data-initial-perspective="self"] .enemy-atk-adds-section,
+    html[data-initial-perspective="self"] .enemy-debuff-section,
+    html[data-initial-perspective="enemy"] .self-mult-section,
+    html[data-initial-perspective="enemy"] .self-atk-adds-section,
+    html[data-initial-perspective="enemy"] .self-debuff-section,
+    html[data-initial-perspective="enemy"] .enemy-def-adds-section {
+        display: none;
+    }
 }
 
 
@@ -1434,6 +1588,63 @@ select option {
     margin-bottom: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+.collapsible-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.collapsible-section-header:hover {
+    color: var(--text-main);
+}
+
+.section-collapse-btn {
+    flex: 0 0 auto;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(148, 163, 184, 0.08);
+    color: rgba(226, 232, 240, 0.84);
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.is-collapsed-section {
+    padding-top: 0.68rem;
+    padding-bottom: 0.68rem;
+}
+
+.is-collapsed-section .collapsible-section-body {
+    display: none !important;
+}
+
+.collapsible-section-body.is-collapsed-body {
+    display: none !important;
+}
+
+.collapsible-section-header.is-collapsed-header {
+    margin-bottom: 0;
+}
+
+.is-collapsed-section > .stat-cat-header,
+.is-collapsed-section .card-section-header {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.is-collapsed-section .card-section-header-meta {
+    display: none;
 }
 
 .stat-row {
@@ -1870,10 +2081,13 @@ select option {
 }
 
 .artifact-preset-load.is-active.is-empty:not(.is-dirty) {
-    border-color: rgba(148, 163, 184, 0.22);
-    background: rgba(148, 163, 184, 0.08);
-    color: #e2e8f0;
-    box-shadow: none;
+    opacity: 0.9;
+    border-color: rgba(236, 72, 153, 0.46);
+    background: linear-gradient(180deg, rgba(236, 72, 153, 0.12), rgba(148, 163, 184, 0.08));
+    color: #fce7f3;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 0 0 1px rgba(236, 72, 153, 0.08);
 }
 
 .artifact-preset-icon-btn {
@@ -2198,10 +2412,13 @@ select option {
 }
 
 .spell-preset-load.is-active.is-empty:not(.is-dirty) {
-    border-color: rgba(148, 163, 184, 0.22);
-    background: rgba(148, 163, 184, 0.08);
-    color: #e2e8f0;
-    box-shadow: none;
+    opacity: 0.9;
+    border-color: rgba(236, 72, 153, 0.46);
+    background: linear-gradient(180deg, rgba(236, 72, 153, 0.12), rgba(148, 163, 184, 0.08));
+    color: #fce7f3;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 0 0 1px rgba(236, 72, 153, 0.08);
 }
 
 .spell-preset-icon-btn {
@@ -2406,7 +2623,7 @@ select option {
 }
 
 .calc-spell-card-section {
-    margin-top: 0.45rem;
+    margin-top: 0;
 }
 
 .spell-preset-bar-inline {
@@ -2522,6 +2739,16 @@ select option {
 
 .calc-spell-detail-btn {
     flex: 0 0 auto;
+}
+
+.calc-spell-tab-btn {
+    flex: 0 0 auto;
+    min-height: 1.45rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    white-space: nowrap;
 }
 
 .calc-spell-selected-panel {
@@ -3779,6 +4006,74 @@ select option {
 .final-modifier-chip.core {
     background: rgba(168, 85, 247, 0.14);
     border-color: rgba(216, 180, 254, 0.18);
+}
+
+.card-summary-chip.tone-attack,
+.spell-bonus-chip.tone-attack,
+.final-modifier-chip.tone-attack,
+.final-modifier-chip.core.tone-attack,
+.final-modifier-chip.stat.tone-attack {
+    background: rgba(127, 29, 29, 0.18);
+    border-color: rgba(248, 113, 113, 0.28);
+    color: #fecaca;
+}
+
+.card-summary-chip.tone-defense,
+.spell-bonus-chip.tone-defense,
+.final-modifier-chip.tone-defense,
+.final-modifier-chip.core.tone-defense,
+.final-modifier-chip.stat.tone-defense {
+    background: rgba(30, 64, 175, 0.18);
+    border-color: rgba(96, 165, 250, 0.3);
+    color: #bfdbfe;
+}
+
+.card-summary-chip.tone-skill,
+.spell-bonus-chip.tone-skill,
+.final-modifier-chip.tone-skill,
+.final-modifier-chip.multiplier.tone-skill,
+.final-modifier-chip.stat.tone-skill {
+    background: rgba(113, 63, 18, 0.2);
+    border-color: rgba(250, 204, 21, 0.3);
+    color: #fde68a;
+}
+
+.card-summary-chip.tone-damage,
+.spell-bonus-chip.tone-damage,
+.final-modifier-chip.tone-damage,
+.final-modifier-chip.multiplier.tone-damage,
+.final-modifier-chip.muted.tone-damage {
+    background: rgba(88, 28, 135, 0.2);
+    border-color: rgba(167, 139, 250, 0.32);
+    color: #ddd6fe;
+}
+
+.card-summary-chip.tone-type,
+.spell-bonus-chip.tone-type,
+.final-modifier-chip.tone-type,
+.final-modifier-chip.multiplier.tone-type {
+    background: rgba(20, 83, 45, 0.18);
+    border-color: rgba(74, 222, 128, 0.3);
+    color: #bbf7d0;
+}
+
+.card-summary-chip.tone-enemy,
+.spell-bonus-chip.tone-enemy,
+.final-modifier-chip.tone-enemy,
+.final-modifier-chip.multiplier.tone-enemy,
+.final-modifier-chip.muted.tone-enemy {
+    background: rgba(131, 24, 67, 0.2);
+    border-color: rgba(244, 114, 182, 0.32);
+    color: #fbcfe8;
+}
+
+.card-summary-chip.tone-hp,
+.spell-bonus-chip.tone-hp,
+.final-modifier-chip.tone-hp,
+.final-modifier-chip.stat.tone-hp {
+    background: rgba(15, 118, 110, 0.18);
+    border-color: rgba(45, 212, 191, 0.28);
+    color: #ccfbf1;
 }
 
 .spell-bonus-empty {
@@ -5563,33 +5858,31 @@ select option {
 }
 
 .disabled-section {
-    opacity: 0.4;
-    pointer-events: none;
-    filter: grayscale(100%);
+    display: none;
 }
 
 /* Apply disabled-state immediately from the initial checked radio,
-   so the UI does not wait for JS before graying out unavailable sections. */
+   so the UI does not wait for JS before hiding unavailable sections. */
 #perspective-self:checked ~ .side-panels .self-def-adds-section,
 #perspective-self:checked ~ .side-panels .enemy-mult-section,
 #perspective-self:checked ~ .side-panels .enemy-atk-adds-section,
+#perspective-self:checked ~ .side-panels .enemy-debuff-section,
 #perspective-enemy:checked ~ .side-panels .self-mult-section,
 #perspective-enemy:checked ~ .side-panels .self-atk-adds-section,
+#perspective-enemy:checked ~ .side-panels .self-debuff-section,
 #perspective-enemy:checked ~ .side-panels .enemy-def-adds-section {
-    opacity: 0.4;
-    pointer-events: none;
-    filter: grayscale(100%);
+    display: none;
 }
 
 html[data-initial-perspective="self"] .self-def-adds-section,
 html[data-initial-perspective="self"] .enemy-mult-section,
 html[data-initial-perspective="self"] .enemy-atk-adds-section,
+html[data-initial-perspective="self"] .enemy-debuff-section,
 html[data-initial-perspective="enemy"] .self-mult-section,
 html[data-initial-perspective="enemy"] .self-atk-adds-section,
+html[data-initial-perspective="enemy"] .self-debuff-section,
 html[data-initial-perspective="enemy"] .enemy-def-adds-section {
-    opacity: 0.4;
-    pointer-events: none;
-    filter: grayscale(100%);
+    display: none;
 }
 
 

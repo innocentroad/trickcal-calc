@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trickcal Damage Calculator</title>
-    <link rel="icon" href="ico.webp?v=2.5.0" type="image/webp">
-    <link rel="stylesheet" href="style.css?v=2.5.0">
+    <link rel="icon" href="ico.webp?v=2.6.0" type="image/webp">
+    <link rel="stylesheet" href="style.css?v=2.6.0">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google tag (gtag.js) -->
@@ -79,8 +79,8 @@
             }
             .header-actions { position: static !important; }
             #reset-btn { position: static !important; margin-left: 6px; }
-            .header-tabs { margin: 0 !important; flex: 1; min-width: auto !important; }
-            .tab-btn { padding: 6px 8px !important; font-size: 12px !important; }
+            .header-tabs { margin: 0 !important; flex: 0 0 auto; min-width: 360px !important; }
+            .tab-btn { flex: 1 1 0 !important; min-width: 0 !important; padding: 6px 6px !important; font-size: 11px !important; }
             .header-social-link { width: 1.55rem !important; height: 1.55rem !important; }
             .header-social-link.note-link { position: static !important; }
             .header-social-icon { width: 0.78rem !important; height: 0.78rem !important; }
@@ -91,10 +91,10 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.5</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.6</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
-                    <button class="tab-btn" data-tab="spell">スペル<br>カード</button>
+                    <button class="tab-btn" data-tab="spell">スペル<br>選択</button>
                     <button class="tab-btn" data-tab="crayon">クレヨン<br>比較</button>
                     <button class="tab-btn" data-tab="est">ステータス<br>推定</button>
                 </div>
@@ -177,33 +177,30 @@
                                 </div>
 
                                 <div class="stat-category">
-                                    <h3 class="stat-cat-header">攻撃ステータス</h3>
+                                    <h3 class="stat-cat-header">ステータス</h3>
                                     <div class="multipliers-grid">
-                                        <div class="input-group">
-                                            <label>攻撃力</label>
+                                        <div class="input-group stat-input-attack">
+                                            <label><img class="stat-label-icon stat-icon-attack" src="img/物理攻撃力.webp" alt="">攻撃力</label>
                                             <input type="number" id="self-atk" value="50000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心</label>
+                                        <div class="input-group stat-input-attack">
+                                            <label><img class="stat-label-icon" src="img/会心.webp" alt="">会心</label>
                                             <input type="number" id="self-crit" value="30000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心DMG</label>
+                                        <div class="input-group stat-input-attack">
+                                            <label><img class="stat-label-icon" src="img/会心ダメージ.webp" alt="">会心DMG</label>
                                             <input type="number" id="self-crit-dmg" value="30000">
                                         </div>
-                                    </div>
-                                    <h3 class="stat-cat-header" style="margin-top: 1.2rem;">防御ステータス</h3>
-                                    <div class="multipliers-grid">
-                                        <div class="input-group">
-                                            <label>防御力</label>
+                                        <div class="input-group stat-input-defense">
+                                            <label><img class="stat-label-icon stat-icon-defense" src="img/物理防御力.webp" alt="">防御力</label>
                                             <input type="number" id="self-def" value="50000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心抵抗</label>
+                                        <div class="input-group stat-input-defense">
+                                            <label><img class="stat-label-icon" src="img/会心抵抗.webp" alt="">会心抵抗</label>
                                             <input type="number" id="self-crit-res" value="30000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心DMG抵抗</label>
+                                        <div class="input-group stat-input-defense">
+                                            <label><img class="stat-label-icon" src="img/会心DMG抵抗.webp" alt="">会心DMG抵抗</label>
                                             <input type="number" id="self-crit-dmg-res" value="30000">
                                         </div>
                                     </div>
@@ -212,7 +209,7 @@
         <div class="dynamic-section self-mult-section">
             <h3 class="stat-cat-header">倍率 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group">
+                <div class="input-group stat-input-skill">
                     <label>スキル 
                         <select id="self-main-skill-dropdown" class="skill-icon-btn">
                             <option value="" hidden>リスト</option>
@@ -221,11 +218,11 @@
                     </label>
                     <input type="number" id="self-mult-skill-number" min="0" max="10000" value="100">
                 </div>
-                <div class="input-group" id="self-add-mult-group">
+                <div class="input-group stat-input-damage" id="self-add-mult-group">
                     <label>与被DMG増減</label>
-                    <input type="number" id="self-mult-add-number" min="0" max="1000" value="100">
+                    <input type="number" id="self-mult-add-number" min="-100" max="1000" value="0">
                 </div>
-                <div class="input-group">
+                <div class="input-group stat-input-type">
                     <label>相性</label>
                     <select id="self-mult-type">
                         <option value="50">50</option>
@@ -236,12 +233,8 @@
                     </select>
                 </div>
                 <div class="input-group">
-                    <label>特殊</label>
-                    <input type="number" id="self-mult-sp-number" min="0" max="1000" value="100">
-                </div>
-                <div class="input-group">
                     <label>その他</label>
-                    <input type="number" id="self-mult-other-number" min="0" max="1000" value="100">
+                    <input type="number" id="self-mult-other-number" min="-100" max="1000" value="0">
                 </div>
             </div>
         </div>
@@ -249,16 +242,16 @@
         <div class="dynamic-section self-atk-adds-section">
             <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group">
-                    <label>攻撃力</label>
+                <div class="input-group stat-input-attack">
+                    <label><img class="stat-label-icon stat-icon-attack" src="img/物理攻撃力.webp" alt="">攻撃力</label>
                     <input type="number" id="self-add-atk-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>会心率増加</label>
+                <div class="input-group stat-input-attack">
+                    <label><img class="stat-label-icon" src="img/会心.webp" alt="">会心率増加</label>
                     <input type="number" id="self-add-crit-rate-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>会心DMG増</label>
+                <div class="input-group stat-input-attack">
+                    <label><img class="stat-label-icon" src="img/会心ダメージ.webp" alt="">会心DMG増</label>
                     <input type="number" id="self-add-crit-dmg-p" value="0">
                 </div>
             </div>
@@ -267,17 +260,45 @@
         <div class="dynamic-section self-def-adds-section disabled-section">
             <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group">
-                    <label>防御力</label>
+                <div class="input-group stat-input-defense">
+                    <label><img class="stat-label-icon stat-icon-defense" src="img/物理防御力.webp" alt="">防御力</label>
                     <input type="number" id="self-add-def-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>被会心率減</label>
+                <div class="input-group stat-input-defense">
+                    <label><img class="stat-label-icon" src="img/会心抵抗.webp" alt="">被会心率減</label>
                     <input type="number" id="self-add-crit-res-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>会心被DMG減</label>
+                <div class="input-group stat-input-defense">
+                    <label><img class="stat-label-icon" src="img/会心DMG抵抗.webp" alt="">会心被DMG減</label>
                     <input type="number" id="self-add-crit-dmg-res-p" value="0">
+                </div>
+            </div>
+        </div>
+
+        <div class="dynamic-section self-debuff-section">
+            <h3 class="stat-cat-header">バフ / デバフ</h3>
+            <div class="multipliers-grid">
+                <div class="input-group stat-input-enemy">
+                    <label>毒</label>
+                    <select id="self-debuff-poison">
+                        <option value="0">0%</option>
+                        <option value="-11">-11%</option>
+                        <option value="-22">-22%</option>
+                        <option value="-33">-33%</option>
+                        <option value="-44">-44%</option>
+                        <option value="-55">-55%</option>
+                        <option value="-66">-66%</option>
+                        <option value="-77">-77%</option>
+                        <option value="-88">-88%</option>
+                        <option value="-99">-99%</option>
+                    </select>
+                </div>
+                <div class="input-group stat-input-enemy">
+                    <label>ノイズ</label>
+                    <select id="self-debuff-noise">
+                        <option value="0">0%</option>
+                        <option value="-50">-50%</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -345,6 +366,7 @@
                                             <h3 class="stat-cat-header">スペルカード</h3>
                                         </div>
                                         <div class="card-section-header-meta">
+                                            <button type="button" id="go-spell-tab-btn" class="secondary-btn calc-spell-tab-btn">設定へ移動</button>
                                             <span class="card-section-cost-unit card-section-cost-trigger" id="self-spell-cost-label" role="button" tabindex="0" title="コスト詳細を見る">
                                                 <span class="card-section-cost-label">合計コスト</span>
                                                 <span class="card-section-cost-inline" id="self-spell-cost-inline">
@@ -410,33 +432,30 @@
                                 </div>
 
                                 <div class="stat-category">
-                                    <h3 class="stat-cat-header">攻撃ステータス</h3>
+                                    <h3 class="stat-cat-header">ステータス</h3>
                                     <div class="multipliers-grid">
-                                        <div class="input-group">
-                                            <label>攻撃力</label>
+                                        <div class="input-group stat-input-attack">
+                                            <label><img class="stat-label-icon stat-icon-attack" src="img/物理攻撃力.webp" alt="">攻撃力</label>
                                             <input type="number" id="enemy-atk" value="50000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心</label>
+                                        <div class="input-group stat-input-attack">
+                                            <label><img class="stat-label-icon" src="img/会心.webp" alt="">会心</label>
                                             <input type="number" id="enemy-crit" value="30000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心DMG</label>
+                                        <div class="input-group stat-input-attack">
+                                            <label><img class="stat-label-icon" src="img/会心ダメージ.webp" alt="">会心DMG</label>
                                             <input type="number" id="enemy-crit-dmg" value="30000">
                                         </div>
-                                    </div>
-                                    <h3 class="stat-cat-header" style="margin-top: 1.2rem;">防御ステータス</h3>
-                                    <div class="multipliers-grid">
-                                        <div class="input-group">
-                                            <label>防御力</label>
+                                        <div class="input-group stat-input-defense">
+                                            <label><img class="stat-label-icon stat-icon-defense" src="img/物理防御力.webp" alt="">防御力</label>
                                             <input type="number" id="enemy-def" value="50000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心抵抗</label>
+                                        <div class="input-group stat-input-defense">
+                                            <label><img class="stat-label-icon" src="img/会心抵抗.webp" alt="">会心抵抗</label>
                                             <input type="number" id="enemy-crit-res" value="30000">
                                         </div>
-                                        <div class="input-group">
-                                            <label>会心DMG抵抗</label>
+                                        <div class="input-group stat-input-defense">
+                                            <label><img class="stat-label-icon" src="img/会心DMG抵抗.webp" alt="">会心DMG抵抗</label>
                                             <input type="number" id="enemy-crit-dmg-res" value="30000">
                                         </div>
                                     </div>
@@ -445,7 +464,7 @@
         <div class="dynamic-section enemy-mult-section disabled-section">
             <h3 class="stat-cat-header">倍率 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group">
+                <div class="input-group stat-input-skill">
                     <label>スキル 
                         <select id="enemy-main-skill-dropdown" class="skill-icon-btn">
                             <option value="" hidden>リスト</option>
@@ -454,11 +473,11 @@
                     </label>
                     <input type="number" id="enemy-mult-skill-number" min="0" max="10000" value="100">
                 </div>
-                <div class="input-group" id="enemy-add-mult-group">
+                <div class="input-group stat-input-damage" id="enemy-add-mult-group">
                     <label>与被DMG増減</label>
-                    <input type="number" id="enemy-mult-add-number" min="0" max="1000" value="100">
+                    <input type="number" id="enemy-mult-add-number" min="-100" max="1000" value="0">
                 </div>
-                <div class="input-group">
+                <div class="input-group stat-input-type">
                     <label>相性</label>
                     <select id="enemy-mult-type">
                         <option value="50">50</option>
@@ -468,13 +487,13 @@
                         <option value="200">200</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label>特殊</label>
+                <div class="input-group stat-input-enemy">
+                    <label>敵用補正</label>
                     <input type="number" id="enemy-mult-sp-number" min="0" max="1000" value="100">
                 </div>
                 <div class="input-group">
                     <label>その他</label>
-                    <input type="number" id="enemy-mult-other-number" min="0" max="1000" value="100">
+                    <input type="number" id="enemy-mult-other-number" min="-100" max="1000" value="0">
                 </div>
             </div>
         </div>
@@ -482,16 +501,16 @@
         <div class="dynamic-section enemy-atk-adds-section disabled-section">
             <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group">
-                    <label>攻撃力</label>
+                <div class="input-group stat-input-attack">
+                    <label><img class="stat-label-icon stat-icon-attack" src="img/物理攻撃力.webp" alt="">攻撃力</label>
                     <input type="number" id="enemy-add-atk-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>会心率増加</label>
+                <div class="input-group stat-input-attack">
+                    <label><img class="stat-label-icon" src="img/会心.webp" alt="">会心率増加</label>
                     <input type="number" id="enemy-add-crit-rate-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>会心DMG増</label>
+                <div class="input-group stat-input-attack">
+                    <label><img class="stat-label-icon" src="img/会心ダメージ.webp" alt="">会心DMG増</label>
                     <input type="number" id="enemy-add-crit-dmg-p" value="0">
                 </div>
             </div>
@@ -500,16 +519,16 @@
         <div class="dynamic-section enemy-def-adds-section">
             <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group">
-                    <label>防御力</label>
+                <div class="input-group stat-input-defense">
+                    <label><img class="stat-label-icon stat-icon-defense" src="img/物理防御力.webp" alt="">防御力</label>
                     <input type="number" id="enemy-add-def-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>被会心率減</label>
+                <div class="input-group stat-input-defense">
+                    <label><img class="stat-label-icon" src="img/会心抵抗.webp" alt="">被会心率減</label>
                     <input type="number" id="enemy-add-crit-res-p" value="0">
                 </div>
-                <div class="input-group">
-                    <label>会心被DMG減</label>
+                <div class="input-group stat-input-defense">
+                    <label><img class="stat-label-icon" src="img/会心DMG抵抗.webp" alt="">会心被DMG減</label>
                     <input type="number" id="enemy-add-crit-dmg-res-p" value="0">
                 </div>
             </div>
@@ -518,7 +537,7 @@
         <div class="dynamic-section enemy-debuff-section">
             <h3 class="stat-cat-header">バフ / デバフ</h3>
             <div class="multipliers-grid">
-                <div class="input-group">
+                <div class="input-group stat-input-enemy">
                     <label>毒</label>
                     <select id="enemy-debuff-poison">
                         <option value="0">0%</option>
@@ -533,14 +552,14 @@
                         <option value="-99">-99%</option>
                     </select>
                 </div>
-                <div class="input-group">
+                <div class="input-group stat-input-enemy">
                     <label>ノイズ</label>
                     <select id="enemy-debuff-noise">
                         <option value="0">0%</option>
                         <option value="-50">-50%</option>
                     </select>
                 </div>
-                <div class="input-group">
+                <div class="input-group stat-input-enemy">
                     <label>怒り</label>
                     <select id="enemy-debuff-anger">
                         <option value="0">0%</option>
@@ -1184,9 +1203,9 @@
             </div>
         </div>
     </div>
-    <script src="presets.js?v=2.5.0"></script>
-    <script src="cards.js?v=2.5.0"></script>
-    <script src="script.js?v=2.5.0"></script>
+    <script src="presets.js?v=2.6.0"></script>
+    <script src="cards.js?v=2.6.0"></script>
+    <script src="script.js?v=2.6.0"></script>
 </body>
 </html>
 

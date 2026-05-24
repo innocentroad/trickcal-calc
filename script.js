@@ -27,7 +27,7 @@ const inputs = {
             skill: document.getElementById('self-mult-skill-number'),
             add: document.getElementById('self-mult-add-number'),
             type: document.getElementById('self-mult-type'),
-            special: document.getElementById('self-mult-sp-number'),
+            special: null,
             other: document.getElementById('self-mult-other-number'),
             skillDropdown: document.getElementById('self-main-skill-dropdown')
         },
@@ -38,6 +38,10 @@ const inputs = {
             defP: document.getElementById('self-add-def-p'),
             critResP: document.getElementById('self-add-crit-res-p'),
             critDmgResP: document.getElementById('self-add-crit-dmg-res-p')
+        },
+        debuffs: {
+            poison: document.getElementById('self-debuff-poison'),
+            noise: document.getElementById('self-debuff-noise')
         }
     },
     
@@ -1578,8 +1582,21 @@ function getWeaknessAddBonus(v) {
     return preset.weakness[v.dmgType].add || 0;
 }
 
+function getBonusToneClass(text = '') {
+    const label = String(text);
+    if (/敵用補正|敵防御|敵被会心|敵会心|毒|ノイズ|怒り/.test(label)) return 'tone-enemy';
+    if (/スキル|クールタイム|攻撃速度|SP/.test(label)) return 'tone-skill';
+    if (/与被DMG|与ダメ|被ダメ|弱点|ダメージ量|倍率/.test(label)) return 'tone-damage';
+    if (/相性|属性/.test(label)) return 'tone-type';
+    if (/防御|被会心|会心被DMG|会心DMG抵抗|会心抵抗/.test(label)) return 'tone-defense';
+    if (/攻撃|会心率|会心DMG|最終会心/.test(label)) return 'tone-attack';
+    if (/HP|治癒|回復|シールド/.test(label)) return 'tone-hp';
+    return '';
+}
+
 function createModifierChip(label, value, variant = 'multiplier') {
-    return `<span class="final-modifier-chip ${variant}">${label} ${value}</span>`;
+    const toneClass = getBonusToneClass(label);
+    return `<span class="final-modifier-chip ${variant} ${toneClass}">${label} ${value}</span>`;
 }
 
 function updateFinalModifierSummary(v, overrideSelf = null) {
@@ -1623,7 +1640,7 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
         createModifierChip('スキル倍率', formatMultiplierPercent(v.common.skill)),
         createModifierChip('与被DMG増減', finalAddInfo.text, `multiplier${finalAddInfo.isClamped ? ' clamped' : ''}`),
         createModifierChip('属性相性', formatMultiplierPercent(v.common.type)),
-        createModifierChip('特殊', formatMultiplierPercent(v.common.special)),
+        createModifierChip('敵用補正', formatMultiplierPercent(v.common.special)),
         createModifierChip('その他', formatMultiplierPercent(v.common.other))
     ];
 
@@ -1770,7 +1787,7 @@ function updateCardSummary(side) {
         return;
     }
     summaryEl.className = 'card-summary card-summary-active';
-    const chips = parts.map(part => `<span class="card-summary-chip">${part}</span>`).join('');
+    const chips = parts.map(part => `<span class="card-summary-chip ${getBonusToneClass(part)}">${part}</span>`).join('');
     const noteText = bonus.notes.length ? `<div class="card-summary-note">※ ${bonus.notes[0]}</div>` : '';
     summaryEl.innerHTML = `
         <div class="card-summary-head">
@@ -1805,7 +1822,7 @@ function updateCalcSpellCardSummary() {
         return;
     }
     summaryEl.className = 'card-summary card-summary-active';
-    const chips = parts.map(part => `<span class="card-summary-chip">${part}</span>`).join('');
+    const chips = parts.map(part => `<span class="card-summary-chip ${getBonusToneClass(part)}">${part}</span>`).join('');
     summaryEl.innerHTML = `
         <div class="card-summary-head">
             <span class="card-summary-title">スペルカード補正</span>
@@ -2001,7 +2018,7 @@ function updateSpellBonusSummary() {
         bindApplyToggles();
         return;
     }
-    const chips = parts.map(part => `<span class="spell-bonus-chip">${part}</span>`).join('');
+    const chips = parts.map(part => `<span class="spell-bonus-chip ${getBonusToneClass(part)}">${part}</span>`).join('');
     summaryEl.innerHTML = `${summaryHead}<div class="spell-bonus-chip-list">${chips}</div>`;
     bindApplyToggles();
 }
@@ -2938,17 +2955,22 @@ function getValues() {
             const def = isSelfAttacker ? inputs.enemy : inputs.self;
             const attCard = isSelfAttacker ? cardBonuses.self : cardBonuses.enemy;
             const defCard = isSelfAttacker ? cardBonuses.enemy : cardBonuses.self;
+            const attackerDebuffs = isSelfAttacker ? inputs.self.debuffs : inputs.enemy.debuffs;
+            const attackerPoisonP = Math.max(0, Math.min(99, -(parseInt(attackerDebuffs.poison?.value || '0', 10) || 0)));
+            const attackerNoiseP = Math.max(0, Math.min(50, -(parseInt(attackerDebuffs.noise?.value || '0', 10) || 0)));
+            const attackerAngerP = isSelfAttacker ? 0 : Math.max(0, Math.min(200, parseInt(inputs.enemy.debuffs.anger?.value || '0', 10) || 0));
             
-            const rawAdd = parseFloat(att.mult.add?.value || 100);
-            let addM = (rawAdd === 0 ? 0 : rawAdd) / 100;
+            const rawAdd = parseFloat(att.mult.add?.value || 0);
+            let addM = 1 + (rawAdd / 100);
             if (addM < 0.2 && addM !== 0) addM = 0.2;
+            const rawOther = parseFloat(att.mult.other?.value || 0);
             
             return {
                 skill: (parseFloat(att.mult.skill?.value) === 0 ? 0 : (parseFloat(att.mult.skill?.value) || 100)) / 100,
                 add: addM + (attCard.addP || 0) / 100,
                 type: (parseFloat(att.mult.type?.value) === 0 ? 0 : (parseFloat(att.mult.type?.value) || 100)) / 100,
                 special: ((parseFloat(att.mult.special?.value) === 0 ? 0 : (parseFloat(att.mult.special?.value) || 100)) + (attCard.specialP || 0)) / 100,
-                other: ((parseFloat(att.mult.other?.value) === 0 ? 0 : (parseFloat(att.mult.other?.value) || 100)) + (attCard.otherP || 0)) / 100,
+                other: 1 + (rawOther + (attCard.otherP || 0)) / 100,
                 atkP: (parseFloat(att.adds.atkP?.value) || 0) + (attCard.atkP || 0),
                 critRateP: (parseFloat(att.adds.critRateP?.value) || 0) + (attCard.critRateP || 0),
                 critDmgP: (parseFloat(att.adds.critDmgP?.value) || 0) + (attCard.critDmgP || 0),
@@ -2959,20 +2981,10 @@ function getValues() {
                 enemyCritResDownP: attCard.enemyCritResDownP || 0,
                 enemyCritDmgResDownP: attCard.enemyCritDmgResDownP || 0,
                 takenDmgP: defCard.takenDmgP || 0,
-                attackerDmgDownPoisonP: perspective === 'enemy'
-                    ? Math.max(0, Math.min(99, -(parseInt(inputs.enemy.debuffs.poison?.value || '0', 10) || 0)))
-                    : 0,
-                attackerDmgDownNoiseP: perspective === 'enemy'
-                    ? Math.max(0, Math.min(50, -(parseInt(inputs.enemy.debuffs.noise?.value || '0', 10) || 0)))
-                    : 0,
-                attackerAngerP: perspective === 'enemy'
-                    ? Math.max(0, Math.min(200, parseInt(inputs.enemy.debuffs.anger?.value || '0', 10) || 0))
-                    : 0,
-                attackerDmgDownP: (perspective === 'enemy'
-                    ? Math.max(0, Math.min(99, -(parseInt(inputs.enemy.debuffs.poison?.value || '0', 10) || 0)))
-                    : 0) + (perspective === 'enemy'
-                    ? Math.max(0, Math.min(50, -(parseInt(inputs.enemy.debuffs.noise?.value || '0', 10) || 0)))
-                    : 0)
+                attackerDmgDownPoisonP: attackerPoisonP,
+                attackerDmgDownNoiseP: attackerNoiseP,
+                attackerAngerP,
+                attackerDmgDownP: attackerPoisonP + attackerNoiseP
             };
         })()
     };
@@ -3112,6 +3124,15 @@ function updateDamageTypeIcon() {
     icon.alt = isPhys ? '物理' : '魔法';
     chip.classList.toggle('phys', isPhys);
     chip.classList.toggle('mag', !isPhys);
+
+    document.querySelectorAll('.stat-icon-attack').forEach((statIcon) => {
+        statIcon.src = isPhys ? 'img/物理攻撃力.webp' : 'img/魔法攻撃力.webp';
+        statIcon.alt = isPhys ? '物理攻撃力' : '魔法攻撃力';
+    });
+    document.querySelectorAll('.stat-icon-defense').forEach((statIcon) => {
+        statIcon.src = isPhys ? 'img/物理防御力.webp' : 'img/魔法防御力.webp';
+        statIcon.alt = isPhys ? '物理防御力' : '魔法防御力';
+    });
 }
 
 function updateUI() {
@@ -3503,16 +3524,20 @@ function updatePerspectiveUI() {
     const selfMult = document.querySelector('.self-mult-section');
     const selfAtkAdds = document.querySelector('.self-atk-adds-section');
     const selfDefAdds = document.querySelector('.self-def-adds-section');
+    const selfDebuffs = document.querySelector('.self-debuff-section');
     if (selfMult) selfMult.classList.toggle('disabled-section', !isSelf);
     if (selfAtkAdds) selfAtkAdds.classList.toggle('disabled-section', !isSelf);
     if (selfDefAdds) selfDefAdds.classList.toggle('disabled-section', isSelf);
+    if (selfDebuffs) selfDebuffs.classList.toggle('disabled-section', !isSelf);
 
     const enemyMult = document.querySelector('.enemy-mult-section');
     const enemyAtkAdds = document.querySelector('.enemy-atk-adds-section');
     const enemyDefAdds = document.querySelector('.enemy-def-adds-section');
+    const enemyDebuffs = document.querySelector('.enemy-debuff-section');
     if (enemyMult) enemyMult.classList.toggle('disabled-section', isSelf);
     if (enemyAtkAdds) enemyAtkAdds.classList.toggle('disabled-section', isSelf);
     if (enemyDefAdds) enemyDefAdds.classList.toggle('disabled-section', !isSelf);
+    if (enemyDebuffs) enemyDebuffs.classList.toggle('disabled-section', isSelf);
     updateMobileSideUI(mobileVisibleSide);
     updateUI();
 }
@@ -3536,6 +3561,21 @@ function updateTabUI(activeTab) {
     if (activeTab === 'est') {
         runEstimation();
     }
+}
+
+function switchTab(tab) {
+    const targetBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+    const targetPage = document.getElementById(`tab-${tab}`);
+    if (!targetBtn || !targetPage) return;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-page').forEach(page => page.classList.remove('active'));
+    targetBtn.classList.add('active');
+    targetPage.classList.add('active');
+    updateTabUI(tab);
+    saveState();
+    requestAnimationFrame(() => {
+        targetPage.scrollIntoView({ block: 'start' });
+    });
 }
 
 function initListeners() {
@@ -3706,15 +3746,13 @@ const detailsBtn = document.getElementById('toggle-details-btn');
 
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-            updateTabUI(btn.dataset.tab);
-            saveState();
-        });
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
+
+    const goSpellTabBtn = document.getElementById('go-spell-tab-btn');
+    if (goSpellTabBtn) {
+        goSpellTabBtn.addEventListener('click', () => switchTab('spell'));
+    }
 
     // Collapsibles
     document.querySelectorAll('.collapsible-header').forEach(header => {
@@ -4458,12 +4496,12 @@ function openPresetConflictDialog(kindLabel, currentSlot, targetSlot) {
         const sameSlot = String(currentSlot) === String(targetSlot);
         const choices = sameSlot
             ? [
-                { value: 'discard', label: '変更を破棄', className: 'danger' },
+                { value: 'discard', label: '変更前に戻す', className: 'danger' },
                 { value: 'save-current', label: '変更を保存', className: 'primary' },
                 { value: null, label: 'キャンセル', className: 'ghost' }
             ]
             : [
-                { value: 'discard', label: `変更を破棄してプリセット${targetSlot}に切り替え`, className: 'danger' },
+                { value: 'discard', label: `保存せずプリセット${targetSlot}に切り替え`, className: 'danger' },
                 { value: 'save-current', label: `プリセット${currentSlot}に保存してプリセット${targetSlot}に切り替え`, className: 'primary' },
                 { value: 'save-target', label: `プリセット${targetSlot}に変更を保存`, className: 'accent' },
                 { value: null, label: 'キャンセル', className: 'ghost' }
@@ -4584,6 +4622,163 @@ function deleteSpellPreset(slot) {
     renderSpellPresetButtons();
     saveSpellSelectionsState();
     saveState();
+}
+
+const SECTION_COLLAPSE_KEY = `${STORAGE_KEY}:collapsed-sections`;
+let collapsedSections = {};
+
+function loadCollapsedSections() {
+    try {
+        const raw = localStorage.getItem(SECTION_COLLAPSE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        collapsedSections = parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (e) {
+        collapsedSections = {};
+    }
+}
+
+function saveCollapsedSections() {
+    try {
+        localStorage.setItem(SECTION_COLLAPSE_KEY, JSON.stringify(collapsedSections));
+    } catch (e) {
+        console.error('Collapsed section save failed', e);
+    }
+}
+
+function getSectionCollapseId(host, header, index) {
+    if (host.id) return host.id;
+    const side = host.closest('.self-side') ? 'self' : (host.closest('.enemy-side') ? 'enemy' : 'common');
+    const title = (header.textContent || '').trim().replace(/\s+/g, '_') || `section_${index}`;
+    const classKey = Array.from(host.classList || []).filter(cls =>
+        cls.includes('section') || cls.includes('category') || cls.includes('card')
+    ).join('_') || host.tagName.toLowerCase();
+    return `${side}:${classKey}:${title}:${index}`;
+}
+
+function collectCollapsibleTargets(host, header) {
+    if (host.classList.contains('card-section')) {
+        return Array.from(host.children).filter(child => !child.classList.contains('card-section-header'));
+    }
+    if (host.classList.contains('dynamic-section')) {
+        return Array.from(host.children).filter(child => child !== header);
+    }
+    if (host.classList.contains('stat-category')) {
+        const targets = [];
+        let node = header.nextElementSibling;
+        while (node && !node.classList.contains('stat-cat-header')) {
+            targets.push(node);
+            node = node.nextElementSibling;
+        }
+        return targets;
+    }
+    return [];
+}
+
+function applySectionCollapsed(host, collapsed) {
+    host.classList.toggle('is-collapsed-section', collapsed);
+    const header = host.querySelector(':scope > .stat-cat-header, :scope .card-section-header .stat-cat-header');
+    if (header) header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    const btn = header?.querySelector('.section-collapse-btn');
+    if (btn) btn.textContent = collapsed ? '＋' : '−';
+}
+
+function initCollapsibleSections() {
+    loadCollapsedSections();
+    const candidates = [
+        ...document.querySelectorAll('.dynamic-section'),
+        ...document.querySelectorAll('.card-section')
+    ];
+
+    candidates.forEach((host, index) => {
+        if (host.dataset.collapseBound) return;
+        const header = host.classList.contains('card-section')
+            ? host.querySelector('.card-section-header .stat-cat-header')
+            : host.querySelector(':scope > .stat-cat-header');
+        if (!header) return;
+        const targets = collectCollapsibleTargets(host, header);
+        if (targets.length === 0) return;
+
+        const collapseId = getSectionCollapseId(host, header, index);
+        host.dataset.collapseId = collapseId;
+        host.dataset.collapseBound = '1';
+        host.classList.add('collapsible-section');
+        targets.forEach(target => target.classList.add('collapsible-section-body'));
+
+        header.classList.add('collapsible-section-header');
+        header.setAttribute('role', 'button');
+        header.setAttribute('tabindex', '0');
+        if (!header.querySelector('.section-collapse-btn')) {
+            const btn = document.createElement('span');
+            btn.className = 'section-collapse-btn';
+            btn.setAttribute('aria-hidden', 'true');
+            header.appendChild(btn);
+        }
+
+        const toggle = () => {
+            const nextCollapsed = !host.classList.contains('is-collapsed-section');
+            collapsedSections[collapseId] = nextCollapsed;
+            applySectionCollapsed(host, nextCollapsed);
+            saveCollapsedSections();
+            requestAnimationFrame(syncBottomBarSafeArea);
+        };
+        header.addEventListener('click', (e) => {
+            if (e.target.closest('select, input, button, a')) return;
+            toggle();
+        });
+        header.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            toggle();
+        });
+
+        applySectionCollapsed(host, !!collapsedSections[collapseId]);
+    });
+
+    document.querySelectorAll('.stat-category > .stat-cat-header').forEach((header, index) => {
+        if (header.dataset.collapseBound) return;
+        const host = header.closest('.stat-category');
+        if (!host) return;
+        const targets = collectCollapsibleTargets(host, header);
+        if (targets.length === 0) return;
+        const collapseId = getSectionCollapseId(host, header, index);
+        header.dataset.collapseId = collapseId;
+        header.dataset.collapseBound = '1';
+        targets.forEach(target => target.classList.add('collapsible-section-body'));
+        header.classList.add('collapsible-section-header');
+        header.setAttribute('role', 'button');
+        header.setAttribute('tabindex', '0');
+        if (!header.querySelector('.section-collapse-btn')) {
+            const btn = document.createElement('span');
+            btn.className = 'section-collapse-btn';
+            btn.setAttribute('aria-hidden', 'true');
+            header.appendChild(btn);
+        }
+
+        const applyHeaderCollapsed = (collapsed) => {
+            header.classList.toggle('is-collapsed-header', collapsed);
+            header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            targets.forEach(target => target.classList.toggle('is-collapsed-body', collapsed));
+            const btn = header.querySelector('.section-collapse-btn');
+            if (btn) btn.textContent = collapsed ? '＋' : '−';
+        };
+        const toggle = () => {
+            const nextCollapsed = !header.classList.contains('is-collapsed-header');
+            collapsedSections[collapseId] = nextCollapsed;
+            applyHeaderCollapsed(nextCollapsed);
+            saveCollapsedSections();
+            requestAnimationFrame(syncBottomBarSafeArea);
+        };
+        header.addEventListener('click', (e) => {
+            if (e.target.closest('select, input, button, a')) return;
+            toggle();
+        });
+        header.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            toggle();
+        });
+        applyHeaderCollapsed(!!collapsedSections[collapseId]);
+    });
 }
 
 let activeArtifactPresetPopoverAnchor = null;
@@ -4940,6 +5135,22 @@ function restoreFieldState(fieldState) {
     });
 }
 
+function migrateLegacyZeroBaseMultiplierInputs(state = {}) {
+    if (state.multiplierInputBaseVersion === 2) return;
+    [
+        'self-mult-add-number',
+        'self-mult-other-number',
+        'enemy-mult-add-number',
+        'enemy-mult-other-number'
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const current = parseFloat(el.value);
+        if (!Number.isFinite(current)) return;
+        el.value = String(current - 100);
+    });
+}
+
 function saveStatePatch(patch) {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -4969,6 +5180,7 @@ function saveState() {
         spellSelections: normalizedSpellSelections,
         spellPresetSlot: activeSpellPresetSlotId,
         artifactPresetSlot: activeArtifactPresetSlotId,
+        multiplierInputBaseVersion: 2,
         mobileVisibleSide,
         cards: {
             self: collectCardSelections('self'),
@@ -5115,6 +5327,7 @@ function loadState() {
         }
 
         restoreFieldState(state.fieldState);
+        migrateLegacyZeroBaseMultiplierInputs(state);
         
         if (state.tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === state.tab));
@@ -5186,6 +5399,7 @@ initializeCardUI();
 initializeSpellTab();
 renderArtifactPresetButtons();
 loadState();
+initCollapsibleSections();
 updateMobileSideUI(mobileVisibleSide);
 initListeners();
 updateHeaders();

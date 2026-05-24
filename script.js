@@ -148,6 +148,7 @@ let syncToggleCirclePosition = () => {};
 let isSpellSelectedPanelOpen = false;
 let isCalcSpellSelectedPanelOpen = false;
 let mobileVisibleSide = 'self';
+let mobileCrayonVisibleSide = 'current';
 let spellApplyEnabled = true;
 let artifactApplyEnabled = true;
 let spellSelections = {};
@@ -1445,7 +1446,7 @@ function restoreCardSelections(side, state = {}) {
         row.dataset.effects = JSON.stringify(saved.effects || {});
         updateRelicSlotVisual(row);
     });
-    if (side === 'self') {
+    if (side === 'self' && Object.prototype.hasOwnProperty.call(state, 'spells')) {
         if (Array.isArray(state.spells)) {
             const migrated = {};
             state.spells.forEach(selection => {
@@ -1672,8 +1673,10 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
         .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'stat'));
 
     const finalStatChips = statChips.slice();
+    finalStatChips.splice(3, 0, '<span class="final-modifier-break" aria-hidden="true"></span>');
     finalStatChips.push(createModifierChip('最終会心率', finalCritRateInfo.text, `stat${finalCritRateInfo.isClamped ? ' clamped' : ''}`));
     finalStatChips.push(createModifierChip('最終会心DMG', finalCritMultInfo.text, `stat${finalCritMultInfo.isClamped ? ' clamped' : ''}`));
+    finalStatChips.splice(7, 0, '<span class="final-modifier-break" aria-hidden="true"></span>');
 
     const enemyDebuffPairs = [
         ['敵防御減', v.common.enemyDefDownP],
@@ -3498,6 +3501,150 @@ function updateMobileSideUI(side = mobileVisibleSide) {
     });
 }
 
+function updateMobileCrayonUI(side = mobileCrayonVisibleSide) {
+    mobileCrayonVisibleSide = side === 'target' ? 'target' : 'current';
+    document.documentElement.dataset.mobileCrayonSide = mobileCrayonVisibleSide;
+    const targetSide = mobileCrayonVisibleSide === 'current' ? 'target' : 'current';
+    document.querySelectorAll('.mobile-crayon-switch-btn').forEach(btn => {
+        btn.dataset.crayonSide = targetSide;
+        btn.textContent = targetSide === 'current' ? '現在' : '目標';
+        btn.setAttribute('aria-label', `${targetSide === 'current' ? '現在' : '目標'}を表示`);
+        btn.classList.toggle('target-current', targetSide === 'current');
+        btn.classList.toggle('target-target', targetSide === 'target');
+    });
+}
+
+function isMobileCrayonInputMode() {
+    return window.matchMedia('(max-width: 850px)').matches;
+}
+
+function getCrayonNumberInputs() {
+    return Array.from(document.querySelectorAll('#tab-crayon input[type="number"]'));
+}
+
+function syncCrayonInputMode() {
+    const useStepper = isMobileCrayonInputMode();
+    getCrayonNumberInputs().forEach(input => {
+        input.readOnly = useStepper;
+        if (useStepper) {
+            input.setAttribute('inputmode', 'none');
+            input.classList.add('uses-crayon-stepper');
+        } else {
+            input.removeAttribute('inputmode');
+            input.classList.remove('uses-crayon-stepper');
+        }
+    });
+}
+
+function ensureCrayonStepperPopover() {
+    let popover = document.getElementById('crayon-stepper-popover');
+    if (popover) return popover;
+    popover = document.createElement('div');
+    popover.id = 'crayon-stepper-popover';
+    popover.className = 'crayon-stepper-popover';
+    popover.style.display = 'none';
+    popover.innerHTML = `
+        <div class="crayon-stepper-actions">
+            <button type="button" data-step="-10">-10</button>
+            <button type="button" data-step="-1">-1</button>
+            <button type="button" data-set="0">0</button>
+            <button type="button" data-step="1">+1</button>
+            <button type="button" data-step="10">+10</button>
+        </div>
+    `;
+    document.body.appendChild(popover);
+    popover.querySelectorAll('[data-step], [data-set]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const inputId = popover.dataset.inputId;
+            const input = inputId ? document.getElementById(inputId) : null;
+            if (!input) return;
+            if (btn.dataset.set != null) {
+                setCrayonStepperValue(input, Number(btn.dataset.set));
+            } else {
+                setCrayonStepperValue(input, getNumericValue(input) + Number(btn.dataset.step || 0));
+            }
+        });
+    });
+    return popover;
+}
+
+function getNumericValue(input) {
+    const parsed = parseInt(input?.value, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function setCrayonStepperValue(input, value) {
+    if (!input) return;
+    const min = input.min === '' ? 0 : Number(input.min);
+    const next = Math.max(Number.isFinite(min) ? min : 0, Math.round(value));
+    input.value = String(next);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function openCrayonStepperPopover(input) {
+    if (!input || !isMobileCrayonInputMode()) return;
+    const popover = ensureCrayonStepperPopover();
+    document.querySelectorAll('.crayon-stepper-active').forEach(el => el.classList.remove('crayon-stepper-active'));
+    popover.dataset.inputId = input.id;
+    input.classList.add('crayon-stepper-active');
+    popover.style.display = 'block';
+    positionCrayonStepperPopover(input, popover);
+}
+
+function closeCrayonStepperPopover() {
+    const popover = document.getElementById('crayon-stepper-popover');
+    if (popover) {
+        popover.style.display = 'none';
+        delete popover.dataset.inputId;
+    }
+    document.querySelectorAll('.crayon-stepper-active').forEach(el => el.classList.remove('crayon-stepper-active'));
+}
+
+function positionCrayonStepperPopover(input, popover = document.getElementById('crayon-stepper-popover')) {
+    if (!input || !popover) return;
+    const rect = input.getBoundingClientRect();
+    const gap = 8;
+    const margin = 8;
+    const width = Math.min(340, window.innerWidth - margin * 2);
+    const measuredHeight = popover.offsetHeight || 134;
+    let left = rect.left + rect.width / 2 - width / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+    let top = rect.bottom + gap;
+    if (top + measuredHeight > window.innerHeight - margin) {
+        top = Math.max(margin, rect.top - measuredHeight - gap);
+    }
+    popover.style.width = `${width}px`;
+    popover.style.left = `${left}px`;
+    popover.style.right = 'auto';
+    popover.style.top = `${top}px`;
+    popover.style.bottom = 'auto';
+}
+
+function syncCrayonMobileControls() {
+    const isMobileCrayon = window.matchMedia('(max-width: 850px)').matches;
+    const panel = document.querySelector('.crayon-panel');
+    const helpAnchor = document.querySelector('.crayon-help-anchor');
+    const mobileCrayonSwitch = document.getElementById('mobile-crayon-switch');
+    if (isMobileCrayon) {
+        if (helpAnchor && helpAnchor.parentElement !== document.body) {
+            document.body.appendChild(helpAnchor);
+        }
+        if (mobileCrayonSwitch && mobileCrayonSwitch.parentElement !== document.body) {
+            document.body.appendChild(mobileCrayonSwitch);
+        }
+    } else if (panel) {
+        if (helpAnchor && helpAnchor.parentElement !== panel) {
+            panel.insertBefore(helpAnchor, panel.firstElementChild || null);
+        }
+        const columns = panel.querySelector('.crayon-columns');
+        if (mobileCrayonSwitch && mobileCrayonSwitch.parentElement !== panel) {
+            panel.insertBefore(mobileCrayonSwitch, columns || null);
+        }
+    }
+    syncCrayonInputMode();
+}
+
 function updatePerspectiveUI() {
     const isSelf = document.getElementById('perspective-self').checked;
     document.documentElement.dataset.initialPerspective = isSelf ? 'self' : 'enemy';
@@ -3549,6 +3696,12 @@ function updateTabUI(activeTab) {
 
     const mobileSwitch = document.getElementById('mobile-side-switch');
     if (mobileSwitch) mobileSwitch.style.display = activeTab === 'calc' ? '' : 'none';
+
+    const mobileCrayonSwitch = document.getElementById('mobile-crayon-switch');
+    if (mobileCrayonSwitch) mobileCrayonSwitch.style.display = activeTab === 'crayon' ? '' : 'none';
+    const crayonHelpAnchor = document.querySelector('.crayon-help-anchor');
+    if (crayonHelpAnchor) crayonHelpAnchor.style.display = activeTab === 'crayon' ? '' : 'none';
+    syncCrayonMobileControls();
 
     const bottomBar = document.querySelector('.bottom-result-bar');
     if (bottomBar) bottomBar.style.display = activeTab === 'est' ? 'none' : '';
@@ -3621,6 +3774,28 @@ inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI
         btn.addEventListener('click', () => {
             updateMobileSideUI(btn.dataset.side);
             saveState();
+        });
+    });
+
+    document.querySelectorAll('.mobile-crayon-switch-btn').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', () => {
+            updateMobileCrayonUI(btn.dataset.crayonSide);
+            saveState();
+        });
+    });
+
+    getCrayonNumberInputs().forEach(input => {
+        if (input.dataset.crayonStepperBound) return;
+        input.dataset.crayonStepperBound = '1';
+        input.addEventListener('pointerdown', (e) => {
+            if (!isMobileCrayonInputMode()) return;
+            e.preventDefault();
+            openCrayonStepperPopover(input);
+        });
+        input.addEventListener('focus', () => {
+            if (isMobileCrayonInputMode()) openCrayonStepperPopover(input);
         });
     });
 
@@ -4238,6 +4413,15 @@ function getCurrentSpellPresetSelection() {
     return normalizeSpellPresetSelection(spellSelections);
 }
 
+function getSpellPresetCompareKey(selection = {}) {
+    const compact = {};
+    Object.entries(normalizeSpellPresetSelection(selection)).forEach(([cardId, entry]) => {
+        if ((entry?.qty || 0) <= 0) return;
+        compact[cardId] = entry;
+    });
+    return JSON.stringify(compact);
+}
+
 function hasArtifactPresetUnsavedChanges(slot = activeArtifactPresetSlotId) {
     const key = slot ? String(slot) : '';
     if (!key) return false;
@@ -4253,8 +4437,7 @@ function hasSpellPresetUnsavedChanges(slot = activeSpellPresetSlotId) {
     const presets = loadSpellPresets();
     const saved = presets[key];
     const savedSelection = saved && typeof saved === 'object' ? saved : {};
-    const current = JSON.stringify(getCurrentSpellPresetSelection());
-    return JSON.stringify(normalizeSpellPresetSelection(savedSelection)) !== current;
+    return getSpellPresetCompareKey(savedSelection) !== getSpellPresetCompareKey(getCurrentSpellPresetSelection());
 }
 
 function getMatchingArtifactPresetSlot(preferredSlot = '') {
@@ -4280,19 +4463,19 @@ function getMatchingArtifactPresetSlot(preferredSlot = '') {
 
 function getMatchingSpellPresetSlot(preferredSlot = '') {
     const presets = loadSpellPresets();
-    const current = JSON.stringify(getCurrentSpellPresetSelection());
+    const current = getSpellPresetCompareKey(getCurrentSpellPresetSelection());
     const preferredKey = preferredSlot ? String(preferredSlot) : '';
     if (preferredKey) {
         const preferredSaved = presets[preferredKey];
         const preferredSelection = preferredSaved && typeof preferredSaved === 'object' ? preferredSaved : {};
-        if (JSON.stringify(normalizeSpellPresetSelection(preferredSelection)) === current) {
+        if (getSpellPresetCompareKey(preferredSelection) === current) {
             return preferredKey;
         }
     }
     for (let slot = 1; slot <= 7; slot++) {
         const saved = presets[String(slot)];
         const selection = saved && typeof saved === 'object' ? saved : {};
-        if (JSON.stringify(normalizeSpellPresetSelection(selection)) === current) {
+        if (getSpellPresetCompareKey(selection) === current) {
             return String(slot);
         }
     }
@@ -5182,6 +5365,7 @@ function saveState() {
         artifactPresetSlot: activeArtifactPresetSlotId,
         multiplierInputBaseVersion: 2,
         mobileVisibleSide,
+        mobileCrayonVisibleSide,
         cards: {
             self: collectCardSelections('self'),
             enemy: collectCardSelections('enemy')
@@ -5300,6 +5484,9 @@ function loadState() {
         if (typeof state.mobileVisibleSide === 'string') {
             updateMobileSideUI(state.mobileVisibleSide);
         }
+        if (typeof state.mobileCrayonVisibleSide === 'string') {
+            updateMobileCrayonUI(state.mobileCrayonVisibleSide);
+        }
         if (typeof state.spellSelectedPanelOpen === 'boolean') {
             isSpellSelectedPanelOpen = state.spellSelectedPanelOpen;
         }
@@ -5401,6 +5588,7 @@ renderArtifactPresetButtons();
 loadState();
 initCollapsibleSections();
 updateMobileSideUI(mobileVisibleSide);
+updateMobileCrayonUI(mobileCrayonVisibleSide);
 initListeners();
 updateHeaders();
 if (estimator.samplesList.children.length === 0) estimator.samplesList.appendChild(createSampleRow());
@@ -5476,8 +5664,18 @@ document.addEventListener('click', (e) => {
     closeSpellSelectedPopovers();
 });
 
+document.addEventListener('click', (e) => {
+    const popover = document.getElementById('crayon-stepper-popover');
+    if (!popover || popover.style.display === 'none') return;
+    if (popover.contains(e.target) || e.target.closest('#tab-crayon input[type="number"]')) return;
+    closeCrayonStepperPopover();
+});
+
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSpellSelectedPopovers();
+    if (e.key === 'Escape') {
+        closeSpellSelectedPopovers();
+        closeCrayonStepperPopover();
+    }
 });
 
 // Keep toggle circle outside .panel so position:fixed works consistently,
@@ -5494,6 +5692,8 @@ document.addEventListener('keydown', (e) => {
     if (mobileSideSwitch && mobileSideSwitch.parentElement !== document.body) {
         document.body.appendChild(mobileSideSwitch);
     }
+
+    syncCrayonMobileControls();
 
     syncToggleCirclePosition = function(attempt = 0) {
         if (window.matchMedia('(max-width: 820px)').matches) {
@@ -5515,6 +5715,18 @@ document.addEventListener('keydown', (e) => {
 
     syncToggleCirclePosition();
     window.addEventListener('resize', () => syncToggleCirclePosition());
-    window.addEventListener('scroll', () => syncToggleCirclePosition(), { passive: true });
+    window.addEventListener('resize', () => syncCrayonMobileControls());
+    window.addEventListener('resize', () => {
+        if (!isMobileCrayonInputMode()) closeCrayonStepperPopover();
+        const popover = document.getElementById('crayon-stepper-popover');
+        const input = popover?.dataset.inputId ? document.getElementById(popover.dataset.inputId) : null;
+        if (popover && input && popover.style.display !== 'none') positionCrayonStepperPopover(input, popover);
+    });
+    window.addEventListener('scroll', () => {
+        syncToggleCirclePosition();
+        const popover = document.getElementById('crayon-stepper-popover');
+        const input = popover?.dataset.inputId ? document.getElementById(popover.dataset.inputId) : null;
+        if (popover && input && popover.style.display !== 'none') positionCrayonStepperPopover(input, popover);
+    }, { passive: true });
 })();
 

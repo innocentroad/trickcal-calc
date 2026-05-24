@@ -91,7 +91,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.6</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.7</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>選択</button>
@@ -662,7 +662,7 @@
                                     <h3>カード一覧</h3>
                                     <div class="spell-filter-row">
                                         <div class="spell-bulk-grade-row">
-                                            <span class="spell-bulk-grade-label">全カード変更</span>
+                                            <span class="spell-bulk-grade-label">全変更</span>
                                             <div class="spell-bulk-grade-actions" id="spell-bulk-grade-actions">
                                                 <button type="button" class="grade-star-btn spell-bulk-grade-btn" data-star="1" title="全カード★1"><img src="img/Grade_on.webp" alt="★1" class="grade-star-icon"></button>
                                                 <button type="button" class="grade-star-btn spell-bulk-grade-btn" data-star="2" title="全カード★2"><img src="img/Grade_on.webp" alt="★2" class="grade-star-icon"></button>
@@ -699,7 +699,7 @@
                                             <option value="healing">HP治癒量</option>
                                             <option value="hpRecovery">HP回復量</option>
                                         </select>
-                                        <button type="button" id="spell-clear-all" class="secondary-btn spell-clear-all-btn">すべて外す</button>
+                                        <button type="button" id="spell-clear-all" class="secondary-btn spell-clear-all-btn">全解除</button>
                                     </div>
                                 </div>
                                 <div id="spell-library-grid" class="spell-library-grid"></div>
@@ -726,6 +726,9 @@
                                 現在のボード塗り状況と、目標（比較用）の塗り状況を入力してください。ダメージ計算タブへの差分反映は、目標側の「計算結果に反映」をオンにした時だけ行われます。<br>
                                 オンになっている場合、現在から目標へ変更した場合のダメージ増減等が確認できます。
                             </div>
+                        </div>
+                        <div id="mobile-crayon-switch" class="mobile-crayon-switch" aria-label="クレヨン表示切り替え">
+                            <button type="button" class="mobile-crayon-switch-btn" data-crayon-side="target" aria-label="目標を表示">目標</button>
                         </div>
                         <div class="crayon-columns">
                             <!-- Left Column: Current State -->

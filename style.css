@@ -4117,6 +4117,10 @@ select option {
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
 }
 
+.spell-card-tile[hidden] {
+    display: none !important;
+}
+
 .spell-card-media {
     position: relative;
 }

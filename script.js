@@ -2500,7 +2500,7 @@ function clearSpellSelections() {
 
 const SPELL_EFFECT_FILTER_KEYS = {
     attack: ['atkP'],
-    defense: ['defP', 'critResP', 'critDmgResP', 'takenDmgP'],
+    defense: ['defP'],
     hp: ['hpP'],
     critRate: ['critRateP'],
     critDmg: ['critDmgP'],
@@ -2518,7 +2518,9 @@ function cardHasBonusKeys(card, keys = []) {
     const hasKeys = (bonus = {}) => keys.some(key => Number(bonus?.[key] || 0) !== 0);
     if ((card.bonusesByStar || []).some(hasKeys)) return true;
     if ((card.solderBonuses && Object.values(card.solderBonuses).some(hasKeys))) return true;
-    return (card.conditionalEffects || []).some(effect => (effect.bonusesByStar || []).some(hasKeys));
+    return (card.conditionalEffects || []).some(effect =>
+        !isSignatureEffect(effect) && (effect.bonusesByStar || []).some(hasKeys)
+    );
 }
 
 function cardMatchesSpellEffectFilter(card, filter) {
@@ -2526,21 +2528,43 @@ function cardMatchesSpellEffectFilter(card, filter) {
     return cardHasBonusKeys(card, SPELL_EFFECT_FILTER_KEYS[filter] || []);
 }
 
-function renderSpellLibrary() {
+function applySpellLibraryFilters() {
     const grid = document.getElementById('spell-library-grid');
     const rarityFilter = document.getElementById('spell-rarity-filter')?.value || '';
     const effectFilter = document.getElementById('spell-effect-filter')?.value || '';
     if (!grid) return;
 
-    const cards = getSpellCards().filter(card =>
-        (!rarityFilter || card.rarity === rarityFilter) &&
-        cardMatchesSpellEffectFilter(card, effectFilter)
-    );
+    grid.querySelectorAll('.spell-library-empty').forEach(el => el.remove());
+    let visibleCount = 0;
+
+    grid.querySelectorAll('.spell-card-tile').forEach(tile => {
+        const card = CARD_INDEX[tile.dataset.cardId];
+        const shouldShow = !!card
+            && (!rarityFilter || card.rarity === rarityFilter)
+            && cardMatchesSpellEffectFilter(card, effectFilter);
+        tile.hidden = !shouldShow;
+        if (shouldShow) visibleCount += 1;
+    });
+
+    if (visibleCount === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'spell-empty spell-library-empty';
+        empty.textContent = '条件に合うスペルカードがありません。';
+        grid.appendChild(empty);
+    }
+}
+
+function renderSpellLibrary() {
+    const grid = document.getElementById('spell-library-grid');
+    if (!grid) return;
+
+    const cards = getSpellCards();
     grid.innerHTML = '';
 
     cards.forEach(card => {
         const tile = document.createElement('div');
         tile.className = 'spell-card-tile';
+        tile.dataset.cardId = card.id;
         const frameClass = getCardFrameClass(card);
         const entry = getSpellEntry(card.id);
 
@@ -2614,6 +2638,8 @@ function renderSpellLibrary() {
         tile.appendChild(actions);
         grid.appendChild(tile);
     });
+
+    applySpellLibraryFilters();
 }
 
 function renderSelectedSpellListInto(list) {
@@ -2743,12 +2769,12 @@ function initializeSpellTab() {
     const filter = document.getElementById('spell-rarity-filter');
     if (filter && !filter.dataset.bound) {
         filter.dataset.bound = '1';
-        filter.addEventListener('change', renderSpellLibrary);
+        filter.addEventListener('change', applySpellLibraryFilters);
     }
     const effectFilter = document.getElementById('spell-effect-filter');
     if (effectFilter && !effectFilter.dataset.bound) {
         effectFilter.dataset.bound = '1';
-        effectFilter.addEventListener('change', renderSpellLibrary);
+        effectFilter.addEventListener('change', applySpellLibraryFilters);
     }
 
     const clearBtn = document.getElementById('spell-clear-all');

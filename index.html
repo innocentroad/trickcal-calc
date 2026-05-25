@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trickcal Damage Calculator</title>
-    <link rel="icon" href="ico.webp?v=2.6.0" type="image/webp">
-    <link rel="stylesheet" href="style.css?v=2.6.0">
+    <link rel="icon" href="ico.webp?v=2.9.0" type="image/webp">
+    <link rel="stylesheet" href="style.css?v=2.9.0">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google tag (gtag.js) -->
@@ -75,15 +75,21 @@
                 justify-content: space-between !important;
                 align-items: center !important;
                 width: 100%;
-                gap: 0;
+                gap: 0.25rem;
+                padding: 0 0.35rem !important;
             }
-            .header-actions { position: static !important; }
-            #reset-btn { position: static !important; margin-left: 6px; }
-            .header-tabs { margin: 0 !important; flex: 0 0 auto; min-width: 360px !important; }
-            .tab-btn { flex: 1 1 0 !important; min-width: 0 !important; padding: 6px 6px !important; font-size: 11px !important; }
+            .header-actions { position: static !important; flex: 0 0 auto; gap: 0.2rem !important; margin-left: 0 !important; }
+            #reset-btn { position: static !important; margin-left: 0; padding: 4px 6px !important; font-size: 10.5px !important; white-space: nowrap; }
+            .header-tabs { margin: 0 !important; flex: 1 1 auto !important; min-width: 0 !important; gap: 0.18rem !important; padding: 0.18rem !important; }
+            .tab-btn { flex: 1 1 0 !important; min-width: 0 !important; padding: 5px 3px !important; font-size: 10.5px !important; }
             .header-social-link { width: 1.55rem !important; height: 1.55rem !important; }
             .header-social-link.note-link { position: static !important; }
             .header-social-icon { width: 0.78rem !important; height: 0.78rem !important; }
+        }
+        @media (max-width: 390px) {
+            .tab-btn { font-size: 10px !important; padding-inline: 2px !important; }
+            #reset-btn { font-size: 10px !important; padding-inline: 5px !important; }
+            .header-social-link { width: 1.42rem !important; height: 1.42rem !important; }
         }
     </style>
 </head>
@@ -91,7 +97,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.7</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.9</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>選択</button>
@@ -203,6 +209,18 @@
                                             <label><img class="stat-label-icon" src="img/会心DMG抵抗.webp" alt="">会心DMG抵抗</label>
                                             <input type="number" id="self-crit-dmg-res" value="30000">
                                         </div>
+                                        <div class="input-group stat-input-hp hp-compare-group hp-wide-group">
+                                            <div class="hp-wide-label">
+                                                <label><img class="stat-label-icon" src="img/HP.webp" alt="">HP</label>
+                                            </div>
+                                            <div class="hp-input-row">
+                                                <input type="number" id="self-hp" value="400000">
+                                                <label class="hp-survival-toggle hp-survival-toggle-inline">
+                                                    <input type="checkbox" id="hp-survival-toggle">
+                                                    <span>計算結果に加える</span>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -260,6 +278,10 @@
         <div class="dynamic-section self-def-adds-section disabled-section">
             <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
+                <div class="input-group stat-input-hp">
+                    <label><img class="stat-label-icon" src="img/HP.webp" alt="">HP</label>
+                    <input type="number" id="self-add-hp-p" value="0">
+                </div>
                 <div class="input-group stat-input-defense">
                     <label><img class="stat-label-icon stat-icon-defense" src="img/物理防御力.webp" alt="">防御力</label>
                     <input type="number" id="self-add-def-p" value="0">
@@ -458,6 +480,18 @@
                                             <label><img class="stat-label-icon" src="img/会心DMG抵抗.webp" alt="">会心DMG抵抗</label>
                                             <input type="number" id="enemy-crit-dmg-res" value="30000">
                                         </div>
+                                        <div class="input-group stat-input-hp hp-compare-group hp-wide-group">
+                                            <div class="hp-wide-label">
+                                                <label><img class="stat-label-icon" src="img/HP.webp" alt="">HP</label>
+                                            </div>
+                                            <div class="hp-input-row">
+                                                <input type="number" id="enemy-hp" value="400000">
+                                                <label class="hp-survival-toggle hp-survival-toggle-inline hp-survival-toggle-mirror">
+                                                    <input type="checkbox" id="hp-survival-toggle-enemy">
+                                                    <span>計算結果に加える</span>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -519,6 +553,10 @@
         <div class="dynamic-section enemy-def-adds-section">
             <h3 class="stat-cat-header">追加 (%)</h3>
             <div class="multipliers-grid">
+                <div class="input-group stat-input-hp">
+                    <label><img class="stat-label-icon" src="img/HP.webp" alt="">HP</label>
+                    <input type="number" id="enemy-add-hp-p" value="0">
+                </div>
                 <div class="input-group stat-input-defense">
                     <label><img class="stat-label-icon stat-icon-defense" src="img/物理防御力.webp" alt="">防御力</label>
                     <input type="number" id="enemy-add-def-p" value="0">
@@ -847,18 +885,18 @@
                                 <!-- Aside (Current) -->
                                 <div class="crayon-board-side">
                                     <h3 class="board-title">アサイド <span class="board-desc">(手動追加バフ)</span></h3>
-                                    <div class="board-grid-side">
+                                    <div class="board-grid-side aside-grid-side">
                                         <div class="crayon-input-group">
                                             <label>HP (%)</label>
                                             <input type="number" id="aside-hp-cur" min="0" placeholder="0">
                                         </div>
                                         <div class="crayon-input-group">
-                                            <label>攻撃 (%)</label>
-                                            <input type="number" id="aside-atk-cur" min="0" placeholder="0">
+                                            <label>物攻 (%)</label>
+                                            <input type="number" id="aside-atk-p-cur" min="0" placeholder="0">
                                         </div>
                                         <div class="crayon-input-group">
-                                            <label>防御 (%)</label>
-                                            <input type="number" id="aside-def-cur" min="0" placeholder="0">
+                                            <label>物防 (%)</label>
+                                            <input type="number" id="aside-def-p-cur" min="0" placeholder="0">
                                         </div>
                                         <div class="crayon-input-group">
                                             <label>会心 (%)</label>
@@ -867,6 +905,14 @@
                                         <div class="crayon-input-group">
                                             <label>会心抵 (%)</label>
                                             <input type="number" id="aside-critres-cur" min="0" placeholder="0">
+                                        </div>
+                                        <div class="crayon-input-group aside-magic-atk">
+                                            <label>魔攻 (%)</label>
+                                            <input type="number" id="aside-atk-m-cur" min="0" placeholder="0">
+                                        </div>
+                                        <div class="crayon-input-group aside-magic-def">
+                                            <label>魔防 (%)</label>
+                                            <input type="number" id="aside-def-m-cur" min="0" placeholder="0">
                                         </div>
                                     </div>
                                 </div>
@@ -994,18 +1040,18 @@
                                 <!-- Aside (Target) -->
                                 <div class="crayon-board-side">
                                     <h3 class="board-title">アサイド <span class="board-desc">(手動追加バフ)</span></h3>
-                                    <div class="board-grid-side">
+                                    <div class="board-grid-side aside-grid-side">
                                         <div class="crayon-input-group">
                                             <label>HP (%)</label>
                                             <input type="number" id="aside-hp-tgt" min="0" placeholder="0">
                                         </div>
                                         <div class="crayon-input-group">
-                                            <label>攻撃 (%)</label>
-                                            <input type="number" id="aside-atk-tgt" min="0" placeholder="0">
+                                            <label>物攻 (%)</label>
+                                            <input type="number" id="aside-atk-p-tgt" min="0" placeholder="0">
                                         </div>
                                         <div class="crayon-input-group">
-                                            <label>防御 (%)</label>
-                                            <input type="number" id="aside-def-tgt" min="0" placeholder="0">
+                                            <label>物防 (%)</label>
+                                            <input type="number" id="aside-def-p-tgt" min="0" placeholder="0">
                                         </div>
                                         <div class="crayon-input-group">
                                             <label>会心 (%)</label>
@@ -1015,6 +1061,14 @@
                                             <label>会心抵 (%)</label>
                                             <input type="number" id="aside-critres-tgt" min="0" placeholder="0">
                                         </div>
+                                        <div class="crayon-input-group aside-magic-atk">
+                                            <label>魔攻 (%)</label>
+                                            <input type="number" id="aside-atk-m-tgt" min="0" placeholder="0">
+                                        </div>
+                                        <div class="crayon-input-group aside-magic-def">
+                                            <label>魔防 (%)</label>
+                                            <input type="number" id="aside-def-m-tgt" min="0" placeholder="0">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1022,6 +1076,10 @@
                         <div id="crayon-stats-display" class="crayon-stats-panel" style="display:none;">
                             <h3 class="crayon-stats-title">クレヨン適用後のステータス</h3>
                             <div class="results-grid crayon-stats-grid">
+                                <div class="result-card crayon-stat-card">
+                                    <h4>HP</h4>
+                                    <p id="corr-hp">0</p>
+                                </div>
                                 <div class="result-card crayon-stat-card">
                                     <h4>攻撃力</h4>
                                     <p id="corr-atk">0</p>
@@ -1133,22 +1191,25 @@
         <!-- Fixed Bottom Results Bar -->
         <div class="bottom-result-bar">
             <div class="bottom-results-grid">
-                <div class="result-card">
+                <div class="result-card result-detail-trigger" data-result-kind="normal">
                     <h3 style="font-size: 0.75rem;">通常ダメージ</h3>
                     <p id="res-normal" style="font-size: 1rem;">0</p>
+                    <span class="hp-result-text" id="hp-normal-rate" style="display:none;">残HP --</span>
                     <span class="improvement-text" id="imp-normal" style="display:none; font-size: 0.75rem;">+0.0%</span>
                 </div>
-                <div class="result-card highlight">
+                <div class="result-card highlight result-detail-trigger" data-result-kind="expected">
                     <h3 style="font-size: 0.75rem;">期待値</h3>
                     <p id="res-expected" style="font-size: 1.1rem;">0</p>
+                    <span class="hp-result-text" id="hp-expected-rate" style="display:none;">残HP --</span>
                     <span class="improvement-text" id="imp-expected" style="display:none; font-size: 0.75rem;">+0.0%</span>
                 </div>
-                <div class="result-card highlight-secondary">
+                <div class="result-card highlight-secondary result-detail-trigger" data-result-kind="crit">
                     <h3 style="font-size: 0.75rem;">会心ダメージ</h3>
                     <p id="res-crit-dmg" style="font-size: 1.1rem;">0</p>
+                    <span class="hp-result-text" id="hp-crit-rate" style="display:none;">残HP --</span>
                     <span class="improvement-text" id="imp-crit-dmg" style="display:none; font-size: 0.75rem;">+0.0%</span>
                 </div>
-                <div class="result-card highlight-secondary">
+                <div class="result-card highlight-secondary result-detail-trigger" data-result-kind="critRate">
                     <h3 style="font-size: 0.75rem;">会心率</h3>
                     <p id="res-crit-rate" style="font-size: 1rem;">0%</p>
                     <span class="improvement-text" id="imp-crit-rate" style="display:none; font-size: 0.75rem;">+0.0%</span>
@@ -1171,6 +1232,10 @@
                                 <div class="final-modifier-group">
                                     <div class="final-modifier-group-title">最終ステータス</div>
                                     <div id="final-core-chip-list" class="final-modifier-chip-list"></div>
+                                </div>
+                                <div class="final-modifier-group">
+                                    <div class="final-modifier-group-title">HP耐久テスト</div>
+                                    <div id="final-hp-chip-list" class="final-modifier-chip-list"></div>
                                 </div>
                                 <div class="final-modifier-group">
                                     <div class="final-modifier-group-title">ダメージ倍率</div>
@@ -1205,10 +1270,19 @@
                 </div>
             </div>
         </div>
+        <div id="result-detail-popover" class="result-detail-popover" style="display:none;">
+            <div class="result-detail-panel">
+                <div class="result-detail-head">
+                    <strong id="result-detail-title">結果詳細</strong>
+                    <button type="button" id="result-detail-close" class="result-detail-close">×</button>
+                </div>
+                <div id="result-detail-body" class="result-detail-body"></div>
+            </div>
+        </div>
     </div>
-    <script src="presets.js?v=2.6.0"></script>
-    <script src="cards.js?v=2.6.0"></script>
-    <script src="script.js?v=2.6.0"></script>
+    <script src="presets.js?v=2.9.0"></script>
+    <script src="cards.js?v=2.9.0"></script>
+    <script src="script.js?v=2.9.0"></script>
 </body>
 </html>
 

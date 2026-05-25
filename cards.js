@@ -189,29 +189,23 @@ const CARD_LIBRARY = {
                 {
                     id: "max_stack_defense",
                     type: "toggle",
-                    label: "防御力増加 (20スタック時) ",
-                    shortLabel: "20スタック 防御+",
+                    label: "20スタック時 防御力・最大HP増加",
+                    shortLabel: "20スタック 防御/HP+",
                     nonStacking: true,
                     descriptionByStar: [
-                        "通常攻撃スタックが最大時のみ適用 / 防御力+20% / この効果はスタックしない",
-                        "通常攻撃スタックが最大時のみ適用 / 防御力+24% / この効果はスタックしない",
-                        "通常攻撃スタックが最大時のみ適用 / 防御力+28% / この効果はスタックしない",
-                        "通常攻撃スタックが最大時のみ適用 / 防御力+32% / この効果はスタックしない",
-                        "通常攻撃スタックが最大時のみ適用 / 防御力+36% / この効果はスタックしない"
+                        "通常攻撃スタックが最大時のみ適用 / 防御力+20% / 最大HP+20% / この効果はスタックしない",
+                        "通常攻撃スタックが最大時のみ適用 / 防御力+24% / 最大HP+20% / この効果はスタックしない",
+                        "通常攻撃スタックが最大時のみ適用 / 防御力+28% / 最大HP+20% / この効果はスタックしない",
+                        "通常攻撃スタックが最大時のみ適用 / 防御力+32% / 最大HP+20% / この効果はスタックしない",
+                        "通常攻撃スタックが最大時のみ適用 / 防御力+36% / 最大HP+20% / この効果はスタックしない"
                     ],
                     bonusesByStar: [
-                        { defP: 20.0 },
-                        { defP: 24.0 },
-                        { defP: 28.0 },
-                        { defP: 32.0 },
-                        { defP: 36.0 }
+                        { defP: 20.0, hpP: 20.0 },
+                        { defP: 24.0, hpP: 20.0 },
+                        { defP: 28.0, hpP: 20.0 },
+                        { defP: 32.0, hpP: 20.0 },
+                        { defP: 36.0, hpP: 20.0 }
                     ]
-                },
-                {
-                    id: "max_stack_hp_up",
-                    type: "info",
-                    label: "20スタック時 最大HP増加",
-                    description: "+20%"
                 },
                 {
                     id: "signature_skill",
@@ -597,29 +591,23 @@ const CARD_LIBRARY = {
             conditionalEffects: [
                 {
                     id: "hp50_max_hp_up",
-                    type: "info",
-                    label: "HP50%以上 最大HP増加",
-                    description: "+10% / この効果はスタックしない"
-                },
-                {
-                    id: "hp50_defense_up",
                     type: "toggle",
-                    label: "HP50%以上 防御増加",
-                    shortLabel: "HP50%以上 防御増加",
+                    label: "HP50%以上 最大HP・防御増加",
+                    shortLabel: "HP50%以上 HP/防御+",
                     nonStacking: true,
                     bonusesByStar: [
-                        { defP: 20.0 },
-                        { defP: 24.5 },
-                        { defP: 29.0 },
-                        { defP: 33.5 },
-                        { defP: 38.0 }
+                        { hpP: 10.0, defP: 20.0 },
+                        { hpP: 10.0, defP: 24.5 },
+                        { hpP: 10.0, defP: 29.0 },
+                        { hpP: 10.0, defP: 33.5 },
+                        { hpP: 10.0, defP: 38.0 }
                     ],
                     descriptionByStar: [
-                        "この効果はスタックしない",
-                        "この効果はスタックしない",
-                        "この効果はスタックしない",
-                        "この効果はスタックしない",
-                        "この効果はスタックしない"
+                        "HP50%以上時のみ適用 / 最大HP+10% / 防御力+20% / この効果はスタックしない",
+                        "HP50%以上時のみ適用 / 最大HP+10% / 防御力+24.5% / この効果はスタックしない",
+                        "HP50%以上時のみ適用 / 最大HP+10% / 防御力+29% / この効果はスタックしない",
+                        "HP50%以上時のみ適用 / 最大HP+10% / 防御力+33.5% / この効果はスタックしない",
+                        "HP50%以上時のみ適用 / 最大HP+10% / 防御力+38% / この効果はスタックしない"
                     ]
                 },
                 {
@@ -1765,7 +1753,13 @@ const CARD_LIBRARY = {
             rarity: "希少",
             name: "世話好き",
             cost: 21,
-            bonusesByStar: [{}, {}, {}, {}, {}],
+            bonusesByStar: [
+                { hpP: 7.3, healingP: 4.4 },
+                { hpP: 9.1, healingP: 5.5 },
+                { hpP: 10.9, healingP: 6.6 },
+                { hpP: 12.8, healingP: 7.7 },
+                { hpP: 14.6, healingP: 8.8 }
+            ],
             conditionalEffects: [
                 { id: "caring_hp", type: "info", label: "最大HP増加", description: "7.3/9.1/10.9/12.8/14.6%" },
                 { id: "caring_heal", type: "info", label: "HP治癒量増加", description: "4.4/5.5/6.6/7.7/8.8%" }
@@ -2030,11 +2024,11 @@ const CARD_LIBRARY = {
             name: "体力強化",
             cost: 18,
             bonusesByStar: [
-                { defP: 2.9 },
-                { defP: 3.7 },
-                { defP: 4.4 },
-                { defP: 5.1 },
-                { defP: 5.9 }
+                { hpP: 3.9, defP: 2.9 },
+                { hpP: 4.9, defP: 3.7 },
+                { hpP: 5.9, defP: 4.4 },
+                { hpP: 6.8, defP: 5.1 },
+                { hpP: 7.8, defP: 5.9 }
             ],
             conditionalEffects: [
                 { id: "hp_training_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+3.9%", "+4.9%", "+5.9%", "+6.8%", "+7.8%"] }
@@ -2047,11 +2041,11 @@ const CARD_LIBRARY = {
             name: "防弾不壊",
             cost: 17,
             bonusesByStar: [
-                { defP: 2.8 },
-                { defP: 3.4 },
-                { defP: 4.1 },
-                { defP: 4.8 },
-                { defP: 5.5 }
+                { hpP: 3.7, defP: 2.8 },
+                { hpP: 4.6, defP: 3.4 },
+                { hpP: 5.5, defP: 4.1 },
+                { hpP: 6.4, defP: 4.8 },
+                { hpP: 7.3, defP: 5.5 }
             ],
             conditionalEffects: [
                 { id: "bulletproof_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+3.7%", "+4.6%", "+5.5%", "+6.4%", "+7.3%"] }
@@ -2089,11 +2083,11 @@ const CARD_LIBRARY = {
             name: "パーソナルトレーニング",
             cost: 12,
             bonusesByStar: [
-                { critResP: 1.1 },
-                { critResP: 1.4 },
-                { critResP: 1.7 },
-                { critResP: 2.0 },
-                { critResP: 2.3 }
+                { hpP: 2.5, critResP: 1.1 },
+                { hpP: 3.2, critResP: 1.4 },
+                { hpP: 3.8, critResP: 1.7 },
+                { hpP: 4.4, critResP: 2.0 },
+                { hpP: 5.0, critResP: 2.3 }
             ],
             conditionalEffects: [
                 { id: "personal_training_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+2.5%", "+3.2%", "+3.8%", "+4.4%", "+5.0%"] }
@@ -2164,7 +2158,13 @@ const CARD_LIBRARY = {
             rarity: "高級",
             name: "ランダムコイン",
             cost: 11,
-            bonusesByStar: [{}, {}, {}, {}, {}],
+            bonusesByStar: [
+                { hpP: 2.3 },
+                { hpP: 2.9 },
+                { hpP: 3.45 },
+                { hpP: 4.05 },
+                { hpP: 4.6 }
+            ],
             conditionalEffects: [
                 { id: "random_coin_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+2.3%", "+2.9%", "+3.45%", "+4.05%", "+4.6%"] },
                 {
@@ -2235,7 +2235,13 @@ const CARD_LIBRARY = {
             rarity: "高級",
             name: "イチゴ味カプセル",
             cost: 4,
-            bonusesByStar: [{}, {}, {}, {}, {}],
+            bonusesByStar: [
+                { hpP: 1.6 },
+                { hpP: 2.0 },
+                { hpP: 2.4 },
+                { hpP: 2.8 },
+                { hpP: 3.2 }
+            ],
             conditionalEffects: [
                 { id: "strawberry_capsule_hp", type: "info", label: "最大HP増加", descriptionByStar: ["+1.6%", "+2.0%", "+2.4%", "+2.8%", "+3.2%"] },
                 { id: "strawberry_capsule_heal", type: "info", label: "味方全体HP回復", descriptionByStar: ["15%回復", "16.5%回復", "18%回復", "19.5%回復", "21%回復"] }

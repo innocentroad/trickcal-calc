@@ -8,6 +8,7 @@ const inputs = {
         preset: document.getElementById('self-preset'),
         saveBtn: document.getElementById('save-self-preset'),
         delBtn: document.getElementById('del-self-preset'),
+        hp: document.getElementById('self-hp'),
         atk: document.getElementById('self-atk'),
         crit: document.getElementById('self-crit'),
         critDmg: document.getElementById('self-crit-dmg'),
@@ -32,6 +33,7 @@ const inputs = {
             skillDropdown: document.getElementById('self-main-skill-dropdown')
         },
         adds: {
+            hpP: document.getElementById('self-add-hp-p'),
             atkP: document.getElementById('self-add-atk-p'),
             critRateP: document.getElementById('self-add-crit-rate-p'),
             critDmgP: document.getElementById('self-add-crit-dmg-p'),
@@ -51,6 +53,7 @@ const inputs = {
         delBtn: document.getElementById('del-enemy-preset'),
         phase: document.getElementById('enemy-phase'),
         phaseGroup: document.getElementById('enemy-phase-group'),
+        hp: document.getElementById('enemy-hp'),
         atk: document.getElementById('enemy-atk'),
         crit: document.getElementById('enemy-crit'),
         critDmg: document.getElementById('enemy-crit-dmg'),
@@ -67,6 +70,7 @@ const inputs = {
             skillDropdown: document.getElementById('enemy-main-skill-dropdown')
         },
         adds: {
+            hpP: document.getElementById('enemy-add-hp-p'),
             atkP: document.getElementById('enemy-add-atk-p'),
             critRateP: document.getElementById('enemy-add-crit-rate-p'),
             critDmgP: document.getElementById('enemy-add-crit-dmg-p'),
@@ -81,6 +85,30 @@ const inputs = {
         }
     }
 };
+
+const hpSurvivalToggle = document.getElementById('hp-survival-toggle');
+const hpSurvivalToggleEnemy = document.getElementById('hp-survival-toggle-enemy');
+
+function isHpSurvivalEnabled() {
+    return !!(hpSurvivalToggle?.checked || hpSurvivalToggleEnemy?.checked);
+}
+
+function syncHpSurvivalToggles(source = null) {
+    const checked = !!source?.checked;
+    [hpSurvivalToggle, hpSurvivalToggleEnemy].filter(Boolean).forEach(toggle => {
+        if (toggle !== source) toggle.checked = checked;
+    });
+}
+
+function updateHpSurvivalToggleVisibility() {
+    const isSelfDefender = document.getElementById('perspective-enemy')?.checked;
+    document.querySelectorAll('.self-side .hp-survival-toggle-inline').forEach(el => {
+        el.style.display = isSelfDefender ? 'inline-flex' : 'none';
+    });
+    document.querySelectorAll('.enemy-side .hp-survival-toggle-inline').forEach(el => {
+        el.style.display = isSelfDefender ? 'none' : 'inline-flex';
+    });
+}
 
 // Helper for Smart 100-base start
 function setupSmartStart(input) {
@@ -133,6 +161,12 @@ const impTexts = {
     normal: document.getElementById('imp-normal'),
     critDmg: document.getElementById('imp-crit-dmg'),
     critRate: document.getElementById('imp-crit-rate')
+};
+
+const hpResultTexts = {
+    normal: document.getElementById('hp-normal-rate'),
+    expected: document.getElementById('hp-expected-rate'),
+    crit: document.getElementById('hp-crit-rate')
 };
 
 const graphControls = {
@@ -1600,9 +1634,128 @@ function createModifierChip(label, value, variant = 'multiplier') {
     return `<span class="final-modifier-chip ${variant} ${toneClass}">${label} ${value}</span>`;
 }
 
-function updateFinalModifierSummary(v, overrideSelf = null) {
+function calculateHpSurvival(v, result, overrideSelf = null) {
+    const selfStats = overrideSelf || v.self;
+    const enemyStats = v.enemy;
+    const defender = v.perspective === 'self' ? enemyStats : selfStats;
+    const finalHp = Math.max(0, defender.hp || 0) * (1 + (v.common.hpP || 0) / 100);
+    const damage = Math.max(0, result?.expected || 0);
+    const remainingHp = finalHp - damage;
+    const remainingRate = finalHp > 0 ? (remainingHp / finalHp) * 100 : 0;
+    const surviveHits = damage > 0 ? finalHp / damage : Infinity;
+    return { finalHp, damage, remainingHp, remainingRate, surviveHits };
+}
+
+function calculateHpSurvivalForDamage(v, damage, overrideSelf = null) {
+    const selfStats = overrideSelf || v.self;
+    const enemyStats = v.enemy;
+    const defender = v.perspective === 'self' ? enemyStats : selfStats;
+    const finalHp = Math.max(0, defender.hp || 0) * (1 + (v.common.hpP || 0) / 100);
+    const safeDamage = Math.max(0, damage || 0);
+    const remainingHp = finalHp - safeDamage;
+    const remainingRate = finalHp > 0 ? (remainingHp / finalHp) * 100 : 0;
+    const surviveHits = safeDamage > 0 ? finalHp / safeDamage : Infinity;
+    return { finalHp, damage: safeDamage, remainingHp, remainingRate, surviveHits };
+}
+
+function formatHpRate(rate) {
+    return `${Math.max(0, rate).toFixed(1)}%`;
+}
+
+function formatSurviveHits(value) {
+    return Number.isFinite(value) ? `${value.toFixed(2)}回` : '∞';
+}
+
+function updateHpResultBar(v, result, oldResult = null, overrideSelf = null) {
+    const enabled = isHpSurvivalEnabled();
+    const specs = [
+        { key: 'normal', label: '通常DMG', damage: result?.normal || 0, oldDamage: oldResult?.normal },
+        { key: 'expected', label: '期待値', damage: result?.expected || 0, oldDamage: oldResult?.expected },
+        { key: 'crit', label: '会心DMG', damage: result?.crit || 0, oldDamage: oldResult?.crit }
+    ];
+    specs.forEach(spec => {
+        const el = hpResultTexts[spec.key];
+        if (!el) return;
+        if (!enabled) {
+            el.style.display = 'none';
+            el.textContent = '';
+            el.title = '';
+            return;
+        }
+        const data = calculateHpSurvivalForDamage(v, spec.damage, overrideSelf);
+        const oldData = oldResult ? calculateHpSurvivalForDamage(v, spec.oldDamage, null) : null;
+        const delta = oldData ? data.remainingRate - oldData.remainingRate : 0;
+        const deltaText = oldData ? ` (${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%)` : '';
+        el.style.display = 'block';
+        el.textContent = `残HP率 ${formatHpRate(data.remainingRate)}${deltaText}`;
+        el.title = `${spec.label}: 耐え回数 ${formatSurviveHits(data.surviveHits)} / 残HP ${Math.floor(data.remainingHp).toLocaleString()} / 最大HP ${Math.floor(data.finalHp).toLocaleString()}`;
+        const cardEl = el.closest('.result-card');
+        if (cardEl) cardEl.title = el.title;
+        el.classList.toggle('is-danger', data.remainingHp < 0);
+        el.classList.toggle('is-positive', oldData ? delta > 0 : data.remainingHp >= 0);
+        el.classList.toggle('is-negative', oldData ? delta < 0 : data.remainingHp < 0);
+    });
+    if (!enabled) {
+        document.querySelectorAll('.result-detail-trigger').forEach(card => {
+            card.title = 'クリックで詳細を表示';
+        });
+    }
+}
+
+let latestResultDetailState = null;
+
+function setResultDetailState(v, result, oldResult = null, overrideSelf = null) {
+    latestResultDetailState = { v, result, oldResult, overrideSelf };
+}
+
+function openResultDetailPopover(kind) {
+    if (!latestResultDetailState) return;
+    const popover = document.getElementById('result-detail-popover');
+    const titleEl = document.getElementById('result-detail-title');
+    const bodyEl = document.getElementById('result-detail-body');
+    if (!popover || !titleEl || !bodyEl) return;
+    const { v, result, oldResult, overrideSelf } = latestResultDetailState;
+    const map = {
+        normal: { title: '通常ダメージ', damage: result.normal, oldDamage: oldResult?.normal },
+        expected: { title: '期待値', damage: result.expected, oldDamage: oldResult?.expected },
+        crit: { title: '会心ダメージ', damage: result.crit, oldDamage: oldResult?.crit },
+        critRate: { title: '会心率', damage: null, oldDamage: null }
+    };
+    const spec = map[kind] || map.expected;
+    titleEl.textContent = `${spec.title} 詳細`;
+    const rows = [];
+    if (kind === 'critRate') {
+        rows.push({ label: '会心率', value: `${(result.critRate * 100).toFixed(1)}%`, tone: 'crit' });
+        if (oldResult) rows.push({ label: '変更前', value: `${(oldResult.critRate * 100).toFixed(1)}%`, tone: 'muted' });
+    } else {
+        const hp = calculateHpSurvivalForDamage(v, spec.damage, overrideSelf);
+        const oldHp = oldResult ? calculateHpSurvivalForDamage(v, spec.oldDamage, null) : null;
+        rows.push({ label: 'ダメージ', value: Math.floor(spec.damage).toLocaleString(), tone: 'damage' });
+        if (oldResult) rows.push({ label: '変更前ダメージ', value: Math.floor(spec.oldDamage).toLocaleString(), tone: 'muted' });
+        if (isHpSurvivalEnabled()) {
+            rows.push({ label: '最大HP', value: Math.floor(hp.finalHp).toLocaleString(), tone: 'hp' });
+            rows.push({ label: '残HP', value: Math.floor(hp.remainingHp).toLocaleString(), tone: hp.remainingHp < 0 ? 'danger' : 'hp' });
+            rows.push({ label: '残HP率', value: formatHpRate(hp.remainingRate), tone: hp.remainingHp < 0 ? 'danger' : 'survival' });
+            rows.push({ label: '耐え回数', value: formatSurviveHits(hp.surviveHits), tone: 'survival' });
+            if (oldHp) {
+                const delta = hp.remainingRate - oldHp.remainingRate;
+                rows.push({ label: '残HP率差分', value: `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%`, tone: delta >= 0 ? 'positive' : 'negative' });
+            }
+        }
+    }
+    bodyEl.innerHTML = rows.map(row => `<div class="result-detail-row ${row.tone || ''}"><span>${row.label}</span><strong>${row.value}</strong></div>`).join('');
+    popover.style.display = 'flex';
+}
+
+function closeResultDetailPopover() {
+    const popover = document.getElementById('result-detail-popover');
+    if (popover) popover.style.display = 'none';
+}
+
+function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
     const perspectiveEl = document.getElementById('final-modifier-perspective');
     const coreListEl = document.getElementById('final-core-chip-list');
+    const hpListEl = document.getElementById('final-hp-chip-list');
     const multiplierListEl = document.getElementById('final-multiplier-chip-list');
     const statListEl = document.getElementById('final-stat-chip-list');
     const enemyDebuffListEl = document.getElementById('final-enemy-debuff-chip-list');
@@ -1616,6 +1769,7 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
     const defender = v.perspective === 'self' ? enemyStats : selfStats;
     const finalAtk = attacker.atk * (1 + v.common.atkP / 100);
     const finalDef = defender.def * (1 + (v.common.defP - v.common.enemyDefDownP) / 100);
+    const finalHp = Math.max(0, defender.hp || 0) * (1 + (v.common.hpP || 0) / 100);
 
     const weaknessAdd = getWeaknessAddBonus(v);
     const poisonAddPenalty = (v.common.attackerDmgDownP || 0) / 100;
@@ -1634,8 +1788,20 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
     const defenderLabel = v.perspective === 'self' ? '敵キャラ' : '自キャラ';
     const coreChips = [
         createModifierChip(`${attackerLabel} 最終攻撃力`, Math.floor(finalAtk).toLocaleString(), 'core'),
-        createModifierChip(`${defenderLabel} 最終防御力`, Math.floor(finalDef).toLocaleString(), 'core')
+        createModifierChip(`${defenderLabel} 最終防御力`, Math.floor(finalDef).toLocaleString(), 'core'),
+        createModifierChip(`${defenderLabel} 最終HP`, Math.floor(finalHp).toLocaleString(), 'core')
     ];
+
+    const hpChips = [];
+    if (isHpSurvivalEnabled() && result) {
+        const survival = calculateHpSurvival(v, result, overrideSelf);
+        hpChips.push(createModifierChip('予測被ダメ', Math.floor(survival.damage).toLocaleString(), 'stat'));
+        hpChips.push(createModifierChip('残HP', Math.floor(survival.remainingHp).toLocaleString(), `stat${survival.remainingHp < 0 ? ' clamped' : ''}`));
+        hpChips.push(createModifierChip('残HP率', `${survival.remainingRate.toFixed(1)}%`, `stat${survival.remainingHp < 0 ? ' clamped' : ''}`));
+        hpChips.push(createModifierChip('耐え回数', Number.isFinite(survival.surviveHits) ? `${survival.surviveHits.toFixed(2)}回` : '∞', 'stat'));
+    } else {
+        hpChips.push(createModifierChip('未反映', 'チェックONで残HPを表示', 'muted'));
+    }
 
     const multiplierChips = [
         createModifierChip('スキル倍率', formatMultiplierPercent(v.common.skill)),
@@ -1662,6 +1828,7 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
     }
 
     const statPairs = [
+        ['HP', v.common.hpP],
         ['攻撃', v.common.atkP],
         ['会心率', v.common.critRateP],
         ['会心DMG', v.common.critDmgP],
@@ -1673,10 +1840,10 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
         .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'stat'));
 
     const finalStatChips = statChips.slice();
-    finalStatChips.splice(3, 0, '<span class="final-modifier-break" aria-hidden="true"></span>');
+    finalStatChips.splice(4, 0, '<span class="final-modifier-break" aria-hidden="true"></span>');
     finalStatChips.push(createModifierChip('最終会心率', finalCritRateInfo.text, `stat${finalCritRateInfo.isClamped ? ' clamped' : ''}`));
     finalStatChips.push(createModifierChip('最終会心DMG', finalCritMultInfo.text, `stat${finalCritMultInfo.isClamped ? ' clamped' : ''}`));
-    finalStatChips.splice(7, 0, '<span class="final-modifier-break" aria-hidden="true"></span>');
+    finalStatChips.splice(8, 0, '<span class="final-modifier-break" aria-hidden="true"></span>');
 
     const enemyDebuffPairs = [
         ['敵防御減', v.common.enemyDefDownP],
@@ -1688,6 +1855,7 @@ function updateFinalModifierSummary(v, overrideSelf = null) {
         .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'muted'));
 
     coreListEl.innerHTML = coreChips.join('');
+    if (hpListEl) hpListEl.innerHTML = hpChips.join('');
     multiplierListEl.innerHTML = multiplierChips.join('');
     statListEl.innerHTML = finalStatChips.join('');
     if (enemyDebuffListEl) {
@@ -2849,6 +3017,7 @@ function getValues() {
 
 
     const getSideStats = (side) => ({
+        hp: parseFloat(inputs[side].hp?.value) || 0,
         atk: parseFloat(inputs[side].atk.value) || 0,
         crit: parseFloat(inputs[side].crit.value) || 0,
         critDmg: parseFloat(inputs[side].critDmg.value) || 0,
@@ -2897,15 +3066,22 @@ function getValues() {
             return el ? { val: (parseFloat(el.value) || 0) / 100, str: el.value } : { val: 0, str: '' };
         };
         
+        const dmgType = inputs.dmgType.value === 'mag' ? 'm' : 'p';
+        const activeAside = (kind, suffix) => aBuff(`aside-${kind}-${dmgType}-${suffix}`);
         const asideCur = {
-            hp: aBuff('aside-hp-cur').val, atk: aBuff('aside-atk-cur').val, def: aBuff('aside-def-cur').val,
-            crit: aBuff('aside-crit-cur').val, critRes: aBuff('aside-critres-cur').val
+            hp: aBuff('aside-hp-cur').val,
+            atk: activeAside('atk', 'cur').val,
+            def: activeAside('def', 'cur').val,
+            crit: aBuff('aside-crit-cur').val,
+            critRes: aBuff('aside-critres-cur').val
         };
-        
+
+        const asideTgtAtk = activeAside('atk', 'tgt');
+        const asideTgtDef = activeAside('def', 'tgt');
         const asideTgt = {
             hp: aBuff('aside-hp-tgt').str === '' ? asideCur.hp : aBuff('aside-hp-tgt').val,
-            atk: aBuff('aside-atk-tgt').str === '' ? asideCur.atk : aBuff('aside-atk-tgt').val,
-            def: aBuff('aside-def-tgt').str === '' ? asideCur.def : aBuff('aside-def-tgt').val,
+            atk: asideTgtAtk.str === '' ? asideCur.atk : asideTgtAtk.val,
+            def: asideTgtDef.str === '' ? asideCur.def : asideTgtDef.val,
             crit: aBuff('aside-crit-tgt').str === '' ? asideCur.crit : aBuff('aside-crit-tgt').val,
             critRes: aBuff('aside-critres-tgt').str === '' ? asideCur.critRes : aBuff('aside-critres-tgt').val
         };
@@ -2952,6 +3128,7 @@ function getValues() {
         const hasDiff = reqCost !== 0 || fCurBuff !== fTgtBuff || ['hp','atk','def','crit','critRes'].some(k => asideCur[k] !== asideTgt[k]);
         const applyEnabled = !!document.getElementById('crayon-apply-toggle')?.checked;
         return {
+            hp: { new: mult('hp'), cur: 1 },
             atk: { new: mult('atk'), cur: 1 }, // We already did the division in the multiplier
             crit: { new: mult('crit'), cur: 1 },
             critDmg: { new: mult('critDmg'), cur: 1 },
@@ -3003,6 +3180,7 @@ function getValues() {
                 atkP: (parseFloat(att.adds.atkP?.value) || 0) + (attCard.atkP || 0),
                 critRateP: (parseFloat(att.adds.critRateP?.value) || 0) + (attCard.critRateP || 0),
                 critDmgP: (parseFloat(att.adds.critDmgP?.value) || 0) + (attCard.critDmgP || 0),
+                hpP: (parseFloat(def.adds.hpP?.value) || 0) + (defCard.hpP || 0),
                 defP: (parseFloat(def.adds.defP?.value) || 0) + (defCard.defP || 0),
                 critResP: (parseFloat(def.adds.critResP?.value) || 0) + (defCard.critResP || 0),
                 critDmgResP: (parseFloat(def.adds.critDmgResP?.value) || 0) + (defCard.critDmgResP || 0),
@@ -3166,6 +3344,7 @@ function updateDamageTypeIcon() {
 
 function updateUI() {
     updateDamageTypeIcon();
+    updateHpSurvivalToggleVisibility();
     updateWeaknessBadge();
     updateCardSummary('self');
     updateCardSummary('enemy');
@@ -3176,6 +3355,7 @@ function updateUI() {
     if (v.isCrayon) {
         newSelf = { ...v.self };
         const b = v.crayonBonuses;
+        newSelf.hp = (v.self.hp / b.hp.cur) * b.hp.new;
         newSelf.atk = (v.self.atk / b.atk.cur) * b.atk.new;
         newSelf.crit = (v.self.crit / b.crit.cur) * b.crit.new;
         newSelf.critDmg = (v.self.critDmg / b.critDmg.cur) * b.critDmg.new;
@@ -3194,6 +3374,7 @@ function updateUI() {
         
         // Show corrected stats
         document.getElementById('crayon-stats-display').style.display = 'block';
+        document.getElementById('corr-hp').textContent = Math.floor(newSelf.hp).toLocaleString();
         document.getElementById('corr-atk').textContent = Math.floor(newSelf.atk).toLocaleString();
         document.getElementById('corr-crit').textContent = Math.floor(newSelf.crit).toLocaleString();
         document.getElementById('corr-crit-dmg').textContent = Math.floor(newSelf.critDmg).toLocaleString();
@@ -3204,11 +3385,13 @@ function updateUI() {
         document.getElementById('crayon-stats-display').style.display = 'none';
         Object.values(impTexts).forEach(el => { if (el) el.style.display = 'none'; });
     }
-    updateFinalModifierSummary(v, v.isCrayon ? newSelf : null);
+    updateFinalModifierSummary(v, res, v.isCrayon ? newSelf : null);
     results.normal.textContent = Math.floor(res.normal).toLocaleString(); 
     results.critDmg.textContent = Math.floor(res.crit).toLocaleString(); 
     results.expected.textContent = Math.floor(res.expected).toLocaleString(); 
     results.critRate.textContent = (res.critRate * 100).toFixed(1) + '%';
+    updateHpResultBar(v, res, v.isCrayon ? oldRes : null, v.isCrayon ? newSelf : null);
+    setResultDetailState(v, res, v.isCrayon ? oldRes : null, v.isCrayon ? newSelf : null);
     
     updateChart(v, v.isCrayon ? newSelf : null);
     if (!isRestoringState) saveState();
@@ -3219,7 +3402,7 @@ function swapRoles() {
     const e = getValues().enemy;
     
     // Swap main stats
-    const stats = ['atk', 'crit', 'critDmg', 'def', 'critRes', 'critDmgRes'];
+    const stats = ['hp', 'atk', 'crit', 'critDmg', 'def', 'critRes', 'critDmgRes'];
     stats.forEach(k => {
         const temp = inputs.self[k].value;
         inputs.self[k].value = inputs.enemy[k].value;
@@ -3403,6 +3586,7 @@ function applyPreset(side, value, shouldSave = true) {
         presetData = p;
         const type = inputs.dmgType.value;
         stats = { 
+            hp: p.hp,
             atk: type === 'phys' ? p.atk_p : p.atk_m,
             crit: p.crit, critDmg: p.critDmg,
             def: type === 'phys' ? p.def_p : p.def_m,
@@ -3487,6 +3671,7 @@ function applyEnemyPhaseSelection(shouldSave = true) {
         if (phase) {
             const type = inputs.dmgType.value;
             const stats = {
+                hp: p.hp,
                 atk: type === 'phys' ? p.atk_p : p.atk_m,
                 crit: p.crit,
                 critDmg: p.critDmg,
@@ -3497,6 +3682,7 @@ function applyEnemyPhaseSelection(shouldSave = true) {
             const scale = phase.mult;
             const scaled = (k, v) => phase.scaleStats.includes(k) ? Math.floor(v * scale) : v;
 
+            inputs.enemy.hp.value = scaled('hp', stats.hp);
             inputs.enemy.atk.value = scaled('atk_' + (type === 'phys' ? 'p' : 'm'), stats.atk);
             inputs.enemy.crit.value = scaled('crit', stats.crit);
             inputs.enemy.critDmg.value = scaled('critDmg', stats.critDmg);
@@ -3876,6 +4062,21 @@ const detailsBtn = document.getElementById('toggle-details-btn');
 
     const crayonApplyToggle = document.getElementById('crayon-apply-toggle');
     if (crayonApplyToggle) crayonApplyToggle.addEventListener('change', updateUI);
+
+    [hpSurvivalToggle, hpSurvivalToggleEnemy].filter(Boolean).forEach(toggle => {
+        toggle.addEventListener('change', () => {
+            syncHpSurvivalToggles(toggle);
+            updateUI();
+        });
+    });
+
+    document.querySelectorAll('.result-detail-trigger').forEach(card => {
+        if (card.dataset.detailBound) return;
+        card.dataset.detailBound = '1';
+        card.addEventListener('click', () => openResultDetailPopover(card.dataset.resultKind || 'expected'));
+    });
+    const resultDetailClose = document.getElementById('result-detail-close');
+    if (resultDetailClose) resultDetailClose.addEventListener('click', closeResultDetailPopover);
     
     const syncBtn = document.getElementById('btn-sync-crayon');
     if (syncBtn) {
@@ -4448,6 +4649,103 @@ function getSpellPresetCompareKey(selection = {}) {
     return JSON.stringify(compact);
 }
 
+function getCardDisplayName(cardId) {
+    if (!cardId) return '空';
+    return CARD_INDEX[cardId]?.name || cardId;
+}
+
+function getEnabledEffectLabels(card, effects = {}) {
+    if (!card) return [];
+    return (card.conditionalEffects || [])
+        .filter(effect => effect.type === 'toggle' && effects?.[effect.id])
+        .map(effect => effect.shortLabel || effect.label || effect.id);
+}
+
+function formatEffectDiff(card, beforeEffects = {}, afterEffects = {}) {
+    const before = getEnabledEffectLabels(card, beforeEffects);
+    const after = getEnabledEffectLabels(card, afterEffects);
+    const beforeText = before.length ? before.join('、') : 'なし';
+    const afterText = after.length ? after.join('、') : 'なし';
+    return beforeText === afterText ? '' : `切替: ${beforeText} → ${afterText}`;
+}
+
+function createArtifactPresetDiffRows(slot) {
+    const presets = loadArtifactPresets();
+    const saved = normalizeArtifactPresetSelection(Array.isArray(presets[String(slot)]) ? presets[String(slot)] : []);
+    const current = normalizeArtifactPresetSelection(getCurrentArtifactPresetSelection());
+    const rows = [];
+    const savedCost = getArtifactPresetSelectionCost(saved);
+    const currentCost = getArtifactPresetSelectionCost(current);
+    if (savedCost !== currentCost) {
+        rows.push({ tone: 'cost', text: `合計コスト: ${savedCost} → ${currentCost}` });
+    }
+
+    for (let i = 0; i < 3; i++) {
+        const before = saved[i] || {};
+        const after = current[i] || {};
+        const beforeCard = CARD_INDEX[before.cardId || ''];
+        const afterCard = CARD_INDEX[after.cardId || ''];
+        const slotLabel = `枠${i + 1}`;
+        if ((before.cardId || '') !== (after.cardId || '')) {
+            rows.push({ tone: 'card', text: `${slotLabel}: ${getCardDisplayName(before.cardId)} → ${getCardDisplayName(after.cardId)}` });
+            continue;
+        }
+        if (!after.cardId) continue;
+        const parts = [];
+        if ((before.star || 1) !== (after.star || 1)) parts.push(`★${before.star || 1} → ★${after.star || 1}`);
+        if ((before.solder || 0) !== (after.solder || 0)) parts.push(`はんだ+${before.solder || 0} → +${after.solder || 0}`);
+        const effectText = formatEffectDiff(afterCard || beforeCard, before.effects, after.effects);
+        if (effectText) parts.push(effectText);
+        if (parts.length) {
+            rows.push({ tone: 'detail', text: `${slotLabel} ${getCardDisplayName(after.cardId)}: ${parts.join(' / ')}` });
+        }
+    }
+    return rows;
+}
+
+function createSpellPresetDiffRows(slot) {
+    const presets = loadSpellPresets();
+    const saved = normalizeSpellPresetSelection(presets[String(slot)] || {});
+    const current = normalizeSpellPresetSelection(getCurrentSpellPresetSelection());
+    const rows = [];
+    const savedCost = getSpellPresetSelectionCost(saved);
+    const currentCost = getSpellPresetSelectionCost(current);
+    if (savedCost !== currentCost) {
+        rows.push({ tone: 'cost', text: `合計コスト: ${savedCost} → ${currentCost}` });
+    }
+
+    const cardIds = new Set();
+    Object.entries(saved).forEach(([cardId, entry]) => { if ((entry?.qty || 0) > 0) cardIds.add(cardId); });
+    Object.entries(current).forEach(([cardId, entry]) => { if ((entry?.qty || 0) > 0) cardIds.add(cardId); });
+
+    Array.from(cardIds).forEach(cardId => {
+        const card = CARD_INDEX[cardId];
+        const before = saved[cardId] || {};
+        const after = current[cardId] || {};
+        const beforeQty = before.qty || 0;
+        const afterQty = after.qty || 0;
+        const parts = [];
+        if (beforeQty !== afterQty) parts.push(`枚数 ${beforeQty} → ${afterQty}`);
+        if (beforeQty > 0 && afterQty > 0 && (before.star || 1) !== (after.star || 1)) parts.push(`★${before.star || 1} → ★${after.star || 1}`);
+        if (beforeQty > 0 && afterQty > 0 && (before.solder || 0) !== (after.solder || 0)) parts.push(`はんだ+${before.solder || 0} → +${after.solder || 0}`);
+        if (beforeQty > 0 && afterQty > 0) {
+            const effectText = formatEffectDiff(card, before.effects, after.effects);
+            if (effectText) parts.push(effectText);
+        }
+        if (parts.length) {
+            rows.push({ tone: beforeQty === 0 ? 'add' : (afterQty === 0 ? 'remove' : 'detail'), text: `${getCardDisplayName(cardId)}: ${parts.join(' / ')}` });
+        }
+    });
+    return rows;
+}
+
+function createPresetDiffRows(kindLabel, currentSlot) {
+    const rows = kindLabel === '遺物'
+        ? createArtifactPresetDiffRows(currentSlot)
+        : createSpellPresetDiffRows(currentSlot);
+    return rows.length ? rows : [{ tone: 'empty', text: '表示できる変更内容はありません。' }];
+}
+
 function hasArtifactPresetUnsavedChanges(slot = activeArtifactPresetSlotId) {
     const key = slot ? String(slot) : '';
     if (!key) return false;
@@ -4691,13 +4989,37 @@ function openPresetConflictDialog(kindLabel, currentSlot, targetSlot) {
         const panel = document.createElement('div');
         panel.className = 'preset-conflict-panel';
 
+        const head = document.createElement('div');
+        head.className = 'preset-conflict-head';
+
         const title = document.createElement('div');
         title.className = 'preset-conflict-title';
         title.textContent = `${kindLabel}プリセット${currentSlot}に未保存の変更があります`;
 
+        const diffToggle = document.createElement('button');
+        diffToggle.type = 'button';
+        diffToggle.className = 'preset-conflict-diff-toggle';
+        diffToggle.textContent = '変更内容';
+
         const message = document.createElement('div');
         message.className = 'preset-conflict-message';
         message.textContent = `プリセット${targetSlot}を選択する前に、変更の扱いを選んでください。`;
+
+        const diffPanel = document.createElement('div');
+        diffPanel.className = 'preset-conflict-diff';
+        diffPanel.style.display = 'none';
+        createPresetDiffRows(kindLabel, currentSlot).forEach(row => {
+            const item = document.createElement('div');
+            item.className = `preset-conflict-diff-row ${row.tone || ''}`;
+            item.textContent = row.text;
+            diffPanel.appendChild(item);
+        });
+
+        diffToggle.addEventListener('click', () => {
+            const nextVisible = diffPanel.style.display === 'none';
+            diffPanel.style.display = nextVisible ? 'grid' : 'none';
+            diffToggle.classList.toggle('active', nextVisible);
+        });
 
         const actions = document.createElement('div');
         actions.className = 'preset-conflict-actions';
@@ -4731,8 +5053,11 @@ function openPresetConflictDialog(kindLabel, currentSlot, targetSlot) {
             actions.appendChild(btn);
         });
 
-        panel.appendChild(title);
+        head.appendChild(title);
+        head.appendChild(diffToggle);
+        panel.appendChild(head);
         panel.appendChild(message);
+        panel.appendChild(diffPanel);
         panel.appendChild(actions);
         dialog.appendChild(panel);
         dialog.style.display = 'flex';
@@ -5663,6 +5988,11 @@ window.addEventListener('scroll', () => {
 }, true);
 
 document.addEventListener('click', (e) => {
+    const resultDetailPopover = document.getElementById('result-detail-popover');
+    if (resultDetailPopover && resultDetailPopover.style.display !== 'none') {
+        if (e.target === resultDetailPopover) closeResultDetailPopover();
+    }
+
     const popover = document.getElementById('spell-effect-popover');
     if (!popover || popover.style.display === 'none') return;
     if (e.target.closest('#spell-effect-popover') || e.target.closest('.spell-effect-badge')) return;

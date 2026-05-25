@@ -5,6 +5,7 @@ const PLAYER_PRESETS = {
     "dummy_player": {
         name: "[P] Dummy",
         atk: 30000,
+        hp: 200000,
         crit: 25000,
         critDmg: 25000,
         def: 60000,
@@ -26,6 +27,7 @@ const PLAYER_PRESETS = {
     "dummy_player_2": {
         name: "[P] Dummy 2",
         atk: 60000,
+        hp: 400000,
         crit: 50000,
         critDmg: 50000,
         def: 90000,
@@ -47,6 +49,7 @@ const PLAYER_PRESETS = {
     "dummy_player_3": {
         name: "[P] Dummy 3",
         atk: 90000,
+        hp: 600000,
         crit: 50000,
         critDmg: 50000,
         def: 120000,

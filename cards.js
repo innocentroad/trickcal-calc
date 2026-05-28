@@ -433,7 +433,7 @@ const CARD_LIBRARY = {
             kind: "artifact",
             rarity: "伝説",
             signature: true,
-            favoriteCharacter: "シオン",
+            favoriteCharacter: "シオン・ザ・DB",
             name: "シオンの黒マント",
             cost: 25,
             bonusesByStar: [

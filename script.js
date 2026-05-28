@@ -1634,18 +1634,6 @@ function createModifierChip(label, value, variant = 'multiplier') {
     return `<span class="final-modifier-chip ${variant} ${toneClass}">${label} ${value}</span>`;
 }
 
-function calculateHpSurvival(v, result, overrideSelf = null) {
-    const selfStats = overrideSelf || v.self;
-    const enemyStats = v.enemy;
-    const defender = v.perspective === 'self' ? enemyStats : selfStats;
-    const finalHp = Math.max(0, defender.hp || 0) * (1 + (v.common.hpP || 0) / 100);
-    const damage = Math.max(0, result?.expected || 0);
-    const remainingHp = finalHp - damage;
-    const remainingRate = finalHp > 0 ? (remainingHp / finalHp) * 100 : 0;
-    const surviveHits = damage > 0 ? finalHp / damage : Infinity;
-    return { finalHp, damage, remainingHp, remainingRate, surviveHits };
-}
-
 function calculateHpSurvivalForDamage(v, damage, overrideSelf = null) {
     const selfStats = overrideSelf || v.self;
     const enemyStats = v.enemy;
@@ -1755,7 +1743,6 @@ function closeResultDetailPopover() {
 function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
     const perspectiveEl = document.getElementById('final-modifier-perspective');
     const coreListEl = document.getElementById('final-core-chip-list');
-    const hpListEl = document.getElementById('final-hp-chip-list');
     const multiplierListEl = document.getElementById('final-multiplier-chip-list');
     const statListEl = document.getElementById('final-stat-chip-list');
     const enemyDebuffListEl = document.getElementById('final-enemy-debuff-chip-list');
@@ -1791,17 +1778,6 @@ function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
         createModifierChip(`${defenderLabel} 最終防御力`, Math.floor(finalDef).toLocaleString(), 'core'),
         createModifierChip(`${defenderLabel} 最終HP`, Math.floor(finalHp).toLocaleString(), 'core')
     ];
-
-    const hpChips = [];
-    if (isHpSurvivalEnabled() && result) {
-        const survival = calculateHpSurvival(v, result, overrideSelf);
-        hpChips.push(createModifierChip('予測被ダメ', Math.floor(survival.damage).toLocaleString(), 'stat'));
-        hpChips.push(createModifierChip('残HP', Math.floor(survival.remainingHp).toLocaleString(), `stat${survival.remainingHp < 0 ? ' clamped' : ''}`));
-        hpChips.push(createModifierChip('残HP率', `${survival.remainingRate.toFixed(1)}%`, `stat${survival.remainingHp < 0 ? ' clamped' : ''}`));
-        hpChips.push(createModifierChip('耐え回数', Number.isFinite(survival.surviveHits) ? `${survival.surviveHits.toFixed(2)}回` : '∞', 'stat'));
-    } else {
-        hpChips.push(createModifierChip('未反映', 'チェックONで残HPを表示', 'muted'));
-    }
 
     const multiplierChips = [
         createModifierChip('スキル倍率', formatMultiplierPercent(v.common.skill)),
@@ -1855,7 +1831,6 @@ function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
         .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'muted'));
 
     coreListEl.innerHTML = coreChips.join('');
-    if (hpListEl) hpListEl.innerHTML = hpChips.join('');
     multiplierListEl.innerHTML = multiplierChips.join('');
     statListEl.innerHTML = finalStatChips.join('');
     if (enemyDebuffListEl) {

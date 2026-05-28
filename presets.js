@@ -74,18 +74,51 @@ const ENEMY_PRESETS = {
     "lily_d_15": {
         name: "[次元15] リリー",
         hp: 661796770,
-        atk_p: 28118,
-        atk_m: 28118,
+        atk_p: 28120,
+        atk_m: 28120,
         def_p: 52195,
         def_m: 52195,
         dmgType: 'mag',
-        crit: 44178,
-        critDmg: 44178,
+        crit: 44165,
+        critDmg: 44165,
         critRes: 36146,
         critDmgRes: 36146,
         special: 2385.714,
         skills: [
-            { name: "通常攻撃", mult: 100 }
+            { name: "普通攻撃", mult:100 },
+            { name: "ピコハン[AoE/気絶]", mult:100 },
+            { name: "ネギ", mult:150 },
+            { name: "100tハンマー[AoE]", mult:400 },
+            { name: "火の息[5段:15%*5][AoE]", mult:75 },
+            { name: "暴走モード[A]", mult:100 },
+            { name: "暴走モード[B]", mult:150 },
+            { name: "暴走モード[C]", mult:200 },
+            { name: "暴走モード[D]", mult:250 }
+        ]
+    },
+        "lily_d_18": {
+        name: "[次元18] リリー",
+        hp: 1486382912,
+        atk_p: 42150,
+        atk_m: 42150,
+        def_p: 78195,
+        def_m: 78195,
+        dmgType: 'mag',
+        crit: 66165,
+        critDmg: 66165,
+        critRes: 54146,
+        critDmgRes: 54146,
+        special: 3528.571,
+        skills: [
+            { name: "普通攻撃", mult:100 },
+            { name: "ピコハン[AoE/気絶]", mult:100 },
+            { name: "ネギ", mult:150 },
+            { name: "100tハンマー[AoE]", mult:400 },
+            { name: "火の息[5段:15%*5][AoE]", mult:75 },
+            { name: "暴走モード[A]", mult:100 },
+            { name: "暴走モード[B]", mult:150 },
+            { name: "暴走モード[C]", mult:200 },
+            { name: "暴走モード[D]", mult:250 }
         ]
     },
     "Kérberos_d_15": {

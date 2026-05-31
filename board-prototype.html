@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Board Prototype | Trickcal Damage Calc</title>
+  <link rel="stylesheet" href="board-prototype.css">
+</head>
+<body>
+  <main class="board-shell">
+    <header class="board-hero">
+      <button type="button" class="arrow-button" aria-label="前の使徒">‹</button>
+      <div class="hero-center">
+        <p class="eyebrow">Board Prototype</p>
+        <h1 id="board-title">ボード試作</h1>
+        <p class="hero-note" id="apostle-meta"></p>
+      </div>
+      <a class="back-link" href="index.html">計算機へ戻る</a>
+      <button type="button" class="arrow-button" aria-label="次の使徒">›</button>
+    </header>
+
+    <section class="control-card">
+      <label class="select-wrap">
+        <span>使徒</span>
+        <select id="apostle-select"></select>
+      </label>
+
+      <div class="board-tabs" aria-label="ボード番号">
+        <button type="button" class="board-tab is-active" data-level="1">1</button>
+        <button type="button" class="board-tab" data-level="2">2</button>
+        <button type="button" class="board-tab" data-level="3">3</button>
+      </div>
+
+      <div class="mode-switch" aria-label="編集対象">
+        <button type="button" class="mode-button is-active" data-mode="current">Color</button>
+        <button type="button" class="mode-button" data-mode="target">Plan</button>
+      </div>
+
+      <div class="board-actions">
+        <button type="button" id="copy-current">現在を目標へ</button>
+        <button type="button" id="clear-current">現在を解除</button>
+        <button type="button" id="clear-target">目標を解除</button>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="board-panel">
+        <div class="board-grid" id="board-grid"></div>
+      </div>
+
+      <aside class="summary-panel">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow">Tile Info</p>
+            <h2>タイル情報</h2>
+          </div>
+        </div>
+        <div class="tile-info" id="tile-info"></div>
+        <div class="summary-stack" id="summary-stack"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="apostles.js?v=2.10.0"></script>
+  <script src="board-data.js"></script>
+  <script src="board-prototype.js"></script>
+</body>
+</html>

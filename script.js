@@ -30,6 +30,9 @@ const inputs = {
             type: document.getElementById('self-mult-type'),
             special: null,
             other: document.getElementById('self-mult-other-number'),
+            apostleEnabled: document.getElementById('self-apostle-skill-enabled'),
+            apostle: document.getElementById('self-apostle-select'),
+            skillChoices: document.getElementById('self-apostle-skill-choices'),
             skillDropdown: document.getElementById('self-main-skill-dropdown')
         },
         adds: {
@@ -67,6 +70,9 @@ const inputs = {
             type: document.getElementById('enemy-mult-type'),
             special: document.getElementById('enemy-mult-sp-number'),
             other: document.getElementById('enemy-mult-other-number'),
+            apostleEnabled: document.getElementById('enemy-apostle-skill-enabled'),
+            apostle: document.getElementById('enemy-apostle-select'),
+            skillChoices: document.getElementById('enemy-apostle-skill-choices'),
             skillDropdown: document.getElementById('enemy-main-skill-dropdown')
         },
         adds: {
@@ -3441,10 +3447,21 @@ function updateChart(v, overrideSelf = null) {
     });
 }
 // --- Custom Presets & Dropdown Population ---
-const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v1.8';
+const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.0';
+const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v1.8';
+
+function getLocalStorageWithFallback(key, legacyKey = '') {
+    const raw = localStorage.getItem(key);
+    if (raw !== null || !legacyKey) return raw;
+    const legacyRaw = localStorage.getItem(legacyKey);
+    if (legacyRaw !== null) {
+        localStorage.setItem(key, legacyRaw);
+    }
+    return legacyRaw;
+}
 
 function loadCustomPresets() {
-    const raw = localStorage.getItem(CUSTOM_PRESETS_KEY);
+    const raw = getLocalStorageWithFallback(CUSTOM_PRESETS_KEY, LEGACY_CUSTOM_PRESETS_KEY);
     if (!raw) return { self: {}, enemy: {} };
     try {
         return JSON.parse(raw);
@@ -3544,7 +3561,10 @@ function applyPreset(side, value, shouldSave = true) {
             syncPhaseSpacer();
         }
         if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = 100;
-        if (inputs[side]?.mult?.skillDropdown) inputs[side].mult.skillDropdown.value = "";
+        if (inputs[side]?.mult?.skillDropdown) {
+            inputs[side].mult.skillDropdown.value = "";
+            inputs[side].mult.skillDropdown.dataset.selectedSkillKey = "";
+        }
         updateUI();
         if (shouldSave) saveState();
         return;
@@ -3597,22 +3617,657 @@ function applyPreset(side, value, shouldSave = true) {
     }
     updateMainSkillList(side);
     const skillList = presetData?.skills;
-    const initialSkillMult = Array.isArray(skillList) && skillList.length > 0 ? skillList[0].mult : 100;
+    const initialSkillMult = !isApostleSkillSelectionEnabled(side) && Array.isArray(skillList) && skillList.length > 0 ? skillList[0].mult : 100;
     if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = initialSkillMult;
-    if (inputs[side]?.mult?.skillDropdown) inputs[side].mult.skillDropdown.value = "";
+    if (inputs[side]?.mult?.skillDropdown) {
+        inputs[side].mult.skillDropdown.value = "";
+        inputs[side].mult.skillDropdown.dataset.selectedSkillKey = "";
+    }
     updateUI();
     if (shouldSave) saveState();
+}
+
+function getApostleLibrary() {
+    if (typeof APOSTLE_LIBRARY !== 'undefined' && Array.isArray(APOSTLE_LIBRARY)) {
+        return APOSTLE_LIBRARY;
+    }
+    return Array.isArray(window.APOSTLE_LIBRARY) ? window.APOSTLE_LIBRARY : [];
+}
+
+function normalizeApostleEffects(skill) {
+    if (!skill || !skill.effects) return [];
+    return Array.isArray(skill.effects) ? skill.effects : [skill.effects];
+}
+
+function getApostleEffectLevelValue(effect, requestedLevel) {
+    const levels = effect?.levels;
+    if (levels && typeof levels === 'object') {
+        const requestedKey = String(requestedLevel);
+        if (levels[requestedKey] !== undefined && levels[requestedKey] !== '') {
+            return Number(levels[requestedKey]);
+        }
+        const availableLevels = Object.keys(levels)
+            .map(Number)
+            .filter(Number.isFinite)
+            .sort((a, b) => a - b);
+        const fallbackLevel = availableLevels.filter(level => level <= requestedLevel).pop()
+            ?? availableLevels[availableLevels.length - 1];
+        if (fallbackLevel !== undefined) {
+            return Number(levels[String(fallbackLevel)]);
+        }
+    }
+    if (effect?.fixedValue !== undefined && effect.fixedValue !== '') {
+        return Number(effect.fixedValue);
+    }
+    return NaN;
+}
+
+function getApostleEffectLevelOptions(effect) {
+    const levels = effect?.levels;
+    if (!levels || typeof levels !== 'object') return [];
+    return Object.keys(levels)
+        .map(Number)
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+}
+
+function isApostleAttackMultiplierEffect(effect) {
+    const valueKind = String(effect?.valueKind || '');
+    const effectType = String(effect?.effectType || '');
+    const valueClass = String(effect?.valueClass || '');
+    if (valueClass && valueClass !== '倍率') return false;
+    if (effectType && !/攻撃|ダメージ/.test(effectType)) return false;
+    if (!/ダメージ/.test(valueKind)) return false;
+    if (/被ダメージ|被スキルダメージ|ダメージ量減少|回復|シールド/.test(valueKind)) return false;
+    return true;
+}
+
+function isApostleSkillChangeEffect(effect) {
+    const valueKind = String(effect?.valueKind || '');
+    const valueClass = String(effect?.valueClass || '');
+    const effectType = String(effect?.effectType || '');
+    return /スキル変更/.test(valueClass)
+        || /追加発射|基本攻撃強化|強化攻撃化|スキル変更/.test(valueKind)
+        || /スキル変更/.test(effectType);
+}
+
+function isApostlePassiveInfoEffect(effect) {
+    return /パッシブ/.test(String(effect?.effectType || ''));
+}
+
+function normalizeApostleSkillEntries(entries) {
+    if (!entries) return [];
+    return Array.isArray(entries) ? entries.filter(Boolean) : [entries];
+}
+
+function collectApostleSkillSources(apostle) {
+    const sources = [];
+    normalizeApostleSkillEntries(apostle.skills).forEach((skill, index) => {
+        sources.push({ skill, sourceLabel: '通常', sourceKey: `base:${index}` });
+    });
+
+    const favoriteLevels = apostle.favoriteCard?.levels || {};
+    Object.entries(favoriteLevels).forEach(([level, entries]) => {
+        normalizeApostleSkillEntries(entries).forEach((skill, index) => {
+            sources.push({
+                skill,
+                sourceLabel: `愛用Lv${level}`,
+                sourceKey: `favorite:${level}:${index}`
+            });
+        });
+    });
+
+    const asideName = apostle.aside?.name ? `アサイドLv` : 'アサイドLv';
+    const asideLevels = apostle.aside?.levels || {};
+    Object.entries(asideLevels).forEach(([level, data]) => {
+        if (!data) return;
+        const effects = normalizeApostleSkillEntries(data.effects);
+        sources.push({
+            skill: {
+                effects,
+                skillType: data.name || `${asideName}${level}`,
+                skillName: data.description ? data.description.split(/\r?\n/)[0] : `Lv${level}`,
+                targetSkill: effects.find(effect => effect?.targetSkill)?.targetSkill
+            },
+            sourceLabel: `${asideName}${level}`,
+            sourceKey: `aside:${level}`
+        });
+    });
+
+    return sources;
+}
+
+function isApostleSkillSelectionEnabled(side) {
+    const toggle = inputs[side]?.mult?.apostleEnabled;
+    return !!toggle?.checked;
+}
+
+function updateApostleSkillPickerVisibility(side) {
+    const toggle = inputs[side]?.mult?.apostleEnabled;
+    const picker = inputs[side]?.mult?.apostle?.closest('.apostle-skill-picker');
+    if (!toggle || !picker) return;
+    picker.hidden = false;
+    picker.classList.toggle('apostle-off', !toggle.checked);
+}
+
+function getApostleSkillCategory(skill, effect, sourceLabel) {
+    if (sourceLabel.startsWith('愛用')) return sourceLabel.replace('愛用', '愛用品');
+    if (sourceLabel.startsWith('アサイド')) return sourceLabel;
+
+    const rawType = String(skill?.skillType || skill?.targetSkill || effect?.targetSkill || '');
+    if (/普通攻撃_基本|基本攻撃|基本/.test(rawType)) return '基本攻撃';
+    if (/普通攻撃_強化|強化攻撃|強化/.test(rawType)) return '強化攻撃';
+    if (/低学年/.test(rawType)) return '低学年スキル';
+    if (/高学年/.test(rawType)) return '高学年スキル';
+    if (/パッシブ/.test(rawType)) return 'パッシブ';
+    return rawType || sourceLabel || 'スキル';
+}
+
+function getApostleSkillCategoryOrder(category) {
+    if (category === '基本攻撃') return 10;
+    if (category === '強化攻撃') return 20;
+    if (category === '低学年スキル') return 30;
+    if (category === '高学年スキル') return 40;
+    if (category.startsWith('愛用品')) return 50;
+    if (category.startsWith('アサイド')) return 60;
+    return 90;
+}
+
+function getApostleSkillActionLabel(category = '') {
+    if (category === '基本攻撃') return '基本';
+    if (category === '強化攻撃') return '強化';
+    if (category === '低学年スキル') return '低学年';
+    if (category === '高学年スキル') return '高学年';
+    return category;
+}
+
+function getApostleSkillActionTone(category = '') {
+    if (category === '基本攻撃') return 'tone-basic';
+    if (category === '強化攻撃') return 'tone-enhanced';
+    if (category === '低学年スキル') return 'tone-low';
+    if (category === '高学年スキル') return 'tone-high';
+    if (category === 'パッシブ') return 'tone-passive';
+    return 'tone-extra';
+}
+
+function buildApostleSkillOptions(apostleId, requestedLevel) {
+    const apostle = getApostleLibrary().find(item => item.id === apostleId);
+    if (!apostle) return [];
+    const level = Number(requestedLevel) || 12;
+    const options = [];
+
+    collectApostleSkillSources(apostle).forEach(({ skill, sourceLabel, sourceKey }) => {
+        const skillEffects = normalizeApostleEffects(skill);
+        const skillCategory = getApostleSkillCategory(skill, null, sourceLabel);
+        const skillDescription = String(skill.description || '').trim();
+        if (!skillEffects.length) {
+            options.push({
+                key: `${apostle.id}:${sourceKey}:skill-info`,
+                value: '',
+                label: skill.skillName || skillCategory,
+                displayLabel: skillCategory,
+                category: skillCategory,
+                skillName: skill.skillName || '',
+                kind: '説明',
+                detailText: skillDescription,
+                levelLabel: '',
+                selectedLevel: null,
+                levelOptions: [],
+                effect: null,
+                order: getApostleSkillCategoryOrder(skillCategory),
+                disabled: true,
+                hasMultiplier: false
+            });
+            return;
+        }
+        const hasVisibleEffect = skillEffects.some(effect => isApostleAttackMultiplierEffect(effect) || isApostleSkillChangeEffect(effect) || isApostlePassiveInfoEffect(effect));
+        if (!hasVisibleEffect && skillCategory === 'パッシブ') {
+            options.push({
+                key: `${apostle.id}:${sourceKey}:passive-info`,
+                value: '',
+                label: skill.skillName || 'パッシブ',
+                displayLabel: 'パッシブ',
+                category: 'パッシブ',
+                skillName: skill.skillName || '',
+                kind: '説明',
+                detailText: skillDescription,
+                levelLabel: '',
+                selectedLevel: null,
+                levelOptions: [],
+                effect: null,
+                order: getApostleSkillCategoryOrder('パッシブ'),
+                disabled: true,
+                hasMultiplier: false
+            });
+        }
+        skillEffects.forEach((effect, effectIndex) => {
+            const category = getApostleSkillCategory(skill, effect, sourceLabel);
+            const kind = effect.valueKind || 'ダメージ';
+            const rawSkillName = skill.skillName || '';
+            const skillName = /基本攻撃|強化攻撃/.test(category) ? '' : rawSkillName;
+            const levelOptions = getApostleEffectLevelOptions(effect);
+            const selectedLevel = levelOptions.includes(level) ? level : (levelOptions.filter(item => item <= level).pop() || levelOptions[levelOptions.length - 1] || null);
+            const levelLabel = selectedLevel ? `Lv${selectedLevel}` : '';
+            const order = getApostleSkillCategoryOrder(category);
+            const effectDescription = String(effect.description || effect.effectDescription || '').trim();
+            const detailText = [skillDescription, effectDescription].filter(Boolean).join('\n');
+
+            if (isApostleAttackMultiplierEffect(effect)) {
+                const mult = getApostleEffectLevelValue(effect, selectedLevel || level);
+                if (!Number.isFinite(mult)) return;
+                const displayLabel = category;
+                options.push({
+                    key: `${apostle.id}:${sourceKey}:${effectIndex}`,
+                    value: String(mult),
+                    label: `${category} / ${kind} (${mult}%)`,
+                    displayLabel,
+                    category,
+                    skillName,
+                    kind,
+                    detailText,
+                    levelLabel,
+                    selectedLevel,
+                    levelOptions,
+                    effect,
+                    order,
+                    hasMultiplier: true
+                });
+                return;
+            }
+
+            const value = getApostleEffectLevelValue(effect, selectedLevel || level);
+            const suffix = Number.isFinite(value) ? ` (${value})` : '';
+            const displayLabel = category;
+            options.push({
+                key: `${apostle.id}:${sourceKey}:${effectIndex}:info`,
+                value: '',
+                label: `${category} / ${kind}${suffix} ※倍率入力なし`,
+                displayLabel,
+                category,
+                skillName,
+                kind,
+                detailText,
+                levelLabel,
+                selectedLevel,
+                levelOptions,
+                effect,
+                order,
+                disabled: true,
+                hasMultiplier: false
+            });
+        });
+    });
+
+    return options.sort((a, b) => (a.order - b.order) || a.label.localeCompare(b.label, 'ja'));
+}
+
+function splitPresetSkillName(rawName = '') {
+    const source = String(rawName || '').trim();
+    const details = [];
+    const baseName = source.replace(/\[([^\]]+)\]/g, (_, detail) => {
+        if (detail) details.push(detail.trim());
+        return '';
+    }).trim() || source;
+    return { baseName, details };
+}
+
+function inferPresetSkillAction(baseName = '') {
+    if (/普通攻撃|通常攻撃|基本攻撃/.test(baseName)) return '基本攻撃';
+    if (/強攻撃|強化攻撃/.test(baseName)) return '強化攻撃';
+    if (/低学年/.test(baseName)) return '低学年スキル';
+    if (/高学年/.test(baseName)) return '高学年スキル';
+    if (/パッシブ/.test(baseName)) return 'パッシブ';
+    return baseName || '行動';
+}
+
+function getPresetDamageKind(dmgType = '') {
+    if (dmgType === 'phys') return '物理ダメージ';
+    if (dmgType === 'mag') return '魔法ダメージ';
+    return 'ダメージ';
+}
+
+function inferPresetSkillKind(skill, presetDmgType = '') {
+    if (skill.kind) return skill.kind;
+    const joined = String(skill.name || '');
+    if (/回復/.test(joined)) return '回復';
+    if (/シールド/.test(joined)) return 'シールド';
+    return getPresetDamageKind(presetDmgType);
+}
+
+function buildPresetSkillOptions(skills = [], presetKey = '', presetDmgType = '') {
+    return skills.map((skill, index) => {
+        const { baseName, details } = splitPresetSkillName(skill.name || skill.label || '');
+        const action = skill.action || inferPresetSkillAction(baseName);
+        const kind = inferPresetSkillKind(skill, presetDmgType);
+        const shortDetail = skill.note || details.join(' / ');
+        const detailText = skill.description || details.join('\n') || baseName;
+        const mult = Number(skill.mult);
+        return {
+            key: `preset:${presetKey}:${index}`,
+            value: Number.isFinite(mult) ? String(mult) : '',
+            label: `${baseName} / ${kind}${Number.isFinite(mult) ? ` (${mult}%)` : ''}`,
+            displayLabel: action,
+            actionLabel: skill.actionLabel || baseName || getApostleSkillActionLabel(action),
+            category: action,
+            skillName: baseName,
+            kind,
+            shortDetail,
+            detailText,
+            levelLabel: '',
+            selectedLevel: null,
+            levelOptions: [],
+            effect: null,
+            order: index,
+            disabled: !Number.isFinite(mult),
+            hasMultiplier: Number.isFinite(mult)
+        };
+    });
+}
+
+function appendSkillOption(dropdown, value, label, key = '', disabled = false, displayLabel = '') {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    if (key) option.dataset.skillKey = key;
+    if (displayLabel) option.dataset.displayLabel = displayLabel;
+    option.dataset.fullLabel = label;
+    option.disabled = disabled;
+    dropdown.appendChild(option);
+}
+
+function resetSkillDropdown(dropdown) {
+    dropdown.innerHTML = '';
+    appendSkillOption(dropdown, '', 'スキルリスト');
+    dropdown.options[0].hidden = true;
+    appendSkillOption(dropdown, '100', '100%');
+}
+
+function restoreSkillDropdownFullLabels(dropdown) {
+    Array.from(dropdown?.options || []).forEach(option => {
+        if (option.dataset.fullLabel) option.textContent = option.dataset.fullLabel;
+    });
+}
+
+function shortenSkillDropdownSelectedLabel(dropdown) {
+    const selectedOption = dropdown?.selectedOptions?.[0];
+    if (selectedOption?.dataset.displayLabel) {
+        selectedOption.textContent = selectedOption.dataset.displayLabel;
+    }
+}
+
+function clearApostleSkillChoices(side) {
+    const choices = inputs[side]?.mult?.skillChoices;
+    if (!choices) return;
+    choices.innerHTML = '';
+    choices.hidden = true;
+}
+
+function syncApostleSkillChoiceActive(side) {
+    const choices = inputs[side]?.mult?.skillChoices;
+    const selectedKey = inputs[side]?.mult?.skillDropdown?.dataset.selectedSkillKey || '';
+    if (!choices) return;
+    choices.querySelectorAll('.apostle-skill-choice').forEach(btn => {
+        btn.classList.toggle('active', !!selectedKey && btn.dataset.skillKey === selectedKey);
+    });
+}
+
+function syncApostleSkillNoMultiplierToggle(choices) {
+    if (!choices) return;
+    const hidden = choices.dataset.hideNoMultiplier === 'true';
+    choices.classList.toggle('hide-no-multiplier', hidden);
+    const button = choices.querySelector('.apostle-skill-choice-filter');
+    if (button) {
+        button.textContent = hidden ? '+' : '-';
+        button.title = hidden ? '倍率効果がない行を表示' : '倍率効果がない行を隠す';
+        button.setAttribute('aria-label', button.title);
+    }
+}
+
+function selectApostleSkillOption(side, option) {
+    if (!option || option.disabled || !option.value) return;
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    if (dropdown) {
+        dropdown.dataset.selectedSkillKey = option.key || '';
+        dropdown.value = option.value;
+    }
+    if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = option.value;
+    syncApostleSkillChoiceActive(side);
+    updateUI();
+    saveState();
+}
+
+function updateApostleSkillOptionLevel(side, option, level, multEl) {
+    option.selectedLevel = Number(level);
+    option.levelLabel = `Lv${option.selectedLevel}`;
+    const nextValue = getApostleEffectLevelValue(option.effect, option.selectedLevel);
+    if (Number.isFinite(nextValue)) {
+        option.value = String(nextValue);
+        if (multEl) multEl.textContent = `${option.value}%`;
+        const selectedKey = inputs[side]?.mult?.skillDropdown?.dataset.selectedSkillKey || '';
+        if (selectedKey === option.key) {
+            if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = option.value;
+            const dropdown = inputs[side]?.mult?.skillDropdown;
+            if (dropdown) dropdown.value = option.value;
+            updateUI();
+        }
+        saveState();
+    }
+}
+
+function getApostleSkillInfoPopover() {
+    let popover = document.getElementById('apostle-skill-info-popover');
+    if (popover) return popover;
+    popover = document.createElement('div');
+    popover.id = 'apostle-skill-info-popover';
+    popover.className = 'apostle-skill-info-popover';
+    popover.innerHTML = '<div class="apostle-skill-info-title"></div><div class="apostle-skill-info-body"></div>';
+    document.body.appendChild(popover);
+    return popover;
+}
+
+function closeApostleSkillInfoPopover() {
+    const popover = document.getElementById('apostle-skill-info-popover');
+    if (popover) popover.hidden = true;
+}
+
+function showApostleSkillInfoPopover(anchor, option) {
+    const popover = getApostleSkillInfoPopover();
+    const title = popover.querySelector('.apostle-skill-info-title');
+    const body = popover.querySelector('.apostle-skill-info-body');
+    const lines = [
+        option.skillName ? `スキル名: ${option.skillName}` : '',
+        option.label || '',
+        option.kind ? `値の種類: ${option.kind}` : '',
+        option.detailText || ''
+    ].filter(Boolean);
+    title.textContent = option.category || option.displayLabel || 'スキル詳細';
+    body.textContent = lines.join('\n') || '詳細情報はありません';
+    popover.hidden = false;
+
+    const rect = anchor.getBoundingClientRect();
+    const margin = 8;
+    const width = Math.min(300, window.innerWidth - margin * 2);
+    popover.style.maxWidth = `${width}px`;
+    const measured = popover.getBoundingClientRect();
+    let left = rect.right + margin;
+    if (left + measured.width > window.innerWidth - margin) {
+        left = rect.left - measured.width - margin;
+    }
+    if (left < margin) left = margin;
+    let top = rect.top + rect.height / 2 - measured.height / 2;
+    top = Math.max(margin, Math.min(top, window.innerHeight - measured.height - margin));
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+}
+
+function renderApostleSkillChoices(side, options) {
+    const choices = inputs[side]?.mult?.skillChoices;
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    if (!choices || !dropdown) return;
+
+    dropdown.hidden = true;
+    choices.hidden = false;
+    choices.dataset.hideNoMultiplier = choices.dataset.hideNoMultiplier || 'true';
+    const hasLevelColumn = options.some(option => option.levelOptions?.length || option.levelLabel);
+    choices.classList.toggle('no-level', !hasLevelColumn);
+    choices.innerHTML = '';
+
+    if (!options.length) {
+        const empty = document.createElement('div');
+        empty.className = 'apostle-skill-choice-empty';
+        empty.textContent = '表示できる攻撃倍率がありません';
+        choices.appendChild(empty);
+        return;
+    }
+
+    const header = document.createElement('div');
+    header.className = 'apostle-skill-choice-header';
+    (hasLevelColumn ? ['SLv', '行動', '倍率', '値の種類'] : ['行動', '倍率', '値の種類']).forEach(text => {
+        const cell = document.createElement('span');
+        cell.textContent = text;
+        header.appendChild(cell);
+    });
+    const filterCell = document.createElement('span');
+    const filterButton = document.createElement('button');
+    filterButton.type = 'button';
+    filterButton.className = 'apostle-skill-choice-filter';
+    filterButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        choices.dataset.hideNoMultiplier = choices.dataset.hideNoMultiplier === 'true' ? 'false' : 'true';
+        syncApostleSkillNoMultiplierToggle(choices);
+    });
+    filterCell.appendChild(filterButton);
+    header.appendChild(filterCell);
+    choices.appendChild(header);
+
+    options.forEach(option => {
+        const row = document.createElement('div');
+        row.className = 'apostle-skill-choice';
+        row.dataset.skillKey = option.key || '';
+        row.classList.toggle('disabled', !!option.disabled || !option.value);
+        row.classList.toggle('no-multiplier', !option.hasMultiplier);
+
+        let level = null;
+        if (hasLevelColumn) {
+            level = option.levelOptions?.length ? document.createElement('select') : document.createElement('span');
+            level.className = 'apostle-skill-choice-level';
+            if (option.levelOptions?.length) {
+                option.levelOptions.forEach(levelValue => {
+                    const levelOption = document.createElement('option');
+                    levelOption.value = String(levelValue);
+                    levelOption.textContent = String(levelValue);
+                    level.appendChild(levelOption);
+                });
+                level.value = String(option.selectedLevel || option.levelOptions[0]);
+            } else {
+                level.textContent = option.levelLabel ? option.levelLabel.replace(/^Lv/, '') : '';
+            }
+        }
+
+        const action = document.createElement('button');
+        action.type = 'button';
+        action.className = `apostle-skill-choice-action ${getApostleSkillActionTone(option.category || option.displayLabel || '')}`;
+        action.textContent = option.actionLabel || getApostleSkillActionLabel(option.category || option.displayLabel || 'スキル');
+        action.disabled = !!option.disabled || !option.value;
+
+        const mult = document.createElement('span');
+        mult.className = 'apostle-skill-choice-mult';
+        mult.textContent = option.value ? `${option.value}%` : '-';
+
+        const kind = document.createElement('span');
+        kind.className = 'apostle-skill-choice-kind';
+        kind.textContent = [option.kind, option.shortDetail].filter(Boolean).join(' / ');
+        kind.title = [option.kind, option.shortDetail, option.detailText].filter(Boolean).join('\n');
+
+        const info = document.createElement('button');
+        info.type = 'button';
+        info.className = 'apostle-skill-choice-info';
+        info.textContent = 'i';
+        info.title = [option.skillName, option.label].filter(Boolean).join('\n') || '詳細';
+        info.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showApostleSkillInfoPopover(info, option);
+        });
+
+        if (level?.tagName === 'SELECT') {
+            level.addEventListener('change', () => updateApostleSkillOptionLevel(side, option, level.value, mult));
+        }
+        action.addEventListener('click', () => selectApostleSkillOption(side, option));
+        if (level) row.appendChild(level);
+        row.append(action, mult, kind, info);
+        choices.appendChild(row);
+    });
+
+    syncApostleSkillNoMultiplierToggle(choices);
+    syncApostleSkillChoiceActive(side);
+}
+
+function initializeApostleSkillSelectors() {
+    const apostles = getApostleLibrary()
+        .filter(apostle => apostle?.id && apostle?.name)
+        .slice()
+        .sort((a, b) => String(a.name).localeCompare(String(b.name), 'ja'));
+
+    ['self', 'enemy'].forEach(side => {
+        const apostleSelect = inputs[side]?.mult?.apostle;
+        if (apostleSelect) {
+            const current = apostleSelect.value;
+            apostleSelect.innerHTML = '<option value="">使徒選択</option>';
+            apostles.forEach(apostle => {
+                const option = document.createElement('option');
+                option.value = apostle.id;
+                option.textContent = apostle.name;
+                apostleSelect.appendChild(option);
+            });
+            if (current && apostles.some(apostle => apostle.id === current)) {
+                apostleSelect.value = current;
+            }
+        }
+    });
 }
 
 function updateMainSkillList(side = 'enemy') {
     const presetInput = inputs[side]?.preset;
     const dropdown = inputs[side]?.mult?.skillDropdown;
-    const defaultHTML = '<option value="" hidden>リスト</option><option value="100">100%</option>';
     if (!presetInput || !dropdown) return;
 
-    const val = presetInput.value;
+    updateApostleSkillPickerVisibility(side);
+    const apostleId = isApostleSkillSelectionEnabled(side) ? (inputs[side]?.mult?.apostle?.value || '') : '';
+    const skillLevel = '12';
+    const selectedSkillKey = dropdown.dataset.selectedSkillKey || '';
+    resetSkillDropdown(dropdown);
+    dropdown.hidden = false;
+    clearApostleSkillChoices(side);
 
-    dropdown.innerHTML = defaultHTML;
+    if (apostleId) {
+        const options = buildApostleSkillOptions(apostleId, skillLevel);
+        options.forEach(option => {
+            appendSkillOption(dropdown, option.value, option.label, option.key, option.disabled, option.displayLabel);
+        });
+        renderApostleSkillChoices(side, options);
+        if (selectedSkillKey) {
+            const selectedOption = Array.from(dropdown.options).find(option => option.dataset.skillKey === selectedSkillKey);
+            const selectedApostleOption = options.find(option => option.key === selectedSkillKey);
+            if (selectedOption) {
+                dropdown.value = selectedOption.value;
+                if (selectedOption.dataset.displayLabel) selectedOption.textContent = selectedOption.dataset.displayLabel;
+                if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = selectedOption.value;
+                syncApostleSkillChoiceActive(side);
+                return;
+            }
+            if (selectedApostleOption?.value && inputs[side]?.mult?.skill) {
+                inputs[side].mult.skill.value = selectedApostleOption.value;
+                syncApostleSkillChoiceActive(side);
+                return;
+            }
+        }
+        dropdown.dataset.selectedSkillKey = "";
+        dropdown.value = "";
+        syncApostleSkillChoiceActive(side);
+        return;
+    }
+
+    const val = presetInput.value;
 
     const isPlayer = side === 'self';
     const prefix = isPlayer ? 'p_' : 'e_';
@@ -3622,13 +4277,14 @@ function updateMainSkillList(side = 'enemy') {
     const p = isPlayer ? PLAYER_PRESETS[key] : ENEMY_PRESETS[key];
     if (!p || !p.skills) return;
 
-    let html = defaultHTML;
-    p.skills.forEach(s => {
-        html += `<option value="${s.mult}">${s.name} (${s.mult}%)</option>`;
+    const options = buildPresetSkillOptions(p.skills, key, p.dmgType);
+    options.forEach(option => {
+        appendSkillOption(dropdown, option.value, option.label, option.key, option.disabled, option.displayLabel);
     });
-
-    dropdown.innerHTML = html;
+    renderApostleSkillChoices(side, options);
+    dropdown.dataset.selectedSkillKey = "";
     dropdown.value = "";
+    syncApostleSkillChoiceActive(side);
 }
 
 function syncPhaseSpacer() {
@@ -3937,21 +4593,45 @@ function initListeners() {
     
     // Perspective & Global
     if (inputs.self.mult.skillDropdown) {
+        inputs.self.mult.skillDropdown.addEventListener('mousedown', (e) => restoreSkillDropdownFullLabels(e.currentTarget));
+        inputs.self.mult.skillDropdown.addEventListener('focus', (e) => restoreSkillDropdownFullLabels(e.currentTarget));
+        inputs.self.mult.skillDropdown.addEventListener('blur', (e) => shortenSkillDropdownSelectedLabel(e.currentTarget));
         inputs.self.mult.skillDropdown.addEventListener('change', (e) => {
             if (e.target.value) {
+                const selectedOption = e.target.selectedOptions?.[0];
+                e.target.dataset.selectedSkillKey = selectedOption?.dataset.skillKey || '';
+                if (selectedOption?.dataset.displayLabel) selectedOption.textContent = selectedOption.dataset.displayLabel;
                 inputs.self.mult.skill.value = e.target.value;
                 updateUI();
             }
         });
     }
     if (inputs.enemy.mult.skillDropdown) {
+        inputs.enemy.mult.skillDropdown.addEventListener('mousedown', (e) => restoreSkillDropdownFullLabels(e.currentTarget));
+        inputs.enemy.mult.skillDropdown.addEventListener('focus', (e) => restoreSkillDropdownFullLabels(e.currentTarget));
+        inputs.enemy.mult.skillDropdown.addEventListener('blur', (e) => shortenSkillDropdownSelectedLabel(e.currentTarget));
         inputs.enemy.mult.skillDropdown.addEventListener('change', (e) => {
             if (e.target.value) {
+                const selectedOption = e.target.selectedOptions?.[0];
+                e.target.dataset.selectedSkillKey = selectedOption?.dataset.skillKey || '';
+                if (selectedOption?.dataset.displayLabel) selectedOption.textContent = selectedOption.dataset.displayLabel;
                 inputs.enemy.mult.skill.value = e.target.value;
                 updateUI();
             }
         });
     }
+    ['self', 'enemy'].forEach(side => {
+        const apostleEnabled = inputs[side]?.mult?.apostleEnabled;
+        const apostleSelect = inputs[side]?.mult?.apostle;
+        [apostleEnabled, apostleSelect].forEach(el => {
+            if (!el) return;
+            el.addEventListener('change', () => {
+                updateMainSkillList(side);
+                updateUI();
+                saveState();
+            });
+        });
+    });
 
 inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI));
 
@@ -4461,17 +5141,21 @@ function estimateDefSide(rows, common) {
 }
 
 // --- Persistence & Initialization ---
-const STORAGE_KEY = 'trickcal_calc_state_v1.8';
+const STORAGE_KEY = 'trickcal_calc_state_v3.0';
+const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v1.8';
 const SPELL_STORAGE_KEY = `${STORAGE_KEY}:spell`;
+const LEGACY_SPELL_STORAGE_KEY = `${LEGACY_STORAGE_KEY}:spell`;
 const ARTIFACT_PRESETS_KEY = `${STORAGE_KEY}:artifact-presets`;
+const LEGACY_ARTIFACT_PRESETS_KEY = `${LEGACY_STORAGE_KEY}:artifact-presets`;
 const SPELL_PRESETS_KEY = `${STORAGE_KEY}:spell-presets`;
+const LEGACY_SPELL_PRESETS_KEY = `${LEGACY_STORAGE_KEY}:spell-presets`;
 const ARTIFACT_PRESET_SLOT_COUNT = 9;
 let activeArtifactPresetSlotId = '';
 let activeSpellPresetSlotId = '';
 
 function loadArtifactPresets() {
     try {
-        const raw = localStorage.getItem(ARTIFACT_PRESETS_KEY);
+        const raw = getLocalStorageWithFallback(ARTIFACT_PRESETS_KEY, LEGACY_ARTIFACT_PRESETS_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
         if (!parsed || typeof parsed !== 'object') return {};
         return parsed;
@@ -4521,7 +5205,7 @@ function renderCalcSpellDeckPreview() {
 
 function loadSpellPresets() {
     try {
-        const raw = localStorage.getItem(SPELL_PRESETS_KEY);
+        const raw = getLocalStorageWithFallback(SPELL_PRESETS_KEY, LEGACY_SPELL_PRESETS_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
         if (!parsed || typeof parsed !== 'object') return {};
         return parsed;
@@ -5593,7 +6277,7 @@ function saveSpellSelectionsState() {
 
 function loadSpellSelectionsState() {
     try {
-        const raw = localStorage.getItem(SPELL_STORAGE_KEY);
+        const raw = getLocalStorageWithFallback(SPELL_STORAGE_KEY, LEGACY_SPELL_STORAGE_KEY);
         if (!raw) return false;
         const state = JSON.parse(raw);
         if (state?.selections) {
@@ -5662,7 +6346,7 @@ function migrateLegacyZeroBaseMultiplierInputs(state = {}) {
 
 function saveStatePatch(patch) {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY);
         const state = raw ? JSON.parse(raw) : {};
         Object.assign(state, patch);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -5722,7 +6406,7 @@ function saveState() {
 }
 
 function loadState() {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY);
     if (!raw) return;
     try {
         isRestoringState = true;
@@ -5877,6 +6561,7 @@ document.getElementById('reset-btn').addEventListener('click', () => {
     
     if (activeTab === 'calc') {
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
         location.reload();
     } else if (activeTab === 'crayon') {
         document.querySelectorAll('input[id^="cb-"]').forEach(el => { el.value = 0; });
@@ -5911,6 +6596,7 @@ populatePresets();
 initializeCardUI();
 initializeSpellTab();
 renderArtifactPresetButtons();
+initializeApostleSkillSelectors();
 loadState();
 initCollapsibleSections();
 updateMobileSideUI(mobileVisibleSide);
@@ -6002,10 +6688,18 @@ document.addEventListener('click', (e) => {
     closeCrayonStepperPopover();
 });
 
+document.addEventListener('click', (e) => {
+    const popover = document.getElementById('apostle-skill-info-popover');
+    if (!popover || popover.hidden) return;
+    if (popover.contains(e.target) || e.target.closest('.apostle-skill-choice-info')) return;
+    closeApostleSkillInfoPopover();
+});
+
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeSpellSelectedPopovers();
         closeCrayonStepperPopover();
+        closeApostleSkillInfoPopover();
     }
 });
 

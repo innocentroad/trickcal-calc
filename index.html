@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trickcal Damage Calculator</title>
-    <link rel="icon" href="ico.webp?v=2.9.0" type="image/webp">
-    <link rel="stylesheet" href="style.css?v=2.9.0">
+    <link rel="icon" href="ico.webp?v=3.0.0" type="image/webp">
+    <link rel="stylesheet" href="style.css?v=3.0.0">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google tag (gtag.js) -->
@@ -19,7 +19,7 @@
     </script>
     <script>
         try {
-            const raw = localStorage.getItem('trickcal_calc_state_v1.8');
+            const raw = localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
             const state = raw ? JSON.parse(raw) : null;
             document.documentElement.dataset.initialPerspective = state?.perspective || 'self';
             document.documentElement.dataset.initialTab = state?.tab || 'calc';
@@ -97,7 +97,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v2.10</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v3.0</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>選択</button>
@@ -125,7 +125,7 @@
 <input type="radio" name="perspective" id="perspective-enemy" value="enemy" style="display:none;">
 <script>
     try {
-        const raw = localStorage.getItem('trickcal_calc_state_v1.8');
+        const raw = localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
         const state = raw ? JSON.parse(raw) : null;
         const savedPerspective = state?.perspective;
         if (savedPerspective === 'enemy') {
@@ -227,18 +227,25 @@
         <div class="dynamic-section self-mult-section">
             <h3 class="stat-cat-header">倍率 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group stat-input-skill">
-                    <label>スキル 
-                        <select id="self-main-skill-dropdown" class="skill-icon-btn">
-                            <option value="" hidden>リスト</option>
-                            <option value="100">100%</option>
+                <div class="input-group stat-input-skill apostle-skill-group">
+                    <div class="apostle-skill-title-row" aria-label="使徒スキル倍率選択">
+                        <span class="apostle-skill-title">スキル</span>
+                        <label class="apostle-skill-toggle">
+                            <input type="checkbox" id="self-apostle-skill-enabled" checked>
+                            <span>使徒選択ON</span>
+                        </label>
+                    </div>
+                    <div class="apostle-skill-picker">
+                        <select id="self-apostle-select" class="apostle-select">
+                            <option value="">使徒選択</option>
                         </select>
-                    </label>
-                    <input type="number" id="self-mult-skill-number" min="0" max="10000" value="100">
-                </div>
-                <div class="input-group stat-input-damage" id="self-add-mult-group">
-                    <label>与被DMG増減</label>
-                    <input type="number" id="self-mult-add-number" min="-100" max="1000" value="0">
+                        <input type="number" id="self-mult-skill-number" min="0" max="10000" value="100">
+                    </div>
+                    <select id="self-main-skill-dropdown" class="apostle-skill-list-select">
+                        <option value="" hidden>スキルリスト</option>
+                        <option value="100">100%</option>
+                    </select>
+                    <div id="self-apostle-skill-choices" class="apostle-skill-choices" hidden></div>
                 </div>
                 <div class="input-group stat-input-type">
                     <label>相性</label>
@@ -249,6 +256,10 @@
                         <option value="150">150</option>
                         <option value="200">200</option>
                     </select>
+                </div>
+                <div class="input-group stat-input-damage" id="self-add-mult-group">
+                    <label>与被DMG±</label>
+                    <input type="number" id="self-mult-add-number" min="-100" max="1000" value="0">
                 </div>
                 <div class="input-group">
                     <label>その他</label>
@@ -498,18 +509,25 @@
         <div class="dynamic-section enemy-mult-section disabled-section">
             <h3 class="stat-cat-header">倍率 (%)</h3>
             <div class="multipliers-grid">
-                <div class="input-group stat-input-skill">
-                    <label>スキル 
-                        <select id="enemy-main-skill-dropdown" class="skill-icon-btn">
-                            <option value="" hidden>リスト</option>
-                            <option value="100">100%</option>
+                <div class="input-group stat-input-skill apostle-skill-group">
+                    <div class="apostle-skill-title-row" aria-label="使徒スキル倍率選択">
+                        <span class="apostle-skill-title">スキル</span>
+                        <label class="apostle-skill-toggle">
+                            <input type="checkbox" id="enemy-apostle-skill-enabled">
+                            <span>使徒選択ON</span>
+                        </label>
+                    </div>
+                    <div class="apostle-skill-picker apostle-off">
+                        <select id="enemy-apostle-select" class="apostle-select">
+                            <option value="">使徒選択</option>
                         </select>
-                    </label>
-                    <input type="number" id="enemy-mult-skill-number" min="0" max="10000" value="100">
-                </div>
-                <div class="input-group stat-input-damage" id="enemy-add-mult-group">
-                    <label>与被DMG増減</label>
-                    <input type="number" id="enemy-mult-add-number" min="-100" max="1000" value="0">
+                        <input type="number" id="enemy-mult-skill-number" min="0" max="10000" value="100">
+                    </div>
+                    <select id="enemy-main-skill-dropdown" class="apostle-skill-list-select">
+                        <option value="" hidden>スキルリスト</option>
+                        <option value="100">100%</option>
+                    </select>
+                    <div id="enemy-apostle-skill-choices" class="apostle-skill-choices" hidden></div>
                 </div>
                 <div class="input-group stat-input-type">
                     <label>相性</label>
@@ -520,6 +538,10 @@
                         <option value="150">150</option>
                         <option value="200">200</option>
                     </select>
+                </div>
+                <div class="input-group stat-input-damage" id="enemy-add-mult-group">
+                    <label>与被DMG±</label>
+                    <input type="number" id="enemy-mult-add-number" min="-100" max="1000" value="0">
                 </div>
                 <div class="input-group stat-input-enemy">
                     <label>敵用補正</label>
@@ -1276,10 +1298,10 @@
             </div>
         </div>
     </div>
-    <script src="presets.js?v=2.10.0"></script>
-    <script src="cards.js?v=2.10.0"></script>
-    <script src="apostles.js?v=2.10.0"></script>
-    <script src="script.js?v=2.10.0"></script>
+    <script src="presets.js?v=3.0.0"></script>
+    <script src="cards.js?v=3.0.0"></script>
+    <script src="apostles.js?v=3.0.0"></script>
+    <script src="script.js?v=3.0.0"></script>
 </body>
 </html>
 

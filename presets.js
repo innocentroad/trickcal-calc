@@ -85,15 +85,15 @@ const ENEMY_PRESETS = {
         critDmgRes: 36146,
         special: 2385.714,
         skills: [
-            { name: "普通攻撃", mult:100 },
-            { name: "ピコハン[AoE/気絶]", mult:100 },
-            { name: "ネギ", mult:150 },
-            { name: "100tハンマー[AoE]", mult:400 },
-            { name: "火の息[5段:15%*5][AoE]", mult:75 },
-            { name: "暴走モード[A]", mult:100 },
-            { name: "暴走モード[B]", mult:150 },
-            { name: "暴走モード[C]", mult:200 },
-            { name: "暴走モード[D]", mult:250 }
+            { action: "攻撃", name: "普通攻撃", mult: 100 },
+            { action: "攻撃", name: "ピコハン", mult: 100, note: "AoE / 気絶" },
+            { action: "攻撃", name: "ネギ", mult: 150 },
+            { action: "攻撃", name: "100tハンマー", mult: 400, note: "AoE" },
+            { action: "攻撃", name: "火の息", mult: 75, note: "5段: 15%*5 / AoE" },
+            { action: "攻撃", name: "暴走モードA", mult: 100 },
+            { action: "攻撃", name: "暴走モードB", mult: 150 },
+            { action: "攻撃", name: "暴走モードC", mult: 200 },
+            { action: "攻撃", name: "暴走モードD", mult: 250 }
         ]
     },
         "lily_d_18": {
@@ -110,15 +110,15 @@ const ENEMY_PRESETS = {
         critDmgRes: 54146,
         special: 3528.571,
         skills: [
-            { name: "普通攻撃", mult:100 },
-            { name: "ピコハン[AoE/気絶]", mult:100 },
-            { name: "ネギ", mult:150 },
-            { name: "100tハンマー[AoE]", mult:400 },
-            { name: "火の息[5段:15%*5][AoE]", mult:75 },
-            { name: "暴走モード[A]", mult:100 },
-            { name: "暴走モード[B]", mult:150 },
-            { name: "暴走モード[C]", mult:200 },
-            { name: "暴走モード[D]", mult:250 }
+            { action: "攻撃", name: "普通攻撃", mult: 100 },
+            { action: "攻撃", name: "ピコハン", mult: 100, note: "AoE / 気絶" },
+            { action: "攻撃", name: "ネギ", mult: 150 },
+            { action: "攻撃", name: "100tハンマー", mult: 400, note: "AoE" },
+            { action: "攻撃", name: "火の息", mult: 75, note: "5段: 15%*5 / AoE" },
+            { action: "攻撃", name: "暴走モードA", mult: 100 },
+            { action: "攻撃", name: "暴走モードB", mult: 150 },
+            { action: "攻撃", name: "暴走モードC", mult: 200 },
+            { action: "攻撃", name: "暴走モードD", mult: 250 }
         ]
     },
     "Kérberos_d_15": {
@@ -135,13 +135,13 @@ const ENEMY_PRESETS = {
         critDmgRes: 36146,
         special: 2385.714,
         skills: [
-            { name: "普通攻撃[2段: 50%*2]", mult:100 },
-            { name: "叩きつけ", mult:150 },
-            { name: "舐め回し[18段: (22%+150%)*9][目隠し]", mult:1248 },
-            { name: "咆哮[17段: (17.94%*17)]", mult:305 },
-            { name: "突進[2段*n: (175%*2)*n]", mult:350 },
-            { name: "突進[最終段]", mult:241 },
-            { name: "吸い込み[16段+1段: (25%*16+250%)]", mult:650 }
+            { action: "攻撃", name: "普通攻撃", mult: 100, note: "2段: 50%*2" },
+            { action: "攻撃", name: "叩きつけ", mult: 150 },
+            { action: "攻撃", name: "舐め回し", mult: 1248, note: "18段: (22%+150%)*9 / 目隠し" },
+            { action: "攻撃", name: "咆哮", mult: 305, note: "17段: 17.94%*17" },
+            { action: "攻撃", name: "突進", mult: 350, note: "2段*n: (175%*2)*n" },
+            { action: "攻撃", name: "突進", mult: 241, note: "最終段" },
+            { action: "攻撃", name: "吸い込み", mult: 650, note: "16段+1段: 25%*16+250%" }
         ]
     },
     "Kérberos_d_18": {
@@ -158,13 +158,13 @@ const ENEMY_PRESETS = {
         critDmgRes: 54146,
         special: 3528.571,
         skills: [
-            { name: "普通攻撃[2段: 50%*2]", mult:100 },
-            { name: "叩きつけ", mult:150 },
-            { name: "舐め回し[18段: (22%+150%)*9][目隠し]", mult:1248 },
-            { name: "咆哮[17段: (17.94%*17)]", mult:305 },
-            { name: "突進[2段*n: (175%*2)*n]", mult:350 },
-            { name: "突進[最終段]", mult:241 },
-            { name: "吸い込み[16段+1段: (25%*16+250%)]", mult:650 }
+            { action: "攻撃", name: "普通攻撃", mult: 100, note: "2段: 50%*2" },
+            { action: "攻撃", name: "叩きつけ", mult: 150 },
+            { action: "攻撃", name: "舐め回し", mult: 1248, note: "18段: (22%+150%)*9 / 目隠し" },
+            { action: "攻撃", name: "咆哮", mult: 305, note: "17段: 17.94%*17" },
+            { action: "攻撃", name: "突進", mult: 350, note: "2段*n: (175%*2)*n" },
+            { action: "攻撃", name: "突進", mult: 241, note: "最終段" },
+            { action: "攻撃", name: "吸い込み", mult: 650, note: "16段+1段: 25%*16+250%" }
         ]
     },
     "meow_ef_11": {
@@ -192,14 +192,14 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.46150666, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/12発]", mult: 200 },
-            { name: "火炎放射[AoE/11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/14発]", mult: 300 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" }
         ]
     },
     "meow_ef_12": {
@@ -227,14 +227,14 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.48385743, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/12発]", mult: 200 },
-            { name: "火炎放射[AoE/11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/14発]", mult: 300 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" }
         ]
     },
     "meow_ef_21": {
@@ -262,14 +262,14 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.48912111, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/12発]", mult: 200 },
-            { name: "火炎放射[AoE/11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/14発]", mult: 300 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" }
         ]
     },
     "meow_ef_22": {
@@ -297,14 +297,14 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.49314488, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/12発]", mult: 200 },
-            { name: "火炎放射[AoE/11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/14発]", mult: 300 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" }
         ]
     },
     "meow_ef_31": {
@@ -332,14 +332,14 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.49540894, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/12発]", mult: 200 },
-            { name: "火炎放射[AoE/11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/14発]", mult: 300 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" }
         ]
     },
     "meow_ef_32": {
@@ -367,14 +367,14 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.49692986, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/12発]", mult: 200 },
-            { name: "火炎放射[AoE/11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/14発]", mult: 300 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" }
         ]
     },
     "meow_ef_41": {
@@ -402,14 +402,14 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.49792351, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/12発]", mult: 200 },
-            { name: "火炎放射[AoE/11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/14発]", mult: 300 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" }
         ]
     },
     "meow_ef_42": {
@@ -437,21 +437,21 @@ const ENEMY_PRESETS = {
             { name: "Phase 6 (0/5)", mult: 1.49861376, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
         ],
         skills: [
-            { name: "叩きつけ[AoE/全2段]", mult: 50 },
-            { name: "張り手[AoE]", mult: 150 },
-            { name: "ランチャー[AoE/RNG/3発]", mult: 240 },
-            { name: "ガトリング[AoE/全弾9発?]", mult: 150 },
-            { name: "波状攻撃[AoE/全弾12発]", mult: 200 },
-            { name: "火炎放射[AoE/全弾11発]", mult: 400 },
-            { name: "ミサイル[AoE/RNG/全弾14発?]", mult: 700 },
-            { name: "溜めレーザー[AoE/全弾14発]", mult: 300 },
-            { name: "--------------------------", mult: 100 },
-            { name: "叩きつけ[AoE/2段hit]", mult: 100 },
-            { name: "ガトリング[AoE/9発hit]", mult: 1350 },
-            { name: "波状攻撃[AoE/12発hit]", mult: 2400 },
-            { name: "火炎放射[AoE/11発hit]", mult: 4400 },
-            { name: "ミサイル[AoE/RNG/2発hit]", mult: 1400 },
-            { name: "溜めレーザー[AoE/14発hit]", mult: 4200 }
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
+            { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" },
+            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "張り手 2段hit", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "ガトリング 9発hit", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "波状攻撃 12発hit", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "火炎放射 12発hit", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "ミサイル 2発hit", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "溜めレーザー 14発hit", mult: 300, note: "AoE / 14発" }
         ]
     },
     "GTA_24": {

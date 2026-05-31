@@ -1186,6 +1186,357 @@ select {
     background: rgba(113, 63, 18, 0.14);
 }
 
+.multipliers-grid .apostle-skill-group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+    grid-column: 1 / -1;
+}
+
+.apostle-skill-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.apostle-skill-title {
+    color: #fcd34d;
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin-right: 0.15rem;
+    white-space: nowrap;
+}
+
+.apostle-skill-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.22rem !important;
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    color: #fde68a !important;
+    font-size: 0.72rem !important;
+    line-height: 1 !important;
+    cursor: pointer;
+}
+
+.apostle-skill-toggle input {
+    width: 0.85rem !important;
+    height: 0.85rem !important;
+    margin: 0;
+    accent-color: #65a30d;
+}
+
+.apostle-skill-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: 100%;
+}
+
+.apostle-skill-picker[hidden] {
+    display: none !important;
+}
+
+.apostle-skill-picker.apostle-off .apostle-select {
+    display: none !important;
+}
+
+.multipliers-grid .apostle-skill-picker select {
+    height: 1.65rem;
+    padding: 0 0.32rem;
+    font-size: 0.72rem;
+    text-align: left;
+}
+
+.multipliers-grid .apostle-skill-picker .apostle-select {
+    width: 9.2rem;
+    min-width: 0;
+}
+
+.multipliers-grid .apostle-skill-picker > input {
+    width: 6rem;
+    flex: 0 0 auto;
+}
+
+.multipliers-grid .apostle-skill-list-select {
+    display: inline-block;
+    width: 6.7rem !important;
+    height: 1.28rem !important;
+    padding: 0 0.5rem !important;
+    text-align: center;
+    border-radius: 999px;
+    color: #fef3c7 !important;
+    font-size: 0.68rem !important;
+    font-weight: 850;
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.22), rgba(217, 119, 6, 0.12)) !important;
+    border: 1px solid rgba(250, 204, 21, 0.42) !important;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 8px rgba(113, 63, 18, 0.16);
+    appearance: none;
+}
+
+.apostle-skill-list-select[hidden] {
+    display: none !important;
+}
+
+.apostle-skill-choices {
+    display: grid;
+    grid-template-columns: 1.35rem 3.9rem 3.65rem minmax(5rem, 1fr) 1.4rem;
+    gap: 0.08rem 0.24rem;
+    align-items: stretch;
+    width: min(100%, 34rem);
+    padding: 0.26rem 0.36rem;
+    border: 1px solid rgba(250, 204, 21, 0.16);
+    border-radius: 10px;
+    background: rgba(113, 63, 18, 0.06);
+}
+
+.apostle-skill-choices.no-level {
+    grid-template-columns: 4.5rem 3.65rem minmax(5rem, 1fr) 1.4rem;
+}
+
+.apostle-skill-choices[hidden] {
+    display: none !important;
+}
+
+.apostle-skill-choice-header {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+    padding-bottom: 0.08rem;
+    color: rgba(226, 232, 240, 0.66);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.apostle-skill-choice-header span:first-child {
+    text-align: center;
+}
+
+.apostle-skill-choice-header span:last-child {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.apostle-skill-choice-filter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.05rem;
+    height: 1.05rem;
+    border: 1px solid rgba(148, 163, 184, 0.32);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.28);
+    color: rgba(226, 232, 240, 0.88);
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.apostle-skill-choice-filter:hover {
+    border-color: rgba(250, 204, 21, 0.42);
+    color: #fde68a;
+}
+
+.apostle-skill-choice {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+    min-height: 1.34rem;
+    padding: 0.02rem 0;
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid rgba(250, 204, 21, 0.08);
+    background: transparent;
+    color: rgba(248, 250, 252, 0.9);
+    text-align: left;
+    transition: color 0.16s ease, opacity 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.apostle-skill-choice:hover:not(.disabled) {
+    background: rgba(250, 204, 21, 0.035);
+}
+
+.apostle-skill-choice.active {
+    background: linear-gradient(90deg, rgba(250, 204, 21, 0.13), rgba(34, 197, 94, 0.08));
+    box-shadow: inset 2px 0 0 rgba(250, 204, 21, 0.62), 0 0 12px rgba(250, 204, 21, 0.08);
+}
+
+.apostle-skill-choice.disabled {
+    opacity: 0.55;
+}
+
+.apostle-skill-choices.hide-no-multiplier .apostle-skill-choice.no-multiplier {
+    display: none;
+}
+
+.apostle-skill-choice-level,
+.apostle-skill-choice-action,
+.apostle-skill-choice-mult,
+.apostle-skill-choice-kind {
+    min-width: 0;
+    font-size: 0.68rem;
+    line-height: 1.2;
+}
+
+.apostle-skill-choice-level {
+    color: rgba(248, 250, 252, 0.82);
+    font-weight: 800;
+    justify-self: center;
+}
+
+select.apostle-skill-choice-level {
+    height: 0.95rem;
+    width: 1.15rem;
+    padding: 0;
+    font-size: 0.66rem;
+    text-align: center;
+    border: none;
+    background: transparent;
+    color: rgba(248, 250, 252, 0.86);
+    border-radius: 0;
+    appearance: none;
+    cursor: pointer;
+}
+
+select.apostle-skill-choice-level:hover {
+    color: #ffffff;
+}
+
+.apostle-skill-choice-action {
+    font-weight: 850;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(51, 65, 85, 0.18);
+    color: #ffffff;
+    border-radius: 999px;
+    min-height: 1.08rem;
+    padding: 0 0.35rem;
+    cursor: pointer;
+    text-align: center;
+    justify-self: center;
+    transition: color 0.16s ease, text-shadow 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.apostle-skill-choice-action:hover:not(:disabled) {
+    filter: brightness(1.12);
+}
+
+.apostle-skill-choice-action:disabled {
+    opacity: 1;
+    cursor: default;
+}
+
+.apostle-skill-choice.active .apostle-skill-choice-action {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.18), 0 0 10px rgba(255,255,255,0.08);
+}
+
+.apostle-skill-choice-action.tone-basic {
+    background: rgba(180, 83, 9, 0.22);
+    border-color: rgba(250, 204, 21, 0.38);
+}
+
+.apostle-skill-choice-action.tone-enhanced {
+    background: rgba(127, 29, 29, 0.25);
+    border-color: rgba(248, 113, 113, 0.42);
+}
+
+.apostle-skill-choice-action.tone-low {
+    background: rgba(14, 116, 144, 0.24);
+    border-color: rgba(103, 232, 249, 0.36);
+}
+
+.apostle-skill-choice-action.tone-high {
+    background: rgba(91, 33, 182, 0.25);
+    border-color: rgba(196, 181, 253, 0.38);
+}
+
+.apostle-skill-choice-action.tone-passive {
+    background: rgba(22, 101, 52, 0.18);
+    border-color: rgba(134, 239, 172, 0.28);
+}
+
+.apostle-skill-choice-action.tone-extra {
+    background: rgba(51, 65, 85, 0.22);
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.apostle-skill-choice-mult {
+    color: #86efac;
+    font-weight: 900;
+    text-align: center;
+}
+
+.apostle-skill-choice-kind {
+    color: rgba(248, 250, 252, 0.78);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.apostle-skill-choice-info {
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(15, 23, 42, 0.18);
+    color: rgba(226, 232, 240, 0.82);
+    font-size: 0.64rem;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+    justify-self: end;
+}
+
+.apostle-skill-choice-info:hover {
+    border-color: rgba(250, 204, 21, 0.38);
+    color: #fde68a;
+}
+
+.apostle-skill-choice-empty {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    padding: 0.25rem 0;
+}
+
+.apostle-skill-info-popover {
+    position: fixed;
+    z-index: 12000;
+    min-width: 12rem;
+    max-width: 18.5rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid rgba(250, 204, 21, 0.28);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.96);
+    color: rgba(248, 250, 252, 0.92);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    white-space: pre-line;
+    pointer-events: auto;
+}
+
+.apostle-skill-info-popover[hidden] {
+    display: none !important;
+}
+
+.apostle-skill-info-title {
+    margin-bottom: 0.35rem;
+    color: #fde68a;
+    font-size: 0.78rem;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.apostle-skill-info-body {
+    color: rgba(226, 232, 240, 0.9);
+    font-size: 0.72rem;
+    font-weight: 650;
+    line-height: 1.55;
+}
+
 .stat-input-damage input,
 .stat-input-damage select {
     border-color: rgba(167, 139, 250, 0.24);
@@ -1623,6 +1974,20 @@ select option {
         min-width: 0;
         font-size: 0.78rem;
         padding: 0 0.12rem;
+    }
+    .apostle-skill-title-row,
+    .apostle-skill-picker {
+        gap: 0.22rem;
+    }
+    .multipliers-grid .apostle-skill-picker .apostle-select {
+        flex: 1 1 auto;
+        width: auto;
+    }
+    .multipliers-grid .apostle-skill-group {
+        gap: 0.28rem;
+    }
+    .multipliers-grid .apostle-skill-picker > input {
+        width: 5.2rem;
     }
 }
 

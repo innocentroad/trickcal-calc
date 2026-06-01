@@ -4004,7 +4004,6 @@ function applyPreset(side, value, shouldSave = true) {
         if (side === 'enemy') {
             inputs.enemy.phaseGroup.style.display = 'none';
             inputs.enemy.phase.dataset.currentPreset = '';
-            updateMainSkillList();
             syncPhaseSpacer();
         }
         if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = 100;
@@ -4013,6 +4012,7 @@ function applyPreset(side, value, shouldSave = true) {
             inputs[side].mult.skillDropdown.dataset.selectedSkillKey = "";
             inputs[side].mult.skillDropdown.dataset.selectedSkillCategory = "";
         }
+        updateMainSkillList(side);
         updateUI();
         if (shouldSave) saveState();
         return;

@@ -280,12 +280,19 @@ function setCrayonApplyEnabled(enabled) {
     if (toggle) toggle.checked = !!enabled;
 }
 
+function setHpSurvivalEnabled(enabled) {
+    [hpSurvivalToggle, hpSurvivalToggleEnemy].filter(Boolean).forEach(toggle => {
+        toggle.checked = !!enabled;
+    });
+}
+
 function getApplyFloatStates() {
     return {
         synergy: isSynergyApplyEnabled(),
         artifact: isArtifactApplyEnabled(),
         spell: isSpellApplyEnabled(),
-        crayon: isCrayonApplyEnabled()
+        crayon: isCrayonApplyEnabled(),
+        hp: isHpSurvivalEnabled()
     };
 }
 
@@ -294,6 +301,7 @@ function setApplyFloatTarget(target, enabled) {
     if (target === 'artifact') setArtifactApplyEnabled(enabled);
     if (target === 'spell') setSpellApplyEnabled(enabled);
     if (target === 'crayon') setCrayonApplyEnabled(enabled);
+    if (target === 'hp') setHpSurvivalEnabled(enabled);
 }
 
 function syncApplyFloatControls() {
@@ -304,7 +312,6 @@ function syncApplyFloatControls() {
     const totalCount = Object.keys(states).length;
     const coreEnabledCount = [states.synergy, states.artifact, states.spell].filter(Boolean).length;
     const coreEnabled = states.synergy && states.artifact && states.spell;
-    const countEl = document.getElementById('apply-float-count');
     const statusEl = document.getElementById('apply-float-status');
     const toggle = document.getElementById('apply-float-toggle');
 
@@ -315,13 +322,17 @@ function syncApplyFloatControls() {
     root.classList.toggle('is-enabled-count-2', coreEnabledCount === 2);
     root.classList.toggle('is-core-enabled', coreEnabled);
     root.classList.toggle('is-crayon-enabled', states.crayon);
-    if (countEl) countEl.textContent = `${enabledCount}/${totalCount}`;
+    root.querySelectorAll('[data-apply-dot]').forEach(dot => {
+        const target = dot.dataset.applyDot;
+        dot.classList.toggle('is-on', !!states[target]);
+        dot.classList.toggle('is-off', !states[target]);
+    });
     if (statusEl) {
         statusEl.textContent = enabledCount === totalCount
             ? 'すべてON'
             : (enabledCount === 0 ? 'すべてOFF' : `${enabledCount}項目ON`);
     }
-    if (toggle) toggle.title = `計算結果に反映: ${enabledCount}/${totalCount}`;
+    if (toggle) toggle.title = `計算設定: ${enabledCount}/${totalCount}`;
     root.querySelectorAll('[data-apply-float-target]').forEach(input => {
         input.checked = !!states[input.dataset.applyFloatTarget];
     });
@@ -638,6 +649,13 @@ function applySynergySlotIds(type, ids) {
     });
 }
 
+function clearSynergyGroup(type) {
+    applySynergySlotIds(type, []);
+    updateSynergySummary();
+    updateUI();
+    saveState();
+}
+
 function clearSynergySlot(button) {
     button.dataset.synergyId = '';
     button.classList.remove('is-filled');
@@ -747,6 +765,11 @@ function initializeSynergySlotTest() {
     }
     renderSynergyPalette('personality', document.getElementById('personality-synergy-palette'));
     renderSynergyPalette('race', document.getElementById('race-synergy-palette'));
+    document.querySelectorAll('[data-synergy-clear]').forEach(button => {
+        if (button.dataset.bound) return;
+        button.dataset.bound = '1';
+        button.addEventListener('click', () => clearSynergyGroup(button.dataset.synergyClear));
+    });
 }
 
 function initializeSynergyUI() {
@@ -5162,6 +5185,7 @@ const detailsBtn = document.getElementById('toggle-details-btn');
         toggle.addEventListener('change', () => {
             syncHpSurvivalToggles(toggle);
             updateUI();
+            syncApplyFloatControls();
         });
     });
 

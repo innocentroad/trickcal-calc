@@ -115,14 +115,21 @@
 
         <div class="apply-float-controller" id="apply-float-controller">
             <button type="button" class="apply-float-toggle" id="apply-float-toggle" aria-expanded="false" aria-controls="apply-float-panel">
-                <span>反映</span>
-                <strong id="apply-float-count">4/4</strong>
+                <span>設定</span>
+                <span class="apply-float-dots" id="apply-float-dots" aria-label="設定状態">
+                    <i data-apply-dot="synergy" title="シナジー"></i>
+                    <i data-apply-dot="artifact" title="遺物カード"></i>
+                    <i data-apply-dot="spell" title="スペルカード"></i>
+                    <i data-apply-dot="crayon" title="クレヨン"></i>
+                    <i data-apply-dot="hp" title="HP結果表示"></i>
+                </span>
             </button>
             <div class="apply-float-panel" id="apply-float-panel" hidden>
                 <div class="apply-float-head">
-                    <strong>計算結果に反映</strong>
+                    <strong>計算設定</strong>
                     <span id="apply-float-status">すべてON</span>
                 </div>
+                <div class="apply-float-section-label">補正を計算に反映</div>
                 <label class="apply-float-row">
                     <input type="checkbox" data-apply-float-target="synergy">
                     <span>シナジー</span>
@@ -138,6 +145,11 @@
                 <label class="apply-float-row">
                     <input type="checkbox" data-apply-float-target="crayon">
                     <span>クレヨン</span>
+                </label>
+                <div class="apply-float-section-label">結果表示</div>
+                <label class="apply-float-row">
+                    <input type="checkbox" data-apply-float-target="hp">
+                    <span>HPを結果に表示</span>
                 </label>
                 <div class="apply-float-actions">
                     <button type="button" data-apply-float-bulk="on">全ON</button>
@@ -376,7 +388,10 @@
             <div class="synergy-panel">
                 <div class="synergy-slot-test" aria-label="シナジースロット試作">
                     <div class="synergy-slot-area">
-                        <div class="synergy-group-title">性格</div>
+                        <div class="synergy-group-head">
+                            <div class="synergy-group-title">性格</div>
+                            <button type="button" class="synergy-clear-btn" data-synergy-clear="personality">全解除</button>
+                        </div>
                         <div id="personality-synergy-slots" class="synergy-slot-grid personality-slot-grid"></div>
                         <div class="synergy-palette-row">
                             <span class="synergy-palette-label">選択:</span>
@@ -384,7 +399,10 @@
                         </div>
                     </div>
                     <div class="synergy-slot-area">
-                        <div class="synergy-group-title">種族</div>
+                        <div class="synergy-group-head">
+                            <div class="synergy-group-title">種族</div>
+                            <button type="button" class="synergy-clear-btn" data-synergy-clear="race">全解除</button>
+                        </div>
                         <div id="race-synergy-slots" class="synergy-slot-grid race-slot-grid"></div>
                         <div class="synergy-palette-row">
                             <span class="synergy-palette-label">選択:</span>
@@ -449,7 +467,7 @@
                                     </div>
                                     <div class="artifact-preset-costs" id="self-artifact-preset-costs"></div>
                                     <div class="card-group artifact-slots-group">
-                                        <button type="button" id="self-artifact-clear-all" class="card-section-clear-btn artifact-clear-slots-btn" title="装備を外す">装備を外す</button>
+                                        <button type="button" id="self-artifact-clear-all" class="card-section-clear-btn artifact-clear-slots-btn" title="全解除">全解除</button>
                                         <div id="self-relic-slots" class="card-slots"></div>
                                     </div>
                                     <div class="card-summary" id="self-card-summary">カード補正: なし</div>

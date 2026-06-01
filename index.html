@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trickcal Damage Calculator</title>
-    <link rel="icon" href="ico.webp?v=3.0.0" type="image/webp">
-    <link rel="stylesheet" href="style.css?v=3.0.0">
+    <link rel="icon" href="ico.webp?v=3.1.0" type="image/webp">
+    <link rel="stylesheet" href="style.css?v=3.1.0">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google tag (gtag.js) -->
@@ -19,7 +19,7 @@
     </script>
     <script>
         try {
-            const raw = localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
+            const raw = localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
             const state = raw ? JSON.parse(raw) : null;
             document.documentElement.dataset.initialPerspective = state?.perspective || 'self';
             document.documentElement.dataset.initialTab = state?.tab || 'calc';
@@ -97,7 +97,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v3.0</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v3.1</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>選択</button>
@@ -113,6 +113,39 @@
             </div>
         </header>
 
+        <div class="apply-float-controller" id="apply-float-controller">
+            <button type="button" class="apply-float-toggle" id="apply-float-toggle" aria-expanded="false" aria-controls="apply-float-panel">
+                <span>反映</span>
+                <strong id="apply-float-count">4/4</strong>
+            </button>
+            <div class="apply-float-panel" id="apply-float-panel" hidden>
+                <div class="apply-float-head">
+                    <strong>計算結果に反映</strong>
+                    <span id="apply-float-status">すべてON</span>
+                </div>
+                <label class="apply-float-row">
+                    <input type="checkbox" data-apply-float-target="synergy">
+                    <span>シナジー</span>
+                </label>
+                <label class="apply-float-row">
+                    <input type="checkbox" data-apply-float-target="artifact">
+                    <span>遺物カード</span>
+                </label>
+                <label class="apply-float-row">
+                    <input type="checkbox" data-apply-float-target="spell">
+                    <span>スペルカード</span>
+                </label>
+                <label class="apply-float-row">
+                    <input type="checkbox" data-apply-float-target="crayon">
+                    <span>クレヨン</span>
+                </label>
+                <div class="apply-float-actions">
+                    <button type="button" data-apply-float-bulk="on">全ON</button>
+                    <button type="button" data-apply-float-bulk="off">全OFF</button>
+                </div>
+            </div>
+        </div>
+
         <main class="dashboard">
             <!-- Calculation Mode View -->
             <div id="tab-calc" class="tab-page">
@@ -125,7 +158,7 @@
 <input type="radio" name="perspective" id="perspective-enemy" value="enemy" style="display:none;">
 <script>
     try {
-        const raw = localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
+        const raw = localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
         const state = raw ? JSON.parse(raw) : null;
         const savedPerspective = state?.perspective;
         if (savedPerspective === 'enemy') {
@@ -232,7 +265,7 @@
                         <span class="apostle-skill-title">スキル</span>
                         <label class="apostle-skill-toggle">
                             <input type="checkbox" id="self-apostle-skill-enabled" checked>
-                            <span>使徒選択ON</span>
+                            <span>使徒選択</span>
                         </label>
                     </div>
                     <div class="apostle-skill-picker">
@@ -258,7 +291,7 @@
                     </select>
                 </div>
                 <div class="input-group stat-input-damage" id="self-add-mult-group">
-                    <label>与被DMG±</label>
+                    <label>与被DMG増減</label>
                     <input type="number" id="self-mult-add-number" min="-100" max="1000" value="0">
                 </div>
                 <div class="input-group">
@@ -333,6 +366,42 @@
                         <option value="-50">-50%</option>
                     </select>
                 </div>
+            </div>
+        </div>
+
+        <div class="dynamic-section synergy-section" id="self-synergy-section">
+            <div class="synergy-header">
+                <h3 class="stat-cat-header">シナジー</h3>
+            </div>
+            <div class="synergy-panel">
+                <div class="synergy-slot-test" aria-label="シナジースロット試作">
+                    <div class="synergy-slot-area">
+                        <div class="synergy-group-title">性格</div>
+                        <div id="personality-synergy-slots" class="synergy-slot-grid personality-slot-grid"></div>
+                        <div class="synergy-palette-row">
+                            <span class="synergy-palette-label">選択:</span>
+                            <div id="personality-synergy-palette" class="synergy-palette"></div>
+                        </div>
+                    </div>
+                    <div class="synergy-slot-area">
+                        <div class="synergy-group-title">種族</div>
+                        <div id="race-synergy-slots" class="synergy-slot-grid race-slot-grid"></div>
+                        <div class="synergy-palette-row">
+                            <span class="synergy-palette-label">選択:</span>
+                            <div id="race-synergy-palette" class="synergy-palette"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="synergy-summary" class="synergy-summary card-summary card-summary-empty">
+                <div class="card-summary-head">
+                    <span class="card-summary-title">シナジー補正</span>
+                    <label class="card-summary-apply-toggle synergy-apply-toggle">
+                        <input type="checkbox" id="self-synergy-apply" checked>
+                        <span>計算結果に反映</span>
+                    </label>
+                </div>
+                <span class="card-summary-empty-text">なし</span>
             </div>
         </div>
 
@@ -514,7 +583,7 @@
                         <span class="apostle-skill-title">スキル</span>
                         <label class="apostle-skill-toggle">
                             <input type="checkbox" id="enemy-apostle-skill-enabled">
-                            <span>使徒選択ON</span>
+                            <span>使徒選択</span>
                         </label>
                     </div>
                     <div class="apostle-skill-picker apostle-off">
@@ -540,7 +609,7 @@
                     </select>
                 </div>
                 <div class="input-group stat-input-damage" id="enemy-add-mult-group">
-                    <label>与被DMG±</label>
+                    <label>与被DMG増減</label>
                     <input type="number" id="enemy-mult-add-number" min="-100" max="1000" value="0">
                 </div>
                 <div class="input-group stat-input-enemy">
@@ -1298,10 +1367,11 @@
             </div>
         </div>
     </div>
-    <script src="presets.js?v=3.0.0"></script>
-    <script src="cards.js?v=3.0.0"></script>
-    <script src="apostles.js?v=3.0.0"></script>
-    <script src="script.js?v=3.0.0"></script>
+    <script src="presets.js?v=3.1.0"></script>
+    <script src="cards.js?v=3.1.0"></script>
+    <script src="apostles.js?v=3.1.0"></script>
+    <script src="synergy.js?v=3.1.0"></script>
+    <script src="script.js?v=3.1.0"></script>
 </body>
 </html>
 

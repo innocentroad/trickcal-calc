@@ -234,6 +234,15 @@ function isArtifactApplyEnabled() {
     return toggle ? !!toggle.checked : artifactApplyEnabled;
 }
 
+function isSynergyApplyEnabled() {
+    const toggle = document.getElementById('self-synergy-apply');
+    return toggle ? !!toggle.checked : true;
+}
+
+function isCrayonApplyEnabled() {
+    return !!document.getElementById('crayon-apply-toggle')?.checked;
+}
+
 function getSpellApplyToggles() {
     return [
         document.getElementById('spell-apply-toggle'),
@@ -259,6 +268,108 @@ function setArtifactApplyEnabled(enabled) {
     getArtifactApplyToggles().forEach(toggle => {
         toggle.checked = artifactApplyEnabled;
     });
+}
+
+function setSynergyApplyEnabled(enabled) {
+    const toggle = document.getElementById('self-synergy-apply');
+    if (toggle) toggle.checked = !!enabled;
+}
+
+function setCrayonApplyEnabled(enabled) {
+    const toggle = document.getElementById('crayon-apply-toggle');
+    if (toggle) toggle.checked = !!enabled;
+}
+
+function getApplyFloatStates() {
+    return {
+        synergy: isSynergyApplyEnabled(),
+        artifact: isArtifactApplyEnabled(),
+        spell: isSpellApplyEnabled(),
+        crayon: isCrayonApplyEnabled()
+    };
+}
+
+function setApplyFloatTarget(target, enabled) {
+    if (target === 'synergy') setSynergyApplyEnabled(enabled);
+    if (target === 'artifact') setArtifactApplyEnabled(enabled);
+    if (target === 'spell') setSpellApplyEnabled(enabled);
+    if (target === 'crayon') setCrayonApplyEnabled(enabled);
+}
+
+function syncApplyFloatControls() {
+    const root = document.getElementById('apply-float-controller');
+    if (!root) return;
+    const states = getApplyFloatStates();
+    const enabledCount = Object.values(states).filter(Boolean).length;
+    const totalCount = Object.keys(states).length;
+    const coreEnabledCount = [states.synergy, states.artifact, states.spell].filter(Boolean).length;
+    const coreEnabled = states.synergy && states.artifact && states.spell;
+    const countEl = document.getElementById('apply-float-count');
+    const statusEl = document.getElementById('apply-float-status');
+    const toggle = document.getElementById('apply-float-toggle');
+
+    root.classList.toggle('is-all-enabled', enabledCount === totalCount);
+    root.classList.toggle('is-partial-enabled', enabledCount > 0 && enabledCount < totalCount);
+    root.classList.toggle('is-all-disabled', enabledCount === 0);
+    root.classList.toggle('is-enabled-count-1', coreEnabledCount === 1);
+    root.classList.toggle('is-enabled-count-2', coreEnabledCount === 2);
+    root.classList.toggle('is-core-enabled', coreEnabled);
+    root.classList.toggle('is-crayon-enabled', states.crayon);
+    if (countEl) countEl.textContent = `${enabledCount}/${totalCount}`;
+    if (statusEl) {
+        statusEl.textContent = enabledCount === totalCount
+            ? 'すべてON'
+            : (enabledCount === 0 ? 'すべてOFF' : `${enabledCount}項目ON`);
+    }
+    if (toggle) toggle.title = `計算結果に反映: ${enabledCount}/${totalCount}`;
+    root.querySelectorAll('[data-apply-float-target]').forEach(input => {
+        input.checked = !!states[input.dataset.applyFloatTarget];
+    });
+}
+
+function applyFloatControlChange() {
+    updateSynergySummary();
+    updateUI();
+    saveSpellSelectionsState();
+    saveState();
+}
+
+function initApplyFloatController() {
+    const root = document.getElementById('apply-float-controller');
+    const toggle = document.getElementById('apply-float-toggle');
+    const panel = document.getElementById('apply-float-panel');
+    if (!root || !toggle || !panel || root.dataset.bound) return;
+    root.dataset.bound = '1';
+
+    toggle.addEventListener('click', () => {
+        const nextOpen = panel.hidden;
+        panel.hidden = !nextOpen;
+        toggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+        syncApplyFloatControls();
+    });
+
+    root.querySelectorAll('[data-apply-float-target]').forEach(input => {
+        input.addEventListener('change', () => {
+            setApplyFloatTarget(input.dataset.applyFloatTarget, input.checked);
+            applyFloatControlChange();
+        });
+    });
+
+    root.querySelectorAll('[data-apply-float-bulk]').forEach(button => {
+        button.addEventListener('click', () => {
+            const enabled = button.dataset.applyFloatBulk === 'on';
+            Object.keys(getApplyFloatStates()).forEach(target => setApplyFloatTarget(target, enabled));
+            applyFloatControlChange();
+        });
+    });
+
+    document.addEventListener('click', (event) => {
+        if (panel.hidden || root.contains(event.target)) return;
+        panel.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+    });
+
+    syncApplyFloatControls();
 }
 
 function bindApplyToggles() {
@@ -326,16 +437,322 @@ function createEmptyCardBonus() {
         takenDmgP: 0,
         specialP: 0,
         otherP: 0,
+        basicAddP: 0,
+        skillAddP: 0,
+        spRecoveryP: 0,
         notes: []
     };
 }
 
 function accumulateCardBonus(target, source) {
     if (!source) return target;
-    ['hpP', 'healingP', 'hpRecoveryP', 'atkP', 'defP', 'enemyDefDownP', 'hasteP', 'critRateP', 'critDmgP', 'critResP', 'critDmgResP', 'enemyCritResDownP', 'enemyCritDmgResDownP', 'addP', 'takenDmgP', 'specialP', 'otherP'].forEach(key => {
+    ['hpP', 'healingP', 'hpRecoveryP', 'atkP', 'defP', 'enemyDefDownP', 'hasteP', 'critRateP', 'critDmgP', 'critResP', 'critDmgResP', 'enemyCritResDownP', 'enemyCritDmgResDownP', 'addP', 'takenDmgP', 'specialP', 'otherP', 'basicAddP', 'skillAddP', 'spRecoveryP'].forEach(key => {
         target[key] = (target[key] || 0) + (source[key] || 0);
     });
     return target;
+}
+
+function getSynergyLibraries() {
+    return [
+        { type: 'personality', items: Array.isArray(window.PERSONALITY_SYNERGIES) ? window.PERSONALITY_SYNERGIES : [] },
+        { type: 'race', items: Array.isArray(window.RACE_SYNERGIES) ? window.RACE_SYNERGIES : [] }
+    ];
+}
+
+function getSynergyEffectForCount(synergy, count) {
+    const effectsByCount = synergy?.effectsByCount || {};
+    const direct = effectsByCount[String(count)] || effectsByCount[count];
+    if (direct) return direct;
+    const thresholds = Object.keys(effectsByCount)
+        .map(key => parseInt(key, 10))
+        .filter(value => Number.isFinite(value) && value <= count)
+        .sort((a, b) => b - a);
+    const threshold = thresholds[0];
+    return threshold ? (effectsByCount[String(threshold)] || effectsByCount[threshold] || null) : null;
+}
+
+function normalizeSynergyEffect(effect = {}) {
+    const bonus = createEmptyCardBonus();
+    accumulateCardBonus(bonus, effect);
+    if (effect.critRateTakenDownP) bonus.critResP += effect.critRateTakenDownP;
+    if (effect.critDmgTakenDownP) bonus.critDmgResP += effect.critDmgTakenDownP;
+    if (effect.damageTakenDownP) bonus.takenDmgP += effect.damageTakenDownP;
+    return bonus;
+}
+
+function collectSynergySelections() {
+    const state = { personality: {}, race: {}, applyEnabled: !!document.getElementById('self-synergy-apply')?.checked };
+    ['personality', 'race'].forEach(type => {
+        collectSynergySlotIds(type).forEach(id => {
+            state[type][id] = (state[type][id] || 0) + 1;
+        });
+    });
+    return state;
+}
+
+function restoreSynergySelections(state = {}) {
+    const apply = document.getElementById('self-synergy-apply');
+    if (apply && typeof state.applyEnabled === 'boolean') apply.checked = state.applyEnabled;
+    ['personality', 'race'].forEach(type => {
+        const ids = [];
+        Object.entries(state?.[type] || {}).forEach(([id, count]) => {
+            const safeCount = Math.max(0, parseInt(count || '0', 10) || 0);
+            for (let i = 0; i < safeCount; i += 1) ids.push(id);
+        });
+        applySynergySlotIds(type, ids);
+    });
+    updateSynergySummary();
+}
+
+function getSynergyBonuses(options = {}) {
+    const state = collectSynergySelections();
+    const total = createEmptyCardBonus();
+    if (!options.ignoreApply && !state.applyEnabled) return total;
+    getSynergyLibraries().forEach(group => {
+        group.items.forEach(item => {
+            const count = state[group.type]?.[item.id] || 0;
+            const effect = getSynergyEffectForCount(item, count);
+            if (effect) accumulateCardBonus(total, normalizeSynergyEffect(effect));
+        });
+    });
+    return total;
+}
+
+function formatSynergySummaryParts(bonus) {
+    const parts = formatCardSummaryParts(bonus);
+    if (bonus.basicAddP) parts.push(`普通攻撃ダメージ ${formatSignedPercent(bonus.basicAddP)}`);
+    if (bonus.skillAddP) parts.push(`スキルダメージ ${formatSignedPercent(bonus.skillAddP)}`);
+    if (bonus.spRecoveryP) parts.push(`SP回復量 ${formatSignedPercent(bonus.spRecoveryP)}`);
+    return parts;
+}
+
+function getSelectedActionScopedDamageBonus(cardBonus, side) {
+    const category = inputs[side]?.mult?.skillDropdown?.dataset.selectedSkillCategory || '';
+    let bonus = 0;
+    if (/基本攻撃|強化攻撃/.test(category)) bonus += cardBonus.basicAddP || 0;
+    if (/低学年|高学年|愛用品|アサイド/.test(category)) bonus += cardBonus.skillAddP || 0;
+    return bonus;
+}
+
+function collectSkillSelectionMetadata() {
+    return Object.fromEntries(['self', 'enemy'].map(side => {
+        const dropdown = inputs[side]?.mult?.skillDropdown;
+        return [side, {
+            key: dropdown?.dataset.selectedSkillKey || '',
+            category: dropdown?.dataset.selectedSkillCategory || ''
+        }];
+    }));
+}
+
+function restoreSkillSelectionMetadata(state = {}) {
+    ['self', 'enemy'].forEach(side => {
+        const dropdown = inputs[side]?.mult?.skillDropdown;
+        if (!dropdown || !state[side]) return;
+        dropdown.dataset.selectedSkillKey = state[side].key || '';
+        dropdown.dataset.selectedSkillCategory = state[side].category || '';
+        syncApostleSkillChoiceActive(side);
+    });
+}
+
+function updateSynergySummary() {
+    const summary = document.getElementById('synergy-summary');
+    if (!summary) return;
+    const bonus = getSynergyBonuses({ ignoreApply: true });
+    const parts = formatSynergySummaryParts(bonus);
+    const applyEnabled = collectSynergySelections().applyEnabled;
+    const actionHtml = `<label class="card-summary-apply-toggle synergy-apply-toggle">
+            <input type="checkbox" id="self-synergy-apply" ${applyEnabled ? 'checked' : ''}>
+            <span>計算結果に反映</span>
+        </label>`;
+    if (!parts.length) {
+        summary.className = 'synergy-summary card-summary card-summary-empty';
+        summary.innerHTML = `
+            <div class="card-summary-head">
+                <span class="card-summary-title">シナジー補正</span>
+                ${actionHtml}
+            </div>
+            <span class="card-summary-empty-text">なし</span>
+        `;
+        bindSynergyApplyToggle();
+        return;
+    }
+    const chips = parts.map(part => `<span class="card-summary-chip ${getBonusToneClass(part)}">${part}</span>`).join('');
+    summary.className = `synergy-summary card-summary card-summary-active${applyEnabled ? '' : ' is-disabled-summary'}`;
+    summary.innerHTML = `
+        <div class="card-summary-head">
+            <span class="card-summary-title">シナジー補正</span>
+            ${actionHtml}
+        </div>
+        <div class="card-summary-chip-list">${chips}</div>
+    `;
+    bindSynergyApplyToggle();
+}
+
+function bindSynergyApplyToggle() {
+    const apply = document.getElementById('self-synergy-apply');
+    if (!apply || apply.dataset.bound) return;
+    apply.dataset.bound = '1';
+    apply.addEventListener('change', () => {
+        updateSynergySummary();
+        updateUI();
+        syncApplyFloatControls();
+        saveState();
+    });
+}
+
+function getSynergyItem(type, id) {
+    return getSynergyLibraries()
+        .find(group => group.type === type)
+        ?.items.find(item => item.id === id) || null;
+}
+
+function getSynergySlots(type) {
+    return Array.from(document.querySelectorAll(`.synergy-slot[data-synergy-type="${type}"]`))
+        .sort((a, b) => (parseInt(a.dataset.fillOrder || '0', 10) || 0) - (parseInt(b.dataset.fillOrder || '0', 10) || 0));
+}
+
+function getSynergyItemOrder(type, id) {
+    const items = getSynergyLibraries().find(group => group.type === type)?.items || [];
+    const index = items.findIndex(item => item.id === id);
+    return index >= 0 ? index : Number.MAX_SAFE_INTEGER;
+}
+
+function sortSynergySlotIds(type, ids) {
+    return ids
+        .filter(Boolean)
+        .sort((a, b) => getSynergyItemOrder(type, a) - getSynergyItemOrder(type, b));
+}
+
+function collectSynergySlotIds(type) {
+    return getSynergySlots(type)
+        .map(slot => slot.dataset.synergyId || '')
+        .filter(Boolean);
+}
+
+function applySynergySlotIds(type, ids) {
+    const slots = getSynergySlots(type);
+    slots.forEach(clearSynergySlot);
+    sortSynergySlotIds(type, ids).forEach((id, index) => {
+        const item = getSynergyItem(type, id);
+        if (item && slots[index]) setSynergySlot(slots[index], item);
+    });
+}
+
+function clearSynergySlot(button) {
+    button.dataset.synergyId = '';
+    button.classList.remove('is-filled');
+    button.title = '空きスロット';
+    const icon = button.querySelector('.synergy-slot-icon');
+    if (icon) {
+        icon.removeAttribute('src');
+        icon.alt = '';
+        icon.hidden = true;
+    }
+}
+
+function setSynergySlot(button, item) {
+    button.dataset.synergyId = item.id;
+    button.classList.add('is-filled');
+    button.title = `${item.name} - クリックで外す`;
+    const icon = button.querySelector('.synergy-slot-icon');
+    if (icon) {
+        icon.src = item.icon;
+        icon.alt = item.name;
+        icon.hidden = false;
+    }
+}
+
+function addSynergySlotItem(type, itemId) {
+    const item = getSynergyItem(type, itemId);
+    if (!item) return;
+    const ids = collectSynergySlotIds(type);
+    if (ids.length >= getSynergySlots(type).length) return;
+    ids.push(item.id);
+    applySynergySlotIds(type, ids);
+    updateSynergySummary();
+    updateUI();
+    saveState();
+}
+
+function createSynergySlot(type, index) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'synergy-slot';
+    button.dataset.synergyType = type;
+    button.dataset.index = String(index);
+    const topCount = type === 'personality' ? 6 : 5;
+    if (index < topCount) {
+        button.dataset.row = 'top';
+        button.dataset.fillOrder = String(index * 2 + 1);
+        button.style.gridColumn = String(index * 2 + 1);
+    } else {
+        button.dataset.row = 'bottom';
+        button.dataset.fillOrder = String((index - topCount) * 2 + 2);
+        button.style.gridColumn = String((index - topCount) * 2 + 2);
+    }
+    button.title = '空きスロット';
+
+    const icon = document.createElement('img');
+    icon.className = 'synergy-slot-icon';
+    icon.alt = '';
+    icon.hidden = true;
+    button.appendChild(icon);
+    button.addEventListener('click', () => {
+        if (!button.dataset.synergyId) return;
+        const type = button.dataset.synergyType;
+        const slots = getSynergySlots(type);
+        const ids = slots.map(slot => slot.dataset.synergyId || '').filter(Boolean);
+        const removeIndex = slots.filter(slot => slot.dataset.synergyId).findIndex(slot => slot === button);
+        if (removeIndex >= 0) ids.splice(removeIndex, 1);
+        applySynergySlotIds(type, ids);
+        updateSynergySummary();
+        updateUI();
+        saveState();
+    });
+    return button;
+}
+
+function createSynergyPaletteButton(type, item) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'synergy-palette-btn';
+    button.dataset.synergyType = type;
+    button.dataset.synergyId = item.id;
+    button.title = item.name;
+    const icon = document.createElement('img');
+    icon.src = item.icon;
+    icon.alt = item.name;
+    button.appendChild(icon);
+    button.addEventListener('click', () => addSynergySlotItem(type, item.id));
+    return button;
+}
+
+function renderSynergyPalette(type, container) {
+    if (!container) return;
+    container.innerHTML = '';
+    const items = getSynergyLibraries().find(group => group.type === type)?.items || [];
+    items.forEach(item => container.appendChild(createSynergyPaletteButton(type, item)));
+}
+
+function initializeSynergySlotTest() {
+    const personalitySlots = document.getElementById('personality-synergy-slots');
+    const raceSlots = document.getElementById('race-synergy-slots');
+    if (personalitySlots) {
+        personalitySlots.innerHTML = '';
+        Array.from({ length: 11 }, (_, index) => personalitySlots.appendChild(createSynergySlot('personality', index)));
+    }
+    if (raceSlots) {
+        raceSlots.innerHTML = '';
+        Array.from({ length: 9 }, (_, index) => raceSlots.appendChild(createSynergySlot('race', index)));
+    }
+    renderSynergyPalette('personality', document.getElementById('personality-synergy-palette'));
+    renderSynergyPalette('race', document.getElementById('race-synergy-palette'));
+}
+
+function initializeSynergyUI() {
+    initializeSynergySlotTest();
+    bindSynergyApplyToggle();
+    updateSynergySummary();
 }
 
 function createEmptyCardEffectState(card) {
@@ -1926,8 +2343,9 @@ function updateCardSummary(side) {
                 <span>計算結果に反映</span>
             </label>`
         : '';
+    const artifactEnabled = side !== 'self' || isArtifactApplyEnabled();
     if (parts.length === 0) {
-        summaryEl.className = 'card-summary card-summary-empty';
+        summaryEl.className = `card-summary card-summary-empty${artifactEnabled ? '' : ' is-disabled-summary'}`;
         summaryEl.innerHTML = `
             <div class="card-summary-head">
                 <span class="card-summary-title">${title}</span>
@@ -1938,7 +2356,7 @@ function updateCardSummary(side) {
         bindApplyToggles();
         return;
     }
-    summaryEl.className = 'card-summary card-summary-active';
+    summaryEl.className = `card-summary card-summary-active${artifactEnabled ? '' : ' is-disabled-summary'}`;
     const chips = parts.map(part => `<span class="card-summary-chip ${getBonusToneClass(part)}">${part}</span>`).join('');
     const noteText = bonus.notes.length ? `<div class="card-summary-note">※ ${bonus.notes[0]}</div>` : '';
     summaryEl.innerHTML = `
@@ -1957,12 +2375,13 @@ function updateCalcSpellCardSummary() {
     if (!summaryEl) return;
     const bonus = getSpellBonusesSummary();
     const parts = formatCardSummaryParts(bonus);
+    const spellEnabled = isSpellApplyEnabled();
     const actionHtml = `<label class="card-summary-apply-toggle">
-            <input type="checkbox" id="self-spell-apply-toggle" ${isSpellApplyEnabled() ? 'checked' : ''}>
+            <input type="checkbox" id="self-spell-apply-toggle" ${spellEnabled ? 'checked' : ''}>
             <span>計算結果に反映</span>
         </label>`;
     if (parts.length === 0) {
-        summaryEl.className = 'card-summary card-summary-empty';
+        summaryEl.className = `card-summary card-summary-empty${spellEnabled ? '' : ' is-disabled-summary'}`;
         summaryEl.innerHTML = `
             <div class="card-summary-head">
                 <span class="card-summary-title">スペルカード補正</span>
@@ -1973,7 +2392,7 @@ function updateCalcSpellCardSummary() {
         bindApplyToggles();
         return;
     }
-    summaryEl.className = 'card-summary card-summary-active';
+    summaryEl.className = `card-summary card-summary-active${spellEnabled ? '' : ' is-disabled-summary'}`;
     const chips = parts.map(part => `<span class="card-summary-chip ${getBonusToneClass(part)}">${part}</span>`).join('');
     summaryEl.innerHTML = `
         <div class="card-summary-head">
@@ -3127,6 +3546,8 @@ function getValues() {
         self: getCardBonusesForSide('self', { includeArtifacts: isArtifactApplyEnabled(), includeSpells: isSpellApplyEnabled() }, { dmgType: inputs.dmgType.value }),
         enemy: getCardBonusesForSide('enemy', { includeArtifacts: true, includeSpells: false }, { dmgType: inputs.dmgType.value })
     };
+    const synergyBonuses = getSynergyBonuses();
+    accumulateCardBonus(cardBonuses.self, synergyBonuses);
 
     return {
         perspective,
@@ -3136,6 +3557,7 @@ function getValues() {
         enemy: getSideStats('enemy'),
         crayonBonuses: crayonBoard,
         cardBonuses,
+        synergyBonuses,
         common: (() => {
             const isSelfAttacker = perspective === 'self';
             const att = isSelfAttacker ? inputs.self : inputs.enemy;
@@ -3151,10 +3573,11 @@ function getValues() {
             let addM = 1 + (rawAdd / 100);
             if (addM < 0.2 && addM !== 0) addM = 0.2;
             const rawOther = parseFloat(att.mult.other?.value || 0);
+            const actionScopedAddP = getSelectedActionScopedDamageBonus(attCard, isSelfAttacker ? 'self' : 'enemy');
             
             return {
                 skill: (parseFloat(att.mult.skill?.value) === 0 ? 0 : (parseFloat(att.mult.skill?.value) || 100)) / 100,
-                add: addM + (attCard.addP || 0) / 100,
+                add: addM + ((attCard.addP || 0) + actionScopedAddP) / 100,
                 type: (parseFloat(att.mult.type?.value) === 0 ? 0 : (parseFloat(att.mult.type?.value) || 100)) / 100,
                 special: ((parseFloat(att.mult.special?.value) === 0 ? 0 : (parseFloat(att.mult.special?.value) || 100)) + (attCard.specialP || 0)) / 100,
                 other: 1 + (rawOther + (attCard.otherP || 0)) / 100,
@@ -3375,6 +3798,7 @@ function updateUI() {
     setResultDetailState(v, res, v.isCrayon ? oldRes : null, v.isCrayon ? newSelf : null);
     
     updateChart(v, v.isCrayon ? newSelf : null);
+    syncApplyFloatControls();
     if (!isRestoringState) saveState();
 }
 
@@ -3447,8 +3871,8 @@ function updateChart(v, overrideSelf = null) {
     });
 }
 // --- Custom Presets & Dropdown Population ---
-const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.0';
-const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v1.8';
+const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.1';
+const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.0';
 
 function getLocalStorageWithFallback(key, legacyKey = '') {
     const raw = localStorage.getItem(key);
@@ -3564,6 +3988,7 @@ function applyPreset(side, value, shouldSave = true) {
         if (inputs[side]?.mult?.skillDropdown) {
             inputs[side].mult.skillDropdown.value = "";
             inputs[side].mult.skillDropdown.dataset.selectedSkillKey = "";
+            inputs[side].mult.skillDropdown.dataset.selectedSkillCategory = "";
         }
         updateUI();
         if (shouldSave) saveState();
@@ -3622,6 +4047,7 @@ function applyPreset(side, value, shouldSave = true) {
     if (inputs[side]?.mult?.skillDropdown) {
         inputs[side].mult.skillDropdown.value = "";
         inputs[side].mult.skillDropdown.dataset.selectedSkillKey = "";
+        inputs[side].mult.skillDropdown.dataset.selectedSkillCategory = "";
     }
     updateUI();
     if (shouldSave) saveState();
@@ -4028,6 +4454,7 @@ function selectApostleSkillOption(side, option) {
     const dropdown = inputs[side]?.mult?.skillDropdown;
     if (dropdown) {
         dropdown.dataset.selectedSkillKey = option.key || '';
+        dropdown.dataset.selectedSkillCategory = option.category || '';
         dropdown.value = option.value;
     }
     if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = option.value;
@@ -4192,7 +4619,14 @@ function renderApostleSkillChoices(side, options) {
         if (level?.tagName === 'SELECT') {
             level.addEventListener('change', () => updateApostleSkillOptionLevel(side, option, level.value, mult));
         }
-        action.addEventListener('click', () => selectApostleSkillOption(side, option));
+        action.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectApostleSkillOption(side, option);
+        });
+        row.addEventListener('click', (e) => {
+            if (e.target.closest('.apostle-skill-choice-level, .apostle-skill-choice-info')) return;
+            selectApostleSkillOption(side, option);
+        });
         if (level) row.appendChild(level);
         row.append(action, mult, kind, info);
         choices.appendChild(row);
@@ -4236,7 +4670,7 @@ function updateMainSkillList(side = 'enemy') {
     const skillLevel = '12';
     const selectedSkillKey = dropdown.dataset.selectedSkillKey || '';
     resetSkillDropdown(dropdown);
-    dropdown.hidden = false;
+    dropdown.hidden = true;
     clearApostleSkillChoices(side);
 
     if (apostleId) {
@@ -4252,16 +4686,19 @@ function updateMainSkillList(side = 'enemy') {
                 dropdown.value = selectedOption.value;
                 if (selectedOption.dataset.displayLabel) selectedOption.textContent = selectedOption.dataset.displayLabel;
                 if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = selectedOption.value;
+                dropdown.dataset.selectedSkillCategory = selectedApostleOption?.category || '';
                 syncApostleSkillChoiceActive(side);
                 return;
             }
             if (selectedApostleOption?.value && inputs[side]?.mult?.skill) {
                 inputs[side].mult.skill.value = selectedApostleOption.value;
+                dropdown.dataset.selectedSkillCategory = selectedApostleOption.category || '';
                 syncApostleSkillChoiceActive(side);
                 return;
             }
         }
         dropdown.dataset.selectedSkillKey = "";
+        dropdown.dataset.selectedSkillCategory = "";
         dropdown.value = "";
         syncApostleSkillChoiceActive(side);
         return;
@@ -4283,6 +4720,7 @@ function updateMainSkillList(side = 'enemy') {
     });
     renderApostleSkillChoices(side, options);
     dropdown.dataset.selectedSkillKey = "";
+    dropdown.dataset.selectedSkillCategory = "";
     dropdown.value = "";
     syncApostleSkillChoiceActive(side);
 }
@@ -4600,6 +5038,7 @@ function initListeners() {
             if (e.target.value) {
                 const selectedOption = e.target.selectedOptions?.[0];
                 e.target.dataset.selectedSkillKey = selectedOption?.dataset.skillKey || '';
+                e.target.dataset.selectedSkillCategory = '';
                 if (selectedOption?.dataset.displayLabel) selectedOption.textContent = selectedOption.dataset.displayLabel;
                 inputs.self.mult.skill.value = e.target.value;
                 updateUI();
@@ -4614,6 +5053,7 @@ function initListeners() {
             if (e.target.value) {
                 const selectedOption = e.target.selectedOptions?.[0];
                 e.target.dataset.selectedSkillKey = selectedOption?.dataset.skillKey || '';
+                e.target.dataset.selectedSkillCategory = '';
                 if (selectedOption?.dataset.displayLabel) selectedOption.textContent = selectedOption.dataset.displayLabel;
                 inputs.enemy.mult.skill.value = e.target.value;
                 updateUI();
@@ -5141,8 +5581,9 @@ function estimateDefSide(rows, common) {
 }
 
 // --- Persistence & Initialization ---
-const STORAGE_KEY = 'trickcal_calc_state_v3.0';
-const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v1.8';
+const STORAGE_KEY = 'trickcal_calc_state_v3.1';
+const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v3.0';
+const ANCIENT_STORAGE_KEY = 'trickcal_calc_state_v1.8';
 const SPELL_STORAGE_KEY = `${STORAGE_KEY}:spell`;
 const LEGACY_SPELL_STORAGE_KEY = `${LEGACY_STORAGE_KEY}:spell`;
 const ARTIFACT_PRESETS_KEY = `${STORAGE_KEY}:artifact-presets`;
@@ -5852,6 +6293,9 @@ function collectCollapsibleTargets(host, header) {
     if (host.classList.contains('card-section')) {
         return Array.from(host.children).filter(child => !child.classList.contains('card-section-header'));
     }
+    if (host.classList.contains('synergy-section')) {
+        return Array.from(host.children).filter(child => child.classList.contains('synergy-panel'));
+    }
     if (host.classList.contains('dynamic-section')) {
         return Array.from(host.children).filter(child => child !== header);
     }
@@ -5869,10 +6313,10 @@ function collectCollapsibleTargets(host, header) {
 
 function applySectionCollapsed(host, collapsed) {
     host.classList.toggle('is-collapsed-section', collapsed);
-    const header = host.querySelector(':scope > .stat-cat-header, :scope .card-section-header .stat-cat-header');
+    const header = host.querySelector(':scope > .stat-cat-header, :scope .card-section-header .stat-cat-header, :scope .synergy-header .stat-cat-header');
     if (header) header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     const btn = header?.querySelector('.section-collapse-btn');
-    if (btn) btn.textContent = collapsed ? '＋' : '−';
+    if (btn) btn.textContent = collapsed ? '+' : '-';
 }
 
 function initCollapsibleSections() {
@@ -5886,7 +6330,9 @@ function initCollapsibleSections() {
         if (host.dataset.collapseBound) return;
         const header = host.classList.contains('card-section')
             ? host.querySelector('.card-section-header .stat-cat-header')
-            : host.querySelector(':scope > .stat-cat-header');
+            : (host.classList.contains('synergy-section')
+                ? host.querySelector('.synergy-header .stat-cat-header')
+                : host.querySelector(':scope > .stat-cat-header'));
         if (!header) return;
         const targets = collectCollapsibleTargets(host, header);
         if (targets.length === 0) return;
@@ -5898,12 +6344,11 @@ function initCollapsibleSections() {
         targets.forEach(target => target.classList.add('collapsible-section-body'));
 
         header.classList.add('collapsible-section-header');
-        header.setAttribute('role', 'button');
-        header.setAttribute('tabindex', '0');
         if (!header.querySelector('.section-collapse-btn')) {
-            const btn = document.createElement('span');
+            const btn = document.createElement('button');
+            btn.type = 'button';
             btn.className = 'section-collapse-btn';
-            btn.setAttribute('aria-hidden', 'true');
+            btn.setAttribute('aria-label', 'セクションを開閉');
             header.appendChild(btn);
         }
 
@@ -5914,13 +6359,10 @@ function initCollapsibleSections() {
             saveCollapsedSections();
             requestAnimationFrame(syncBottomBarSafeArea);
         };
-        header.addEventListener('click', (e) => {
-            if (e.target.closest('select, input, button, a')) return;
-            toggle();
-        });
-        header.addEventListener('keydown', (e) => {
-            if (e.key !== 'Enter' && e.key !== ' ') return;
+        const collapseBtn = header.querySelector('.section-collapse-btn');
+        collapseBtn?.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             toggle();
         });
 
@@ -5936,23 +6378,24 @@ function initCollapsibleSections() {
         const collapseId = getSectionCollapseId(host, header, index);
         header.dataset.collapseId = collapseId;
         header.dataset.collapseBound = '1';
+        host.classList.add('collapsible-section');
         targets.forEach(target => target.classList.add('collapsible-section-body'));
         header.classList.add('collapsible-section-header');
-        header.setAttribute('role', 'button');
-        header.setAttribute('tabindex', '0');
         if (!header.querySelector('.section-collapse-btn')) {
-            const btn = document.createElement('span');
+            const btn = document.createElement('button');
+            btn.type = 'button';
             btn.className = 'section-collapse-btn';
-            btn.setAttribute('aria-hidden', 'true');
+            btn.setAttribute('aria-label', 'セクションを開閉');
             header.appendChild(btn);
         }
 
         const applyHeaderCollapsed = (collapsed) => {
+            host.classList.toggle('is-collapsed-section', collapsed);
             header.classList.toggle('is-collapsed-header', collapsed);
             header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
             targets.forEach(target => target.classList.toggle('is-collapsed-body', collapsed));
             const btn = header.querySelector('.section-collapse-btn');
-            if (btn) btn.textContent = collapsed ? '＋' : '−';
+            if (btn) btn.textContent = collapsed ? '+' : '-';
         };
         const toggle = () => {
             const nextCollapsed = !header.classList.contains('is-collapsed-header');
@@ -5961,13 +6404,10 @@ function initCollapsibleSections() {
             saveCollapsedSections();
             requestAnimationFrame(syncBottomBarSafeArea);
         };
-        header.addEventListener('click', (e) => {
-            if (e.target.closest('select, input, button, a')) return;
-            toggle();
-        });
-        header.addEventListener('keydown', (e) => {
-            if (e.key !== 'Enter' && e.key !== ' ') return;
+        const collapseBtn = header.querySelector('.section-collapse-btn');
+        collapseBtn?.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             toggle();
         });
         applyHeaderCollapsed(!!collapsedSections[collapseId]);
@@ -6373,6 +6813,8 @@ function saveState() {
         spellSelections: normalizedSpellSelections,
         spellPresetSlot: activeSpellPresetSlotId,
         artifactPresetSlot: activeArtifactPresetSlotId,
+        synergy: collectSynergySelections(),
+        skillSelection: collectSkillSelectionMetadata(),
         multiplierInputBaseVersion: 2,
         mobileVisibleSide,
         mobileCrayonVisibleSide,
@@ -6506,6 +6948,9 @@ function loadState() {
         if (typeof state.artifactApplyEnabled === 'boolean') {
             setArtifactApplyEnabled(state.artifactApplyEnabled);
         }
+        if (state.synergy) {
+            restoreSynergySelections(state.synergy);
+        }
         
         if (state.samples) {
             estimator.samplesList.innerHTML = '';
@@ -6524,6 +6969,7 @@ function loadState() {
         }
 
         restoreFieldState(state.fieldState);
+        restoreSkillSelectionMetadata(state.skillSelection);
         migrateLegacyZeroBaseMultiplierInputs(state);
         
         if (state.tab) {
@@ -6562,6 +7008,7 @@ document.getElementById('reset-btn').addEventListener('click', () => {
     if (activeTab === 'calc') {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(LEGACY_STORAGE_KEY);
+        localStorage.removeItem(ANCIENT_STORAGE_KEY);
         location.reload();
     } else if (activeTab === 'crayon') {
         document.querySelectorAll('input[id^="cb-"]').forEach(el => { el.value = 0; });
@@ -6597,11 +7044,13 @@ initializeCardUI();
 initializeSpellTab();
 renderArtifactPresetButtons();
 initializeApostleSkillSelectors();
+initializeSynergyUI();
 loadState();
 initCollapsibleSections();
 updateMobileSideUI(mobileVisibleSide);
 updateMobileCrayonUI(mobileCrayonVisibleSide);
 initListeners();
+initApplyFloatController();
 updateHeaders();
 if (estimator.samplesList.children.length === 0) estimator.samplesList.appendChild(createSampleRow());
 updateMainSkillList('self');
@@ -6700,6 +7149,12 @@ document.addEventListener('keydown', (e) => {
         closeSpellSelectedPopovers();
         closeCrayonStepperPopover();
         closeApostleSkillInfoPopover();
+        const applyPanel = document.getElementById('apply-float-panel');
+        const applyToggle = document.getElementById('apply-float-toggle');
+        if (applyPanel && !applyPanel.hidden) {
+            applyPanel.hidden = true;
+            applyToggle?.setAttribute('aria-expanded', 'false');
+        }
     }
 });
 

@@ -450,7 +450,7 @@ const ENEMY_PRESETS = {
             { action: "攻撃", name: "火炎放射 12発hit", mult: 4800, note: "AoE / 11発" },
             { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
             { action: "攻撃", name: "ミサイル 2発hit", mult: 1400, note: "AoE / RNG / 全14発?" },
-            { action: "攻撃", name: "ミサイル 2発hit", mult: 2100, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "ミサイル 3発hit", mult: 2100, note: "AoE / RNG / 全14発?" },
             { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" },
             { action: "攻撃", name: "溜めレーザー 14発hit", mult: 4200, note: "AoE / 14発" }
         ]

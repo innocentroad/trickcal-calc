@@ -72,7 +72,7 @@ const PLAYER_PRESETS = {
 
 const ENEMY_PRESETS = {
     "lily_d_15": {
-        name: "[次元15] リリー",
+        name: "[次元15] リリ一",
         hp: 661796770,
         atk_p: 28120,
         atk_m: 28120,
@@ -89,15 +89,15 @@ const ENEMY_PRESETS = {
             { action: "攻撃", name: "ピコハン", mult: 100, note: "AoE / 気絶" },
             { action: "攻撃", name: "ネギ", mult: 150 },
             { action: "攻撃", name: "100tハンマー", mult: 400, note: "AoE" },
-            { action: "攻撃", name: "火の息", mult: 75, note: "5段: 15%*5 / AoE" },
-            { action: "攻撃", name: "暴走モードA", mult: 100 },
-            { action: "攻撃", name: "暴走モードB", mult: 150 },
-            { action: "攻撃", name: "暴走モードC", mult: 200 },
-            { action: "攻撃", name: "暴走モードD", mult: 250 }
+            { action: "攻撃", name: "火の息", mult: 75, note: "5段: 15%×5 / AoE" },
+            { action: "攻撃", name: "暴走モードA", mult: 100, note: "ABCDをランダム?で繰り返し" },
+            { action: "攻撃", name: "暴走モードB", mult: 150, note: "ABCDをランダム?で繰り返し" },
+            { action: "攻撃", name: "暴走モードC", mult: 200, note: "ABCDをランダム?で繰り返し" },
+            { action: "攻撃", name: "暴走モードD", mult: 250, note: "ABCDをランダム?で繰り返し" }
         ]
     },
         "lily_d_18": {
-        name: "[次元18] リリー",
+        name: "[次元18] リリ一",
         hp: 1486382912,
         atk_p: 42150,
         atk_m: 42150,
@@ -114,11 +114,11 @@ const ENEMY_PRESETS = {
             { action: "攻撃", name: "ピコハン", mult: 100, note: "AoE / 気絶" },
             { action: "攻撃", name: "ネギ", mult: 150 },
             { action: "攻撃", name: "100tハンマー", mult: 400, note: "AoE" },
-            { action: "攻撃", name: "火の息", mult: 75, note: "5段: 15%*5 / AoE" },
-            { action: "攻撃", name: "暴走モードA", mult: 100 },
-            { action: "攻撃", name: "暴走モードB", mult: 150 },
-            { action: "攻撃", name: "暴走モードC", mult: 200 },
-            { action: "攻撃", name: "暴走モードD", mult: 250 }
+            { action: "攻撃", name: "火の息", mult: 75, note: "5段: 15%×5 / AoE" },
+            { action: "攻撃", name: "暴走モードA", mult: 100, note: "ABCDをランダム?で繰り返し" },
+            { action: "攻撃", name: "暴走モードB", mult: 150, note: "ABCDをランダム?で繰り返し" },
+            { action: "攻撃", name: "暴走モードC", mult: 200, note: "ABCDをランダム?で繰り返し" },
+            { action: "攻撃", name: "暴走モードD", mult: 250, note: "ABCDをランダム?で繰り返し" }
         ]
     },
     "Kérberos_d_15": {
@@ -137,11 +137,11 @@ const ENEMY_PRESETS = {
         skills: [
             { action: "攻撃", name: "普通攻撃", mult: 100, note: "2段: 50%*2" },
             { action: "攻撃", name: "叩きつけ", mult: 150 },
-            { action: "攻撃", name: "舐め回し", mult: 1248, note: "18段: (22%+150%)*9 / 目隠し" },
-            { action: "攻撃", name: "咆哮", mult: 305, note: "17段: 17.94%*17" },
-            { action: "攻撃", name: "突進", mult: 350, note: "2段*n: (175%*2)*n" },
+            { action: "攻撃", name: "舐め回し", mult: 1248, note: "18段: (22%+150%)×9 / 目隠し" },
+            { action: "攻撃", name: "咆哮", mult: 305, note: "17段: 17.94%×17" },
+            { action: "攻撃", name: "突進", mult: 350, note: "2段×n: (175%×2)×n" },
             { action: "攻撃", name: "突進", mult: 241, note: "最終段" },
-            { action: "攻撃", name: "吸い込み", mult: 650, note: "16段+1段: 25%*16+250%" }
+            { action: "攻撃", name: "吸い込み", mult: 650, note: "16段+1段: 25%×16+250%" }
         ]
     },
     "Kérberos_d_18": {
@@ -158,13 +158,13 @@ const ENEMY_PRESETS = {
         critDmgRes: 54146,
         special: 3528.571,
         skills: [
-            { action: "攻撃", name: "普通攻撃", mult: 100, note: "2段: 50%*2" },
+            { action: "攻撃", name: "普通攻撃", mult: 100, note: "2段: 50%×2" },
             { action: "攻撃", name: "叩きつけ", mult: 150 },
-            { action: "攻撃", name: "舐め回し", mult: 1248, note: "18段: (22%+150%)*9 / 目隠し" },
-            { action: "攻撃", name: "咆哮", mult: 305, note: "17段: 17.94%*17" },
-            { action: "攻撃", name: "突進", mult: 350, note: "2段*n: (175%*2)*n" },
+            { action: "攻撃", name: "舐め回し", mult: 1248, note: "18段: (22%+150%)×9 / 目隠し" },
+            { action: "攻撃", name: "咆哮", mult: 305, note: "17段: 17.94%×17" },
+            { action: "攻撃", name: "突進", mult: 350, note: "2段×n: (175%×2)×n" },
             { action: "攻撃", name: "突進", mult: 241, note: "最終段" },
-            { action: "攻撃", name: "吸い込み", mult: 650, note: "16段+1段: 25%*16+250%" }
+            { action: "攻撃", name: "吸い込み", mult: 650, note: "16段+1段: 25%×16+250%" }
         ]
     },
     "meow_ef_11": {
@@ -438,20 +438,21 @@ const ENEMY_PRESETS = {
         ],
         skills: [
             { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
+            { action: "攻撃", name: "叩きつけ", mult: 100, note: "AoE / 2段" },
             { action: "攻撃", name: "張り手", mult: 150, note: "AoE" },
+            { action: "攻撃", name: "張り手 2段hit", mult: 300, note: "AoE" },
             { action: "攻撃", name: "ランチャー", mult: 240, note: "AoE / RNG / 3発" },
             { action: "攻撃", name: "ガトリング", mult: 150, note: "AoE / 9発?" },
+            { action: "攻撃", name: "ガトリング 9発hit", mult: 1350, note: "AoE / 9発?" },
             { action: "攻撃", name: "波状攻撃", mult: 200, note: "AoE / 12発" },
+            { action: "攻撃", name: "波状攻撃 12発hit", mult: 2400, note: "AoE / 12発" },
             { action: "攻撃", name: "火炎放射", mult: 400, note: "AoE / 11発" },
+            { action: "攻撃", name: "火炎放射 12発hit", mult: 4800, note: "AoE / 11発" },
             { action: "攻撃", name: "ミサイル", mult: 700, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "ミサイル 2発hit", mult: 1400, note: "AoE / RNG / 全14発?" },
+            { action: "攻撃", name: "ミサイル 2発hit", mult: 2100, note: "AoE / RNG / 全14発?" },
             { action: "攻撃", name: "溜めレーザー", mult: 300, note: "AoE / 14発" },
-            { action: "攻撃", name: "叩きつけ", mult: 50, note: "AoE / 2段" },
-            { action: "攻撃", name: "張り手 2段hit", mult: 150, note: "AoE" },
-            { action: "攻撃", name: "ガトリング 9発hit", mult: 150, note: "AoE / 9発?" },
-            { action: "攻撃", name: "波状攻撃 12発hit", mult: 200, note: "AoE / 12発" },
-            { action: "攻撃", name: "火炎放射 12発hit", mult: 400, note: "AoE / 11発" },
-            { action: "攻撃", name: "ミサイル 2発hit", mult: 700, note: "AoE / RNG / 全14発?" },
-            { action: "攻撃", name: "溜めレーザー 14発hit", mult: 300, note: "AoE / 14発" }
+            { action: "攻撃", name: "溜めレーザー 14発hit", mult: 4200, note: "AoE / 14発" }
         ]
     },
     "GTA_24": {

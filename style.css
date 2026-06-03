@@ -1093,7 +1093,15 @@ select {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.8rem;
 }
-.multipliers-grid .input-group {
+
+.skill-config-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.55rem;
+}
+
+.multipliers-grid .input-group,
+.skill-config-grid .input-group {
     display: block;
     margin-bottom: 0;
 }
@@ -1186,7 +1194,8 @@ select {
     background: rgba(113, 63, 18, 0.14);
 }
 
-.multipliers-grid .apostle-skill-group {
+.multipliers-grid .apostle-skill-group,
+.skill-config-grid .apostle-skill-group {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.3rem;
@@ -1242,25 +1251,35 @@ select {
     display: none !important;
 }
 
-.multipliers-grid .apostle-skill-picker select {
+.multipliers-grid .apostle-skill-picker select,
+.skill-config-grid .apostle-skill-picker select {
+    height: 1.82rem !important;
     padding: 0 0.32rem;
     text-align: left;
     box-sizing: border-box;
+    font-size: 0.86rem !important;
+    line-height: 1.2 !important;
 }
 
-.multipliers-grid .apostle-skill-picker .apostle-select {
+.multipliers-grid .apostle-skill-picker .apostle-select,
+.skill-config-grid .apostle-skill-picker .apostle-select {
     width: 9.2rem;
     min-width: 0;
 }
 
-.multipliers-grid .apostle-skill-picker > input {
+.multipliers-grid .apostle-skill-picker > input,
+.skill-config-grid .apostle-skill-picker > input {
     width: 80px;
     min-width: 80px;
+    height: 1.82rem !important;
     box-sizing: border-box;
     flex: 0 0 80px;
+    font-size: 0.86rem !important;
+    line-height: 1.2 !important;
 }
 
-.multipliers-grid .apostle-skill-list-select {
+.multipliers-grid .apostle-skill-list-select,
+.skill-config-grid .apostle-skill-list-select {
     display: inline-block;
     width: 6.7rem !important;
     height: 1.28rem !important;
@@ -1279,6 +1298,71 @@ select {
 
 .apostle-skill-list-select[hidden] {
     display: none !important;
+}
+
+.apostle-skill-levels {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.22rem 0.34rem;
+    border: 1px solid rgba(250, 204, 21, 0.14);
+    border-radius: 999px;
+    background: rgba(113, 63, 18, 0.08);
+}
+
+.apostle-skill-levels[hidden] {
+    display: none !important;
+}
+
+.apostle-skill-levels-label {
+    color: rgba(254, 243, 199, 0.78);
+    font-size: 0.66rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.apostle-skill-level-control {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.18rem !important;
+    width: auto !important;
+    margin: 0 !important;
+    color: rgba(248, 250, 252, 0.84) !important;
+    font-size: 0.66rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    white-space: nowrap;
+}
+
+.apostle-skill-level-control select {
+    width: 2.45rem !important;
+    min-width: 2.45rem !important;
+    height: 1.25rem !important;
+    padding: 0 0.16rem !important;
+    border-radius: 8px !important;
+    font-size: 0.72rem !important;
+    font-weight: 850;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.54) !important;
+}
+
+.apostle-skill-level-control.level-low {
+    color: #bae6fd !important;
+}
+
+.apostle-skill-level-control.level-high {
+    color: #e9d5ff !important;
+}
+
+.apostle-skill-level-control.level-passive {
+    color: #bbf7d0 !important;
+}
+
+.apostle-skill-level-control.level-aside {
+    color: #fde68a !important;
 }
 
 .apostle-skill-choices {
@@ -1470,6 +1554,12 @@ select.apostle-skill-choice-level:hover {
     border-color: rgba(134, 239, 172, 0.28);
 }
 
+.apostle-skill-choice-action.tone-favorite {
+    background: rgba(234, 179, 8, 0.32);
+    border-color: rgba(253, 224, 71, 0.62);
+    color: #fff7cc;
+}
+
 .apostle-skill-choice-action.tone-extra {
     background: rgba(51, 65, 85, 0.22);
     border-color: rgba(148, 163, 184, 0.3);
@@ -1545,6 +1635,127 @@ select.apostle-skill-choice-level:hover {
     font-size: 0.72rem;
     font-weight: 650;
     line-height: 1.55;
+}
+
+.apostle-skill-effects {
+    display: grid;
+    gap: 0.26rem;
+    width: min(100%, 34rem);
+    padding: 0.32rem 0.42rem;
+    border: 1px solid rgba(34, 197, 94, 0.15);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.16);
+}
+
+.apostle-skill-effects[hidden] {
+    display: none !important;
+}
+
+.apostle-skill-effects-title {
+    color: rgba(226, 232, 240, 0.72);
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+}
+
+.apostle-skill-effect-toggle {
+    display: grid !important;
+    grid-template-columns: 0.9rem auto minmax(0, 1fr);
+    align-items: center !important;
+    gap: 0.34rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+    color: rgba(226, 232, 240, 0.9) !important;
+    font-size: 0.72rem !important;
+    line-height: 1.2 !important;
+    cursor: pointer;
+}
+
+.apostle-skill-effect-toggle input {
+    width: 0.82rem !important;
+    height: 0.82rem !important;
+    margin: 0 !important;
+    accent-color: #22c55e;
+}
+
+.apostle-skill-effect-source {
+    min-width: 3.2rem;
+    padding: 0.15rem 0.38rem;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1;
+}
+
+.apostle-skill-effect-source.tone-basic {
+    background: rgba(202, 138, 4, 0.58);
+}
+
+.apostle-skill-effect-source.tone-enhanced {
+    background: rgba(220, 38, 38, 0.55);
+}
+
+.apostle-skill-effect-source.tone-low {
+    background: rgba(14, 165, 233, 0.55);
+}
+
+.apostle-skill-effect-source.tone-high {
+    background: rgba(147, 51, 234, 0.56);
+}
+
+.apostle-skill-effect-source.tone-passive {
+    background: rgba(22, 163, 74, 0.52);
+}
+
+.apostle-skill-effect-source.tone-favorite {
+    background: rgba(234, 179, 8, 0.72);
+    color: #fffbea;
+}
+
+.apostle-skill-effect-source.tone-extra {
+    background: rgba(100, 116, 139, 0.58);
+}
+
+.apostle-skill-effect-text {
+    display: grid;
+    gap: 0.08rem;
+    min-width: 0;
+    color: rgba(248, 250, 252, 0.9);
+    white-space: normal;
+}
+
+.apostle-skill-effect-text strong {
+    color: rgba(248, 250, 252, 0.94);
+    font-size: 0.73rem;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.apostle-skill-effect-text small {
+    color: rgba(203, 213, 225, 0.76);
+    font-size: 0.64rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.skill-defender-mode .apostle-skill-picker > input,
+.skill-defender-mode .apostle-skill-list-select,
+.skill-defender-mode .apostle-skill-choices {
+    display: none !important;
+}
+
+.skill-defender-mode .apostle-skill-effects {
+    border-color: rgba(96, 165, 250, 0.16);
+    background: rgba(30, 64, 175, 0.08);
+}
+
+.skill-defender-mode .apostle-skill-effects-title::after {
+    content: '（防御系のみ）';
+    margin-left: 0.35rem;
+    color: rgba(147, 197, 253, 0.78);
+    font-size: 0.62rem;
 }
 
 .stat-input-damage input,
@@ -2432,6 +2643,17 @@ select option {
 .perspective-toggle-circle:active {
     transform: translateX(-50%) scale(0.93);
 }
+.perspective-toggle-circle.is-corner {
+    left: auto;
+    right: 0.85rem;
+    transform: none;
+}
+.perspective-toggle-circle.is-corner:hover {
+    transform: scale(1.08);
+}
+.perspective-toggle-circle.is-corner:active {
+    transform: scale(0.93);
+}
 .perspective-toggle-circle .arrow {
     font-size: 1rem;
     line-height: 1.1;
@@ -2520,14 +2742,17 @@ select option {
     .apostle-skill-picker {
         gap: 0.22rem;
     }
-    .multipliers-grid .apostle-skill-picker .apostle-select {
+    .multipliers-grid .apostle-skill-picker .apostle-select,
+    .skill-config-grid .apostle-skill-picker .apostle-select {
         flex: 1 1 auto;
         width: auto;
     }
-    .multipliers-grid .apostle-skill-group {
+    .multipliers-grid .apostle-skill-group,
+    .skill-config-grid .apostle-skill-group {
         gap: 0.28rem;
     }
-    .multipliers-grid .apostle-skill-picker > input {
+    .multipliers-grid .apostle-skill-picker > input,
+    .skill-config-grid .apostle-skill-picker > input {
         width: 100%;
         min-width: 0;
         flex: 1 1 0;
@@ -2639,6 +2864,10 @@ select option {
         left: auto;
         transform: none;
         box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .perspective-toggle-circle.is-crayon-corner {
+        top: calc(var(--header-height) + 6.55rem);
+        right: 0.85rem;
     }
     .perspective-toggle-circle:hover {
         transform: scale(1.08);
@@ -3882,7 +4111,13 @@ select option {
     white-space: nowrap;
 }
 
-.card-section-header .section-collapse-btn,
+.card-section-header .section-collapse-btn {
+    position: absolute;
+    top: 50%;
+    right: 0.32rem;
+    transform: translateY(-50%);
+}
+
 .synergy-header .section-collapse-btn {
     position: absolute;
     top: 50%;
@@ -7371,9 +7606,13 @@ select option {
     }
 
     .card-section {
-        padding: 0.58rem 0.34rem;
+        padding: 0.58rem 0.45rem;
         border-radius: 9px;
         min-width: 0;
+    }
+
+    .card-section-header .section-collapse-btn {
+        right: 0.16rem;
     }
 
     .card-section-header {
@@ -7700,9 +7939,11 @@ select option {
     animation: fadeIn 0.3s ease-out;
 }
 
- .self-mult-section,
+.self-skill-section,
+.self-mult-section,
 .self-atk-adds-section,
 .self-def-adds-section,
+.enemy-skill-section,
 .enemy-mult-section,
 .enemy-atk-adds-section,
 .enemy-def-adds-section {

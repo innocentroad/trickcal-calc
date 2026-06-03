@@ -435,7 +435,11 @@ function createEmptyCardBonus() {
         healingP: 0,
         hpRecoveryP: 0,
         atkP: 0,
+        critStatP: 0,
+        critDmgStatP: 0,
         defP: 0,
+        critResStatP: 0,
+        critDmgResStatP: 0,
         enemyDefDownP: 0,
         hasteP: 0,
         critRateP: 0,
@@ -457,7 +461,7 @@ function createEmptyCardBonus() {
 
 function accumulateCardBonus(target, source) {
     if (!source) return target;
-    ['hpP', 'healingP', 'hpRecoveryP', 'atkP', 'defP', 'enemyDefDownP', 'hasteP', 'critRateP', 'critDmgP', 'critResP', 'critDmgResP', 'enemyCritResDownP', 'enemyCritDmgResDownP', 'addP', 'takenDmgP', 'specialP', 'otherP', 'basicAddP', 'skillAddP', 'spRecoveryP'].forEach(key => {
+    ['hpP', 'healingP', 'hpRecoveryP', 'atkP', 'critStatP', 'critDmgStatP', 'defP', 'critResStatP', 'critDmgResStatP', 'enemyDefDownP', 'hasteP', 'critRateP', 'critDmgP', 'critResP', 'critDmgResP', 'enemyCritResDownP', 'enemyCritDmgResDownP', 'addP', 'takenDmgP', 'specialP', 'otherP', 'basicAddP', 'skillAddP', 'spRecoveryP'].forEach(key => {
         target[key] = (target[key] || 0) + (source[key] || 0);
     });
     return target;
@@ -548,9 +552,31 @@ function getSelectedActionScopedDamageBonus(cardBonus, side) {
 function collectSkillSelectionMetadata() {
     return Object.fromEntries(['self', 'enemy'].map(side => {
         const dropdown = inputs[side]?.mult?.skillDropdown;
+        const effects = document.getElementById(`${side}-apostle-skill-effects`);
+        const effectInputs = effects ? Array.from(effects.querySelectorAll('.apostle-skill-effect-toggle input')) : [];
+        const disabledEffects = effectInputs.length
+            ? effectInputs
+                .filter(input => !input.checked)
+                .map(input => input.dataset.effectKey || '')
+                .filter(Boolean)
+            : getSavedApostleSkillDisabledEffectKeys(side);
+        const enabledEffects = effectInputs.length
+            ? effectInputs
+                .filter(input => input.checked)
+                .map(input => input.dataset.effectKey || '')
+                .filter(Boolean)
+            : getSavedApostleSkillEnabledEffectKeys(side);
+        const levelsEl = document.getElementById(`${side}-apostle-skill-levels`);
+        const levels = levelsEl
+            ? Object.fromEntries(Array.from(levelsEl.querySelectorAll('select[data-level-group]'))
+                .map(select => [select.dataset.levelGroup, select.value]))
+            : getSavedApostleSkillLevels(side);
         return [side, {
             key: dropdown?.dataset.selectedSkillKey || '',
-            category: dropdown?.dataset.selectedSkillCategory || ''
+            category: dropdown?.dataset.selectedSkillCategory || '',
+            disabledEffects,
+            enabledEffects,
+            levels
         }];
     }));
 }
@@ -561,6 +587,9 @@ function restoreSkillSelectionMetadata(state = {}) {
         if (!dropdown || !state[side]) return;
         dropdown.dataset.selectedSkillKey = state[side].key || '';
         dropdown.dataset.selectedSkillCategory = state[side].category || '';
+        dropdown.dataset.disabledSkillEffectKeys = JSON.stringify(state[side].disabledEffects || []);
+        dropdown.dataset.enabledSkillEffectKeys = JSON.stringify(state[side].enabledEffects || []);
+        dropdown.dataset.skillLevels = JSON.stringify(state[side].levels || {});
         syncApostleSkillChoiceActive(side);
     });
 }
@@ -2015,7 +2044,11 @@ function formatCardSummaryParts(bonus) {
     if (bonus.healingP) parts.push(`HP治癒量 ${formatSignedPercent(bonus.healingP)}`);
     if (bonus.hpRecoveryP) parts.push(`HP回復量 ${formatSignedPercent(bonus.hpRecoveryP)}`);
     if (bonus.atkP) parts.push(`攻撃 ${formatSignedPercent(bonus.atkP)}`);
+    if (bonus.critStatP) parts.push(`会心ステ ${formatSignedPercent(bonus.critStatP)}`);
+    if (bonus.critDmgStatP) parts.push(`会心DMGステ ${formatSignedPercent(bonus.critDmgStatP)}`);
     if (bonus.defP) parts.push(`防御 ${formatSignedPercent(bonus.defP)}`);
+    if (bonus.critResStatP) parts.push(`会心抵抗ステ ${formatSignedPercent(bonus.critResStatP)}`);
+    if (bonus.critDmgResStatP) parts.push(`会心DMG抵抗ステ ${formatSignedPercent(bonus.critDmgResStatP)}`);
     if (bonus.enemyDefDownP) parts.push(`敵防御減 ${formatSignedPercent(bonus.enemyDefDownP)}`);
     if (bonus.critRateP) parts.push(`会心率 ${formatSignedPercent(bonus.critRateP)}`);
     if (bonus.critDmgP) parts.push(`会心DMG ${formatSignedPercent(bonus.critDmgP)}`);
@@ -2201,7 +2234,11 @@ function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
     const attacker = v.perspective === 'self' ? selfStats : enemyStats;
     const defender = v.perspective === 'self' ? enemyStats : selfStats;
     const finalAtk = attacker.atk * (1 + v.common.atkP / 100);
+    const finalCritStat = attacker.crit * (1 + (v.common.critStatP || 0) / 100);
+    const finalCritDmgStat = attacker.critDmg * (1 + (v.common.critDmgStatP || 0) / 100);
     const finalDef = defender.def * (1 + (v.common.defP - v.common.enemyDefDownP) / 100);
+    const finalCritResStat = defender.critRes * (1 + (v.common.critResStatP || 0) / 100);
+    const finalCritDmgResStat = defender.critDmgRes * (1 + (v.common.critDmgResStatP || 0) / 100);
     const finalHp = Math.max(0, defender.hp || 0) * (1 + (v.common.hpP || 0) / 100);
 
     const weaknessAdd = getWeaknessAddBonus(v);
@@ -2211,10 +2248,10 @@ function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
     const rawFinalAdd = v.common.add + weaknessAdd / 100 - poisonAddPenalty + angerAddBonus - takenDmgPenalty;
     const boundedFinalAdd = Math.max(0.2, rawFinalAdd);
     const finalAddInfo = formatClampedMultiplier(rawFinalAdd, boundedFinalAdd, 0.2);
-    const rawFinalCritRate = calcCritRate(attacker.crit, defender.critRes) + (v.common.critRateP - v.common.critResP + v.common.enemyCritResDownP) / 100;
+    const rawFinalCritRate = calcCritRate(finalCritStat, finalCritResStat) + (v.common.critRateP - v.common.critResP + v.common.enemyCritResDownP) / 100;
     const boundedFinalCritRate = Math.max(0.05, Math.min(0.8, rawFinalCritRate));
     const finalCritRateInfo = formatClampedMultiplier(rawFinalCritRate, boundedFinalCritRate, 0.05, 0.8, { showNote: false });
-    const rawFinalCritMult = calcCritMultiplier(attacker.critDmg, defender.critDmgRes) + (v.common.critDmgP - v.common.critDmgResP + v.common.enemyCritDmgResDownP) / 100;
+    const rawFinalCritMult = calcCritMultiplier(finalCritDmgStat, finalCritDmgResStat) + (v.common.critDmgP - v.common.critDmgResP + v.common.enemyCritDmgResDownP) / 100;
     const boundedFinalCritMult = Math.max(1.2, Math.min(2.5, rawFinalCritMult));
     const finalCritMultInfo = formatClampedMultiplier(rawFinalCritMult, boundedFinalCritMult, 1.2, 2.5, { showNote: false });
     const attackerLabel = v.perspective === 'self' ? '自キャラ' : '敵キャラ';
@@ -2250,13 +2287,17 @@ function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
     }
 
     const statPairs = [
-        ['HP', v.common.hpP],
         ['攻撃', v.common.atkP],
+        ['会心ステ', v.common.critStatP],
+        ['会心DMGステ', v.common.critDmgStatP],
         ['会心率', v.common.critRateP],
         ['会心DMG', v.common.critDmgP],
         ['防御', v.common.defP],
+        ['会心抵抗ステ', v.common.critResStatP],
+        ['会心DMG抵抗ステ', v.common.critDmgResStatP],
         ['被会心率減', v.common.critResP],
-        ['会心被DMG減', v.common.critDmgResP]
+        ['会心被DMG減', v.common.critDmgResP],
+        ['HP', v.common.hpP]
     ];
     const statChips = statPairs
         .map(([label, value]) => createModifierChip(label, formatSignedPercent(value), 'stat'));
@@ -2290,7 +2331,11 @@ function formatEffectBonusParts(bonus) {
     if (bonus.healingP) parts.push(`HP治癒量 ${formatSignedPercent(bonus.healingP)}`);
     if (bonus.hpRecoveryP) parts.push(`HP回復量 ${formatSignedPercent(bonus.hpRecoveryP)}`);
     if (bonus.atkP) parts.push(`攻撃 ${formatSignedPercent(bonus.atkP)}`);
+    if (bonus.critStatP) parts.push(`会心ステ ${formatSignedPercent(bonus.critStatP)}`);
+    if (bonus.critDmgStatP) parts.push(`会心DMGステ ${formatSignedPercent(bonus.critDmgStatP)}`);
     if (bonus.defP) parts.push(`防御 ${formatSignedPercent(bonus.defP)}`);
+    if (bonus.critResStatP) parts.push(`会心抵抗ステ ${formatSignedPercent(bonus.critResStatP)}`);
+    if (bonus.critDmgResStatP) parts.push(`会心DMG抵抗ステ ${formatSignedPercent(bonus.critDmgResStatP)}`);
     if (bonus.enemyDefDownP) parts.push(`敵防御減 ${formatSignedPercent(bonus.enemyDefDownP)}`);
     if (bonus.critRateP) parts.push(`会心率 ${formatSignedPercent(bonus.critRateP)}`);
     if (bonus.critDmgP) parts.push(`会心DMG ${formatSignedPercent(bonus.critDmgP)}`);
@@ -3571,6 +3616,12 @@ function getValues() {
     };
     const synergyBonuses = getSynergyBonuses();
     accumulateCardBonus(cardBonuses.self, synergyBonuses);
+    const apostleSkillBonuses = {
+        self: getApostleSkillBonusesForSide('self', { dmgType: inputs.dmgType.value }),
+        enemy: getApostleSkillBonusesForSide('enemy', { dmgType: inputs.dmgType.value })
+    };
+    accumulateCardBonus(cardBonuses.self, apostleSkillBonuses.self);
+    accumulateCardBonus(cardBonuses.enemy, apostleSkillBonuses.enemy);
 
     return {
         perspective,
@@ -3581,6 +3632,7 @@ function getValues() {
         crayonBonuses: crayonBoard,
         cardBonuses,
         synergyBonuses,
+        apostleSkillBonuses,
         common: (() => {
             const isSelfAttacker = perspective === 'self';
             const att = isSelfAttacker ? inputs.self : inputs.enemy;
@@ -3605,10 +3657,14 @@ function getValues() {
                 special: ((parseFloat(att.mult.special?.value) === 0 ? 0 : (parseFloat(att.mult.special?.value) || 100)) + (attCard.specialP || 0)) / 100,
                 other: 1 + (rawOther + (attCard.otherP || 0)) / 100,
                 atkP: (parseFloat(att.adds.atkP?.value) || 0) + (attCard.atkP || 0),
+                critStatP: attCard.critStatP || 0,
+                critDmgStatP: attCard.critDmgStatP || 0,
                 critRateP: (parseFloat(att.adds.critRateP?.value) || 0) + (attCard.critRateP || 0),
                 critDmgP: (parseFloat(att.adds.critDmgP?.value) || 0) + (attCard.critDmgP || 0),
                 hpP: (parseFloat(def.adds.hpP?.value) || 0) + (defCard.hpP || 0),
                 defP: (parseFloat(def.adds.defP?.value) || 0) + (defCard.defP || 0),
+                critResStatP: defCard.critResStatP || 0,
+                critDmgResStatP: defCard.critDmgResStatP || 0,
                 critResP: (parseFloat(def.adds.critResP?.value) || 0) + (defCard.critResP || 0),
                 critDmgResP: (parseFloat(def.adds.critDmgResP?.value) || 0) + (defCard.critDmgResP || 0),
                 enemyDefDownP: attCard.enemyDefDownP || 0,
@@ -3632,7 +3688,11 @@ function calculateAll(v, overrideSelf = null) {
     const defender = v.perspective === 'self' ? e : s;
 
     const finalAtk = attacker.atk * (1 + v.common.atkP / 100);
+    const finalCritStat = attacker.crit * (1 + (v.common.critStatP || 0) / 100);
+    const finalCritDmgStat = attacker.critDmg * (1 + (v.common.critDmgStatP || 0) / 100);
     const finalDef = defender.def * (1 + (v.common.defP - v.common.enemyDefDownP) / 100);
+    const finalCritResStat = defender.critRes * (1 + (v.common.critResStatP || 0) / 100);
+    const finalCritDmgResStat = defender.critDmgRes * (1 + (v.common.critDmgResStatP || 0) / 100);
     const rate = calcBaseDamageRate(finalAtk, finalDef);
     const baseDamage = finalAtk * rate;
     
@@ -3657,10 +3717,10 @@ function calculateAll(v, overrideSelf = null) {
     
     const normalDamage = baseDamage * v.common.skill * finalAdd * v.common.type * v.common.special * v.common.other;
 
-    const baseCritRate = calcCritRate(attacker.crit, defender.critRes);
+    const baseCritRate = calcCritRate(finalCritStat, finalCritResStat);
     const finalCritRate = Math.max(0.05, Math.min(0.8, baseCritRate + (v.common.critRateP - v.common.critResP + v.common.enemyCritResDownP) / 100));
 
-    const baseCritMult = calcCritMultiplier(attacker.critDmg, defender.critDmgRes);
+    const baseCritMult = calcCritMultiplier(finalCritDmgStat, finalCritDmgResStat);
     const finalCritMult = Math.max(1.2, Math.min(2.5, baseCritMult + (v.common.critDmgP - v.common.critDmgResP + v.common.enemyCritDmgResDownP) / 100));
 
     const criticalDamage = normalDamage * finalCritMult;
@@ -3894,21 +3954,26 @@ function updateChart(v, overrideSelf = null) {
     });
 }
 // --- Custom Presets & Dropdown Population ---
-const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.1';
-const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.0';
+const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.2';
+const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.1';
+const LEGACY_OLD_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.0';
 
-function getLocalStorageWithFallback(key, legacyKey = '') {
+function getLocalStorageWithFallback(key, ...fallbackKeys) {
     const raw = localStorage.getItem(key);
-    if (raw !== null || !legacyKey) return raw;
-    const legacyRaw = localStorage.getItem(legacyKey);
-    if (legacyRaw !== null) {
-        localStorage.setItem(key, legacyRaw);
+    if (raw !== null) return raw;
+    for (const fallbackKey of fallbackKeys) {
+        if (!fallbackKey) continue;
+        const fallbackRaw = localStorage.getItem(fallbackKey);
+        if (fallbackRaw !== null) {
+            localStorage.setItem(key, fallbackRaw);
+            return fallbackRaw;
+        }
     }
-    return legacyRaw;
+    return null;
 }
 
 function loadCustomPresets() {
-    const raw = getLocalStorageWithFallback(CUSTOM_PRESETS_KEY, LEGACY_CUSTOM_PRESETS_KEY);
+    const raw = getLocalStorageWithFallback(CUSTOM_PRESETS_KEY, LEGACY_CUSTOM_PRESETS_KEY, LEGACY_OLD_CUSTOM_PRESETS_KEY);
     if (!raw) return { self: {}, enemy: {} };
     try {
         return JSON.parse(raw);
@@ -4088,12 +4153,34 @@ function normalizeApostleEffects(skill) {
     return Array.isArray(skill.effects) ? skill.effects : [skill.effects];
 }
 
-function getApostleEffectLevelValue(effect, requestedLevel) {
+function parseApostleEffectNumericValue(value) {
+    if (value === undefined || value === null || value === '') return null;
+    if (typeof value === 'number') return Number.isFinite(value) ? { value, min: value, max: value, isRange: false } : null;
+    const text = String(value).trim();
+    const rangeMatch = text.match(/^(-?\d+(?:\.\d+)?)\s*[～〜~\-]\s*(-?\d+(?:\.\d+)?)$/);
+    if (rangeMatch) {
+        const min = Number(rangeMatch[1]);
+        const max = Number(rangeMatch[2]);
+        if (Number.isFinite(min) && Number.isFinite(max)) {
+            return {
+                value: (min + max) / 2,
+                min,
+                max,
+                isRange: true,
+                raw: text
+            };
+        }
+    }
+    const numeric = Number(text);
+    return Number.isFinite(numeric) ? { value: numeric, min: numeric, max: numeric, isRange: false } : null;
+}
+
+function getApostleEffectLevelInfo(effect, requestedLevel) {
     const levels = effect?.levels;
     if (levels && typeof levels === 'object') {
         const requestedKey = String(requestedLevel);
         if (levels[requestedKey] !== undefined && levels[requestedKey] !== '') {
-            return Number(levels[requestedKey]);
+            return parseApostleEffectNumericValue(levels[requestedKey]);
         }
         const availableLevels = Object.keys(levels)
             .map(Number)
@@ -4102,13 +4189,17 @@ function getApostleEffectLevelValue(effect, requestedLevel) {
         const fallbackLevel = availableLevels.filter(level => level <= requestedLevel).pop()
             ?? availableLevels[availableLevels.length - 1];
         if (fallbackLevel !== undefined) {
-            return Number(levels[String(fallbackLevel)]);
+            return parseApostleEffectNumericValue(levels[String(fallbackLevel)]);
         }
     }
     if (effect?.fixedValue !== undefined && effect.fixedValue !== '') {
-        return Number(effect.fixedValue);
+        return parseApostleEffectNumericValue(effect.fixedValue);
     }
-    return NaN;
+    return null;
+}
+
+function getApostleEffectLevelValue(effect, requestedLevel) {
+    return getApostleEffectLevelInfo(effect, requestedLevel)?.value ?? NaN;
 }
 
 function getApostleEffectLevelOptions(effect) {
@@ -4118,6 +4209,12 @@ function getApostleEffectLevelOptions(effect) {
         .map(Number)
         .filter(Number.isFinite)
         .sort((a, b) => a - b);
+}
+
+function formatApostleMultiplierValue(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return String(value || '');
+    return Number.isInteger(numeric) ? String(numeric) : numeric.toFixed(1).replace(/\.0$/, '');
 }
 
 function isApostleAttackMultiplierEffect(effect) {
@@ -4149,17 +4246,55 @@ function normalizeApostleSkillEntries(entries) {
     return Array.isArray(entries) ? entries.filter(Boolean) : [entries];
 }
 
+function normalizeApostleStatNameForEffect(statName = '') {
+    const name = String(statName || '').trim();
+    if (/最大?HP|HP/.test(name)) return '最大HP増加';
+    if (/会心ダメージ抵抗|会心DMG抵抗/.test(name)) return '会心DMG抵抗ステ増加';
+    if (/会心抵抗|被会心/.test(name)) return '会心抵抗ステ増加';
+    if (/会心ダメージ|会心DMG/.test(name)) return '会心DMGステ増加';
+    if (/^会心$|会心率/.test(name)) return '会心ステ増加';
+    if (/攻撃力/.test(name)) return `${name}増加`;
+    if (/防御力/.test(name)) return `${name}増加`;
+    return `${name}増加`;
+}
+
+function normalizeApostleStatEffects(stats) {
+    return normalizeApostleSkillEntries(stats).map(stat => {
+        const value = Number(stat?.increaseP ?? stat?.increase ?? stat?.value);
+        if (!Number.isFinite(value) || value === 0) return null;
+        const applyTo = String(stat?.statApplyTo || '本人');
+        return {
+            valueKind: normalizeApostleStatNameForEffect(stat?.statName),
+            valueClass: '倍率',
+            effectType: 'パッシブ',
+            effectTarget: /全体|味方/.test(applyTo) ? '味方全体' : '自身',
+            fixedValue: value
+        };
+    }).filter(Boolean);
+}
+
+function mergeApostleSkillAndStatEffects(skill) {
+    const effects = [
+        ...normalizeApostleEffects(skill),
+        ...normalizeApostleStatEffects(skill?.stats)
+    ];
+    return {
+        ...skill,
+        effects
+    };
+}
+
 function collectApostleSkillSources(apostle) {
     const sources = [];
     normalizeApostleSkillEntries(apostle.skills).forEach((skill, index) => {
-        sources.push({ skill, sourceLabel: '通常', sourceKey: `base:${index}` });
+        sources.push({ skill: mergeApostleSkillAndStatEffects(skill), sourceLabel: '通常', sourceKey: `base:${index}` });
     });
 
     const favoriteLevels = apostle.favoriteCard?.levels || {};
     Object.entries(favoriteLevels).forEach(([level, entries]) => {
         normalizeApostleSkillEntries(entries).forEach((skill, index) => {
             sources.push({
-                skill,
+                skill: mergeApostleSkillAndStatEffects(skill),
                 sourceLabel: `愛用Lv${level}`,
                 sourceKey: `favorite:${level}:${index}`
             });
@@ -4170,7 +4305,10 @@ function collectApostleSkillSources(apostle) {
     const asideLevels = apostle.aside?.levels || {};
     Object.entries(asideLevels).forEach(([level, data]) => {
         if (!data) return;
-        const effects = normalizeApostleSkillEntries(data.effects);
+        const effects = [
+            ...normalizeApostleSkillEntries(data.effects),
+            ...normalizeApostleStatEffects(data.stats)
+        ];
         sources.push({
             skill: {
                 effects,
@@ -4189,6 +4327,36 @@ function collectApostleSkillSources(apostle) {
 function isApostleSkillSelectionEnabled(side) {
     const toggle = inputs[side]?.mult?.apostleEnabled;
     return !!toggle?.checked;
+}
+
+function isSideAttacker(side) {
+    const isSelfAttacker = document.getElementById('perspective-self')?.checked !== false;
+    return side === 'self' ? isSelfAttacker : !isSelfAttacker;
+}
+
+function getApostleAttackDmgType(apostleId) {
+    const apostle = getApostleLibrary().find(item => item.id === apostleId);
+    const attackType = String(apostle?.basic?.attackType || '');
+    if (/魔法|mag/i.test(attackType)) return 'mag';
+    if (/物理|phys/i.test(attackType)) return 'phys';
+    return '';
+}
+
+function syncDmgTypeFromApostle(side, options = {}) {
+    if (!options.force && !isSideAttacker(side)) return false;
+    const apostleId = inputs[side]?.mult?.apostle?.value || '';
+    const dmgType = getApostleAttackDmgType(apostleId);
+    if (!dmgType || !inputs.dmgType || inputs.dmgType.value === dmgType) return false;
+    inputs.dmgType.value = dmgType;
+    if (options.dispatchChange) {
+        inputs.dmgType.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    return true;
+}
+
+function syncDmgTypeFromCurrentAttacker(options = {}) {
+    const attackerSide = isSideAttacker('self') ? 'self' : 'enemy';
+    return syncDmgTypeFromApostle(attackerSide, options);
 }
 
 function updateApostleSkillPickerVisibility(side) {
@@ -4236,16 +4404,122 @@ function getApostleSkillActionTone(category = '') {
     if (category === '低学年スキル') return 'tone-low';
     if (category === '高学年スキル') return 'tone-high';
     if (category === 'パッシブ') return 'tone-passive';
+    if (category.startsWith('愛用品')) return 'tone-favorite';
     return 'tone-extra';
+}
+
+function getApostleSkillLevelGroup(category = '') {
+    if (category === '低学年スキル') return 'low';
+    if (category === '高学年スキル') return 'high';
+    if (category === 'パッシブ') return 'passive';
+    return '';
+}
+
+function getApostleMaxAsideLevel(apostleId) {
+    const apostle = getApostleLibrary().find(item => item.id === apostleId);
+    const levels = apostle?.aside?.levels || {};
+    return Object.keys(levels)
+        .map(Number)
+        .filter(Number.isFinite)
+        .reduce((max, level) => Math.max(max, level), 0);
+}
+
+function getSavedApostleSkillLevels(side) {
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    try {
+        const parsed = JSON.parse(dropdown?.dataset.skillLevels || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function getApostleSkillLevelConfigForSide(side) {
+    const saved = getSavedApostleSkillLevels(side);
+    const controls = document.getElementById(`${side}-apostle-skill-levels`);
+    const apostleId = inputs[side]?.mult?.apostle?.value || '';
+    const maxAsideLevel = getApostleMaxAsideLevel(apostleId);
+    const asideValue = Number(controls?.querySelector('select[data-level-group="aside"]')?.value || saved.aside);
+    const aside = Math.max(0, Math.min(maxAsideLevel, Number.isFinite(asideValue) ? asideValue : 0));
+    const maxSkillLevel = 12 + aside;
+    const getLevel = (group) => {
+        const value = Number(controls?.querySelector(`select[data-level-group="${group}"]`)?.value || saved[group]);
+        const level = Number.isFinite(value) && value > 0 ? value : 12;
+        return Math.max(1, Math.min(maxSkillLevel, level));
+    };
+    return {
+        default: 12,
+        low: getLevel('low'),
+        high: getLevel('high'),
+        passive: getLevel('passive'),
+        aside,
+        maxAsideLevel,
+        maxSkillLevel
+    };
+}
+
+function normalizeApostleSkillLevelConfig(requestedLevel) {
+    if (requestedLevel && typeof requestedLevel === 'object') {
+        return {
+            default: Number(requestedLevel.default) || 12,
+            low: Number(requestedLevel.low) || Number(requestedLevel.default) || 12,
+            high: Number(requestedLevel.high) || Number(requestedLevel.default) || 12,
+            passive: Number(requestedLevel.passive) || Number(requestedLevel.default) || 12,
+            aside: Number.isFinite(Number(requestedLevel.aside)) ? Number(requestedLevel.aside) : 0,
+            maxSkillLevel: Number(requestedLevel.maxSkillLevel) || 12
+        };
+    }
+    const level = Number(requestedLevel) || 12;
+    return { default: level, low: level, high: level, passive: level, aside: 0, maxSkillLevel: 12 };
+}
+
+function resolveApostleSkillLevel(category, levelOptions, levelConfig) {
+    const group = getApostleSkillLevelGroup(category);
+    const requested = Number(levelConfig[group] || levelConfig.default) || 12;
+    if (!levelOptions?.length) return requested;
+    return levelOptions.includes(requested)
+        ? requested
+        : (levelOptions.filter(item => item <= requested).pop() || levelOptions[levelOptions.length - 1] || requested);
+}
+
+function isApostleRangeMaxLockEffect(effect) {
+    const valueKind = String(effect?.valueKind || '');
+    const valueClass = String(effect?.valueClass || '');
+    const effectType = String(effect?.effectType || '');
+    return /乱数最大固定|最大ダメージ化/.test(valueKind)
+        || (/最大/.test(valueKind) && /スキル変更|条件/.test(`${valueClass} ${effectType}`));
+}
+
+function isApostleEffectTargetingCategory(effect, category) {
+    const targetSkill = String(effect?.targetSkill || effect?.valueKind || '');
+    if (!targetSkill) return false;
+    if (category === '高学年スキル') return /高学年/.test(targetSkill);
+    if (category === '低学年スキル') return /低学年/.test(targetSkill);
+    if (category === '基本攻撃') return /基本|普通攻撃/.test(targetSkill);
+    if (category === '強化攻撃') return /強化/.test(targetSkill);
+    return false;
+}
+
+function hasApostleRangeMaxLockForCategory(apostle, category, levelConfig) {
+    return collectApostleSkillSources(apostle).some(({ skill, sourceKey }) => {
+        const asideMatch = sourceKey.match(/^aside:(\d+)/);
+        if (asideMatch && Number(asideMatch[1]) > (levelConfig.aside || 0)) return false;
+        return normalizeApostleEffects(skill).some(effect =>
+            isApostleRangeMaxLockEffect(effect)
+            && isApostleEffectTargetingCategory(effect, category)
+        );
+    });
 }
 
 function buildApostleSkillOptions(apostleId, requestedLevel) {
     const apostle = getApostleLibrary().find(item => item.id === apostleId);
     if (!apostle) return [];
-    const level = Number(requestedLevel) || 12;
+    const levelConfig = normalizeApostleSkillLevelConfig(requestedLevel);
     const options = [];
 
     collectApostleSkillSources(apostle).forEach(({ skill, sourceLabel, sourceKey }) => {
+        const asideMatch = sourceKey.match(/^aside:(\d+)/);
+        if (asideMatch && Number(asideMatch[1]) > (levelConfig.aside || 0)) return;
         const skillEffects = normalizeApostleEffects(skill);
         const skillCategory = getApostleSkillCategory(skill, null, sourceLabel);
         const skillDescription = String(skill.description || '').trim();
@@ -4256,6 +4530,9 @@ function buildApostleSkillOptions(apostleId, requestedLevel) {
                 label: skill.skillName || skillCategory,
                 displayLabel: skillCategory,
                 category: skillCategory,
+                sourceKey,
+                sourceLabel,
+                effectIndex: -1,
                 skillName: skill.skillName || '',
                 kind: '説明',
                 detailText: skillDescription,
@@ -4277,6 +4554,9 @@ function buildApostleSkillOptions(apostleId, requestedLevel) {
                 label: skill.skillName || 'パッシブ',
                 displayLabel: 'パッシブ',
                 category: 'パッシブ',
+                sourceKey,
+                sourceLabel,
+                effectIndex: -1,
                 skillName: skill.skillName || '',
                 kind: '説明',
                 detailText: skillDescription,
@@ -4295,25 +4575,34 @@ function buildApostleSkillOptions(apostleId, requestedLevel) {
             const rawSkillName = skill.skillName || '';
             const skillName = /基本攻撃|強化攻撃/.test(category) ? '' : rawSkillName;
             const levelOptions = getApostleEffectLevelOptions(effect);
-            const selectedLevel = levelOptions.includes(level) ? level : (levelOptions.filter(item => item <= level).pop() || levelOptions[levelOptions.length - 1] || null);
+            const selectedLevel = levelOptions.length ? resolveApostleSkillLevel(category, levelOptions, levelConfig) : null;
             const levelLabel = selectedLevel ? `Lv${selectedLevel}` : '';
             const order = getApostleSkillCategoryOrder(category);
             const effectDescription = String(effect.description || effect.effectDescription || '').trim();
             const detailText = [skillDescription, effectDescription].filter(Boolean).join('\n');
 
             if (isApostleAttackMultiplierEffect(effect)) {
-                const mult = getApostleEffectLevelValue(effect, selectedLevel || level);
+                const levelInfo = getApostleEffectLevelInfo(effect, selectedLevel || levelConfig.default);
+                const useRangeMax = levelInfo?.isRange && hasApostleRangeMaxLockForCategory(apostle, category, levelConfig);
+                const mult = useRangeMax ? levelInfo.max : levelInfo?.value;
                 if (!Number.isFinite(mult)) return;
                 const displayLabel = category;
+                const rangeText = levelInfo?.isRange
+                    ? `${levelInfo.min}～${levelInfo.max}% / 計算値: ${useRangeMax ? '最大' : '平均'}${formatApostleMultiplierValue(mult)}%`
+                    : '';
                 options.push({
                     key: `${apostle.id}:${sourceKey}:${effectIndex}`,
                     value: String(mult),
-                    label: `${category} / ${kind} (${mult}%)`,
+                    label: `${category} / ${kind} (${formatApostleMultiplierValue(mult)}%)`,
                     displayLabel,
                     category,
+                    sourceKey,
+                    sourceLabel,
+                    effectIndex,
                     skillName,
                     kind,
-                    detailText,
+                    detailText: [detailText, rangeText].filter(Boolean).join('\n'),
+                    shortDetail: rangeText ? `範囲 ${levelInfo.min}～${levelInfo.max}` : '',
                     levelLabel,
                     selectedLevel,
                     levelOptions,
@@ -4324,7 +4613,7 @@ function buildApostleSkillOptions(apostleId, requestedLevel) {
                 return;
             }
 
-            const value = getApostleEffectLevelValue(effect, selectedLevel || level);
+            const value = getApostleEffectLevelValue(effect, selectedLevel || levelConfig.default);
             const suffix = Number.isFinite(value) ? ` (${value})` : '';
             const displayLabel = category;
             options.push({
@@ -4333,6 +4622,9 @@ function buildApostleSkillOptions(apostleId, requestedLevel) {
                 label: `${category} / ${kind}${suffix} ※倍率入力なし`,
                 displayLabel,
                 category,
+                sourceKey,
+                sourceLabel,
+                effectIndex,
                 skillName,
                 kind,
                 detailText,
@@ -4348,6 +4640,304 @@ function buildApostleSkillOptions(apostleId, requestedLevel) {
     });
 
     return options.sort((a, b) => (a.order - b.order) || a.label.localeCompare(b.label, 'ja'));
+}
+
+function getRenderedApostleSkillLevel(side, skillKey, fallbackLevel) {
+    const choices = inputs[side]?.mult?.skillChoices;
+    if (!choices || !skillKey) return fallbackLevel;
+    const row = Array.from(choices.querySelectorAll('.apostle-skill-choice'))
+        .find(item => item.dataset.skillKey === skillKey);
+    const level = Number(row?.querySelector('.apostle-skill-choice-level')?.value);
+    return Number.isFinite(level) ? level : fallbackLevel;
+}
+
+function isApostleEffectDamageTypeCompatible(effect, dmgType) {
+    const text = [
+        effect?.valueKind,
+        effect?.effectDescription,
+        effect?.description,
+        effect?.targetSkill
+    ].filter(Boolean).join(' ');
+    if (/物理/.test(text) && dmgType !== 'phys') return false;
+    if (/魔法/.test(text) && dmgType !== 'mag') return false;
+    return true;
+}
+
+function applyApostleEffectToCardBonus(bonus, effect, value, options = {}) {
+    if (!bonus || !effect || !Number.isFinite(value) || value === 0) return false;
+    if (isApostleAttackMultiplierEffect(effect)) return false;
+
+    const valueKind = String(effect.valueKind || '');
+    const valueClass = String(effect.valueClass || '');
+    const effectType = String(effect.effectType || '');
+    const effectTarget = String(effect.effectTarget || '');
+    const text = [valueKind, effectType, effectTarget].join(' ');
+
+    if (valueClass && valueClass !== '倍率') return false;
+    if (/SP|シールド|回復|治癒|クールタイム|持続時間|追加発射|スタック数|命中数|回数/.test(valueKind)) return false;
+    if (!isApostleEffectDamageTypeCompatible(effect, options.dmgType || inputs.dmgType?.value || 'phys')) return false;
+
+    const targetsEnemy = /敵/.test(effectTarget) || /デバフ/.test(effectType);
+    const isDecrease = /減少|低下/.test(text);
+    const isIncrease = /増加|上昇/.test(text);
+
+    if (/最大HP|HP増加/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.hpP += value;
+        return true;
+    }
+    if (/攻撃速度/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.hasteP += value;
+        return true;
+    }
+    if (/攻撃力/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.atkP += value;
+        return true;
+    }
+    if (/防御力/.test(valueKind)) {
+        if (targetsEnemy && isDecrease) {
+            bonus.enemyDefDownP += value;
+            return true;
+        }
+        if (!targetsEnemy && isIncrease) {
+            bonus.defP += value;
+            return true;
+        }
+    }
+    if (/被ダメージ|被スキルダメージ/.test(valueKind) && !/会心/.test(valueKind) && !targetsEnemy && isDecrease) {
+        bonus.takenDmgP += value;
+        return true;
+    }
+    if (/召喚獣.*自爆.*ダメージ/.test(valueKind) && isIncrease && !targetsEnemy) {
+        bonus.otherP += value;
+        return true;
+    }
+    if (/基本攻撃|普通攻撃|強化攻撃/.test(valueKind) && /ダメージ/.test(valueKind) && isIncrease && !targetsEnemy) {
+        bonus.basicAddP += value;
+        return true;
+    }
+    if (/スキル/.test(valueKind) && /ダメージ/.test(valueKind) && isIncrease && !targetsEnemy) {
+        bonus.skillAddP += value;
+        return true;
+    }
+    if (/与ダメージ|ダメージ量/.test(valueKind) && isIncrease && !targetsEnemy) {
+        bonus.addP += value;
+        return true;
+    }
+    if (/^(会心ダメージ抵抗|会心DMG抵抗)(ステ|ステータス)増加$/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.critDmgResStatP += value;
+        return true;
+    }
+    if (/会心ダメージ抵抗|会心DMG抵抗|会心被DMG|会心被ダメージ/.test(valueKind)) {
+        if (targetsEnemy && isDecrease) {
+            bonus.enemyCritDmgResDownP += value;
+            return true;
+        }
+        if (!targetsEnemy && (isIncrease || isDecrease)) {
+            bonus.critDmgResP += value;
+            return true;
+        }
+    }
+    if (/^(会心抵抗|被会心率)(ステ|ステータス)?増加$/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.critResStatP += value;
+        return true;
+    }
+    if (/会心抵抗|被会心率/.test(valueKind)) {
+        if (targetsEnemy && isDecrease) {
+            bonus.enemyCritResDownP += value;
+            return true;
+        }
+        if (!targetsEnemy && (isIncrease || isDecrease)) {
+            bonus.critResP += value;
+            return true;
+        }
+    }
+    if (/^(会心ダメージ|会心DMG)(ステ|ステータス)?増加$/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.critDmgStatP += value;
+        return true;
+    }
+    if (/会心ダメージ|会心DMG/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.critDmgP += value;
+        return true;
+    }
+    if (/^(会心|会心ステ|会心ステータス)増加$/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.critStatP += value;
+        return true;
+    }
+    if (/会心率|会心/.test(valueKind) && !/会心ダメージ|会心DMG|会心抵抗/.test(valueKind) && !targetsEnemy && isIncrease) {
+        bonus.critRateP += value;
+        return true;
+    }
+
+    return false;
+}
+
+function getApostleSkillEffectContext(skill, effect, skillEffects = []) {
+    const description = String(skill?.description || '').trim();
+    const context = {
+        title: '',
+        condition: '',
+        meta: []
+    };
+
+    const activation = description.match(/(.+?)(?:と|時|場合)、?([^。]+?)を発動/);
+    if (activation) {
+        context.condition = `${activation[1]}と`;
+        context.title = activation[2].trim();
+    } else if (description && !/^(敵に|範囲|ランダム|指定範囲)/.test(description)) {
+        context.condition = description;
+    }
+
+    const valueKind = String(effect?.valueKind || '');
+    const durationEffect = skillEffects.find(item =>
+        item !== effect
+        && String(item?.valueKind || '') === valueKind
+        && String(item?.valueClass || '') === '持続時間'
+    );
+    const duration = getApostleEffectLevelValue(durationEffect, 12);
+    if (Number.isFinite(duration)) context.meta.push(`${duration}秒`);
+
+    const conditionEffect = skillEffects.find(item =>
+        item !== effect
+        && /発動条件/.test(String(item?.valueKind || ''))
+        && String(item?.valueClass || '') === '回数'
+    );
+    const count = getApostleEffectLevelValue(conditionEffect, 12);
+    if (Number.isFinite(count) && !context.condition) context.condition = `${count}回で発動`;
+
+    return context;
+}
+
+function getSavedApostleSkillDisabledEffectKeys(side) {
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    try {
+        const parsed = JSON.parse(dropdown?.dataset.disabledSkillEffectKeys || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function getSavedApostleSkillEnabledEffectKeys(side) {
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    try {
+        const parsed = JSON.parse(dropdown?.dataset.enabledSkillEffectKeys || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function isApostleSkillEffectDefaultOn(item) {
+    const target = String(item?.effectTarget || '');
+    if (/味方全体|味方全員/.test(target)) return true;
+    return !item?.condition;
+}
+
+function isApostleSkillEffectEnabled(side, effectKey, defaultOn = true) {
+    const effects = document.getElementById(`${side}-apostle-skill-effects`);
+    const checkbox = effects
+        ? Array.from(effects.querySelectorAll('.apostle-skill-effect-toggle input'))
+            .find(input => input.dataset.effectKey === effectKey)
+        : null;
+    if (checkbox) return checkbox.checked;
+    if (getSavedApostleSkillEnabledEffectKeys(side).includes(effectKey)) return true;
+    if (getSavedApostleSkillDisabledEffectKeys(side).includes(effectKey)) return false;
+    return defaultOn;
+}
+
+function isDefensiveApostleSkillBonus(bonus) {
+    return !!(
+        bonus.hpP
+        || bonus.defP
+        || bonus.critResStatP
+        || bonus.critDmgResStatP
+        || bonus.critResP
+        || bonus.critDmgResP
+        || bonus.takenDmgP
+    );
+}
+
+function isOffensiveApostleSkillBonus(bonus) {
+    return !!(
+        bonus.atkP
+        || bonus.critStatP
+        || bonus.critDmgStatP
+        || bonus.critRateP
+        || bonus.critDmgP
+        || bonus.addP
+        || bonus.basicAddP
+        || bonus.skillAddP
+        || bonus.specialP
+        || bonus.otherP
+        || bonus.hasteP
+        || bonus.enemyDefDownP
+        || bonus.enemyCritResDownP
+        || bonus.enemyCritDmgResDownP
+    );
+}
+
+function getApostleSkillEffectItemsForSide(side, options = {}) {
+    if (!isApostleSkillSelectionEnabled(side)) return [];
+
+    const apostleId = inputs[side]?.mult?.apostle?.value || '';
+    const apostle = getApostleLibrary().find(item => item.id === apostleId);
+    if (!apostle) return [];
+
+    const levelConfig = getApostleSkillLevelConfigForSide(side);
+    const skillOptions = buildApostleSkillOptions(apostleId, levelConfig);
+    const items = [];
+
+    collectApostleSkillSources(apostle).forEach(({ skill, sourceLabel, sourceKey }) => {
+        const asideMatch = sourceKey.match(/^aside:(\d+)/);
+        if (asideMatch && Number(asideMatch[1]) > (levelConfig.aside || 0)) return;
+        const category = getApostleSkillCategory(skill, null, sourceLabel);
+
+        normalizeApostleEffects(skill).forEach((effect, effectIndex) => {
+            const option = skillOptions.find(item => item.sourceKey === sourceKey && item.effectIndex === effectIndex);
+            const fallbackLevel = option?.selectedLevel || 12;
+            const level = getRenderedApostleSkillLevel(side, option?.key, fallbackLevel);
+            const value = getApostleEffectLevelValue(effect, level);
+            const effectBonus = createEmptyCardBonus();
+            if (!applyApostleEffectToCardBonus(effectBonus, effect, value, options)) return;
+            if (options.role === 'defender' && !isDefensiveApostleSkillBonus(effectBonus)) return;
+            if (options.role === 'attacker' && !isOffensiveApostleSkillBonus(effectBonus)) return;
+            const parts = formatCardSummaryParts(effectBonus);
+            if (!parts.length) return;
+            const context = getApostleSkillEffectContext(skill, effect, normalizeApostleEffects(skill));
+            const isPassiveEffect = /パッシブ/.test(String(effect?.effectType || ''));
+            if (!context.condition && category !== 'パッシブ' && !isPassiveEffect) {
+                context.condition = `${getApostleSkillActionLabel(category)}使用時`;
+            }
+            items.push({
+                key: `${apostle.id}:${sourceKey}:${effectIndex}`,
+                category,
+                sourceLabel,
+                kind: effect.valueKind || '効果',
+                effectTarget: effect.effectTarget || '',
+                value,
+                bonus: effectBonus,
+                label: parts.join(' / '),
+                contextTitle: context.title,
+                condition: context.condition,
+                meta: context.meta,
+                detail: [skill.skillName, skill.description, effect.description, effect.effectDescription].filter(Boolean).join('\n')
+            });
+        });
+    });
+
+    return items;
+}
+
+function getApostleSkillBonusesForSide(side, options = {}) {
+    const bonus = createEmptyCardBonus();
+    getApostleSkillEffectItemsForSide(side, {
+        ...options,
+        role: isSideAttacker(side) ? 'attacker' : 'defender'
+    }).forEach(item => {
+        if (!isApostleSkillEffectEnabled(side, item.key, isApostleSkillEffectDefaultOn(item))) return;
+        accumulateCardBonus(bonus, item.bonus);
+    });
+    return bonus;
 }
 
 function splitPresetSkillName(rawName = '') {
@@ -4446,9 +5036,20 @@ function shortenSkillDropdownSelectedLabel(dropdown) {
 
 function clearApostleSkillChoices(side) {
     const choices = inputs[side]?.mult?.skillChoices;
-    if (!choices) return;
-    choices.innerHTML = '';
-    choices.hidden = true;
+    if (choices) {
+        choices.innerHTML = '';
+        choices.hidden = true;
+    }
+    const effects = document.getElementById(`${side}-apostle-skill-effects`);
+    if (effects) {
+        effects.innerHTML = '';
+        effects.hidden = true;
+    }
+    const levels = document.getElementById(`${side}-apostle-skill-levels`);
+    if (levels) {
+        levels.innerHTML = '';
+        levels.hidden = true;
+    }
 }
 
 function syncApostleSkillChoiceActive(side) {
@@ -4482,6 +5083,7 @@ function selectApostleSkillOption(side, option) {
     }
     if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = option.value;
     syncApostleSkillChoiceActive(side);
+    renderApostleSkillEffectToggles(side);
     updateUI();
     saveState();
 }
@@ -4498,6 +5100,7 @@ function updateApostleSkillOptionLevel(side, option, level, multEl) {
             if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = option.value;
             const dropdown = inputs[side]?.mult?.skillDropdown;
             if (dropdown) dropdown.value = option.value;
+            renderApostleSkillEffectToggles(side);
             updateUI();
         }
         saveState();
@@ -4550,6 +5153,169 @@ function showApostleSkillInfoPopover(anchor, option) {
     popover.style.top = `${top}px`;
 }
 
+function renderApostleSkillLevelControls(side) {
+    const container = document.getElementById(`${side}-apostle-skill-levels`);
+    if (!container) return;
+    if (!isApostleSkillSelectionEnabled(side) || !(inputs[side]?.mult?.apostle?.value || '')) {
+        container.innerHTML = '';
+        container.hidden = true;
+        return;
+    }
+
+    const config = getApostleSkillLevelConfigForSide(side);
+    const maxSkillLevel = config.maxSkillLevel || 12;
+    const groups = [
+        ['low', '低学年'],
+        ['high', '高学年'],
+        ['passive', 'パッシブ']
+    ];
+    container.innerHTML = '';
+
+    const label = document.createElement('span');
+    label.className = 'apostle-skill-levels-label';
+    label.textContent = 'SLv';
+    container.appendChild(label);
+
+    groups.forEach(([group, text]) => {
+        const item = document.createElement('label');
+        item.className = `apostle-skill-level-control level-${group}`;
+        const name = document.createElement('span');
+        name.textContent = text;
+        const select = document.createElement('select');
+        select.dataset.levelGroup = group;
+        for (let level = 1; level <= maxSkillLevel; level += 1) {
+            const option = document.createElement('option');
+            option.value = String(level);
+            option.textContent = String(level);
+            select.appendChild(option);
+        }
+        select.value = String(config[group] || 12);
+        select.addEventListener('change', () => {
+            const nextLevels = {
+                ...getSavedApostleSkillLevels(side),
+                ...Object.fromEntries(Array.from(container.querySelectorAll('select[data-level-group]'))
+                    .map(itemSelect => [itemSelect.dataset.levelGroup, itemSelect.value]))
+            };
+            const dropdown = inputs[side]?.mult?.skillDropdown;
+            if (dropdown) dropdown.dataset.skillLevels = JSON.stringify(nextLevels);
+            updateMainSkillList(side);
+            updateUI();
+            saveState();
+        });
+        item.append(name, select);
+        container.appendChild(item);
+    });
+
+    if (config.maxAsideLevel > 0) {
+        const asideItem = document.createElement('label');
+        asideItem.className = 'apostle-skill-level-control level-aside';
+        const asideName = document.createElement('span');
+        asideName.textContent = 'アサイド';
+        const asideSelect = document.createElement('select');
+        asideSelect.dataset.levelGroup = 'aside';
+        for (let level = 0; level <= config.maxAsideLevel; level += 1) {
+            const option = document.createElement('option');
+            option.value = String(level);
+            option.textContent = String(level);
+            asideSelect.appendChild(option);
+        }
+        asideSelect.value = String(config.aside || 0);
+        asideSelect.addEventListener('change', () => {
+            const nextLevels = {
+                ...getSavedApostleSkillLevels(side),
+                ...Object.fromEntries(Array.from(container.querySelectorAll('select[data-level-group]'))
+                    .map(itemSelect => [itemSelect.dataset.levelGroup, itemSelect.value]))
+            };
+            const dropdown = inputs[side]?.mult?.skillDropdown;
+            if (dropdown) dropdown.dataset.skillLevels = JSON.stringify(nextLevels);
+            updateMainSkillList(side);
+            updateUI();
+            saveState();
+        });
+        asideItem.append(asideName, asideSelect);
+        container.appendChild(asideItem);
+    }
+    container.hidden = false;
+}
+
+function renderApostleSkillEffectToggles(side) {
+    const effects = document.getElementById(`${side}-apostle-skill-effects`);
+    if (!effects) return;
+
+    const previousChecked = new Map(Array.from(effects.querySelectorAll('.apostle-skill-effect-toggle input'))
+        .map(input => [input.dataset.effectKey || '', input.checked])
+        .filter(([key]) => key));
+    const savedDisabled = new Set(getSavedApostleSkillDisabledEffectKeys(side));
+    const savedEnabled = new Set(getSavedApostleSkillEnabledEffectKeys(side));
+    const items = getApostleSkillEffectItemsForSide(side, {
+        dmgType: inputs.dmgType.value,
+        role: isSideAttacker(side) ? 'attacker' : 'defender'
+    });
+
+    effects.innerHTML = '';
+    if (!items.length) {
+        effects.hidden = true;
+        return;
+    }
+
+    const title = document.createElement('div');
+    title.className = 'apostle-skill-effects-title';
+    title.textContent = 'スキル効果';
+    effects.appendChild(title);
+
+    items.forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'apostle-skill-effect-toggle';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.effectKey = item.key;
+        const defaultOn = isApostleSkillEffectDefaultOn(item);
+        checkbox.checked = previousChecked.has(item.key)
+            ? previousChecked.get(item.key)
+            : savedEnabled.has(item.key)
+                ? true
+                : savedDisabled.has(item.key)
+                    ? false
+                    : defaultOn;
+        checkbox.addEventListener('change', () => {
+            const enabled = Array.from(effects.querySelectorAll('.apostle-skill-effect-toggle input:checked'))
+                .map(input => input.dataset.effectKey || '')
+                .filter(Boolean);
+            const disabled = Array.from(effects.querySelectorAll('.apostle-skill-effect-toggle input:not(:checked)'))
+                .map(input => input.dataset.effectKey || '')
+                .filter(Boolean);
+            const dropdown = inputs[side]?.mult?.skillDropdown;
+            if (dropdown) {
+                dropdown.dataset.enabledSkillEffectKeys = JSON.stringify(enabled);
+                dropdown.dataset.disabledSkillEffectKeys = JSON.stringify(disabled);
+            }
+            updateUI();
+            saveState();
+        });
+
+        const action = document.createElement('span');
+        action.className = `apostle-skill-effect-source ${getApostleSkillActionTone(item.category || '')}`;
+        action.textContent = getApostleSkillActionLabel(item.category || item.sourceLabel || '効果');
+
+        const text = document.createElement('span');
+        text.className = 'apostle-skill-effect-text';
+        const main = document.createElement('strong');
+        main.textContent = [item.contextTitle, item.label].filter(Boolean).join(' / ');
+        text.appendChild(main);
+        const subParts = [item.condition, ...(item.meta || [])].filter(Boolean);
+        if (subParts.length) {
+            const sub = document.createElement('small');
+            sub.textContent = subParts.join(' / ');
+            text.appendChild(sub);
+        }
+        text.title = [item.contextTitle, item.condition, ...(item.meta || []), item.kind, item.detail].filter(Boolean).join('\n');
+
+        label.append(checkbox, action, text);
+        effects.appendChild(label);
+    });
+    effects.hidden = false;
+}
+
 function renderApostleSkillChoices(side, options) {
     const choices = inputs[side]?.mult?.skillChoices;
     const dropdown = inputs[side]?.mult?.skillDropdown;
@@ -4558,7 +5324,7 @@ function renderApostleSkillChoices(side, options) {
     dropdown.hidden = true;
     choices.hidden = false;
     choices.dataset.hideNoMultiplier = choices.dataset.hideNoMultiplier || 'true';
-    const hasLevelColumn = options.some(option => option.levelOptions?.length || option.levelLabel);
+    const hasLevelColumn = false;
     choices.classList.toggle('no-level', !hasLevelColumn);
     choices.innerHTML = '';
 
@@ -4657,6 +5423,7 @@ function renderApostleSkillChoices(side, options) {
 
     syncApostleSkillNoMultiplierToggle(choices);
     syncApostleSkillChoiceActive(side);
+    renderApostleSkillEffectToggles(side);
 }
 
 function initializeApostleSkillSelectors() {
@@ -4690,14 +5457,15 @@ function updateMainSkillList(side = 'enemy') {
 
     updateApostleSkillPickerVisibility(side);
     const apostleId = isApostleSkillSelectionEnabled(side) ? (inputs[side]?.mult?.apostle?.value || '') : '';
-    const skillLevel = '12';
+    const skillLevels = getApostleSkillLevelConfigForSide(side);
     const selectedSkillKey = dropdown.dataset.selectedSkillKey || '';
     resetSkillDropdown(dropdown);
     dropdown.hidden = true;
     clearApostleSkillChoices(side);
 
     if (apostleId) {
-        const options = buildApostleSkillOptions(apostleId, skillLevel);
+        renderApostleSkillLevelControls(side);
+        const options = buildApostleSkillOptions(apostleId, skillLevels);
         options.forEach(option => {
             appendSkillOption(dropdown, option.value, option.label, option.key, option.disabled, option.displayLabel);
         });
@@ -4711,12 +5479,14 @@ function updateMainSkillList(side = 'enemy') {
                 if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = selectedOption.value;
                 dropdown.dataset.selectedSkillCategory = selectedApostleOption?.category || '';
                 syncApostleSkillChoiceActive(side);
+                renderApostleSkillEffectToggles(side);
                 return;
             }
             if (selectedApostleOption?.value && inputs[side]?.mult?.skill) {
                 inputs[side].mult.skill.value = selectedApostleOption.value;
                 dropdown.dataset.selectedSkillCategory = selectedApostleOption.category || '';
                 syncApostleSkillChoiceActive(side);
+                renderApostleSkillEffectToggles(side);
                 return;
             }
         }
@@ -4973,30 +5743,61 @@ function updatePerspectiveUI() {
     }
 
     const selfMult = document.querySelector('.self-mult-section');
+    const selfSkill = document.querySelector('.self-skill-section');
     const selfAtkAdds = document.querySelector('.self-atk-adds-section');
     const selfDefAdds = document.querySelector('.self-def-adds-section');
     const selfDebuffs = document.querySelector('.self-debuff-section');
+    if (selfSkill) {
+        selfSkill.classList.remove('disabled-section');
+        selfSkill.classList.toggle('skill-defender-mode', !isSelf);
+    }
     if (selfMult) selfMult.classList.toggle('disabled-section', !isSelf);
     if (selfAtkAdds) selfAtkAdds.classList.toggle('disabled-section', !isSelf);
     if (selfDefAdds) selfDefAdds.classList.toggle('disabled-section', isSelf);
     if (selfDebuffs) selfDebuffs.classList.toggle('disabled-section', !isSelf);
 
     const enemyMult = document.querySelector('.enemy-mult-section');
+    const enemySkill = document.querySelector('.enemy-skill-section');
     const enemyAtkAdds = document.querySelector('.enemy-atk-adds-section');
     const enemyDefAdds = document.querySelector('.enemy-def-adds-section');
     const enemyDebuffs = document.querySelector('.enemy-debuff-section');
+    if (enemySkill) {
+        enemySkill.classList.remove('disabled-section');
+        enemySkill.classList.toggle('skill-defender-mode', isSelf);
+    }
     if (enemyMult) enemyMult.classList.toggle('disabled-section', isSelf);
     if (enemyAtkAdds) enemyAtkAdds.classList.toggle('disabled-section', isSelf);
     if (enemyDefAdds) enemyDefAdds.classList.toggle('disabled-section', !isSelf);
     if (enemyDebuffs) enemyDebuffs.classList.toggle('disabled-section', isSelf);
+    const syncedDmgType = syncDmgTypeFromApostle(isSelf ? 'self' : 'enemy', { force: true });
+    if (syncedDmgType) {
+        updateMainSkillList('self');
+        updateMainSkillList('enemy');
+    }
+    renderApostleSkillEffectToggles('self');
+    renderApostleSkillEffectToggles('enemy');
     updateMobileSideUI(mobileVisibleSide);
     updateUI();
 }
 
 function updateTabUI(activeTab) {
     document.documentElement.dataset.initialTab = activeTab || 'calc';
+    const shouldShowPerspectiveToggle = ['calc', 'spell', 'crayon'].includes(activeTab);
     const circle = document.getElementById('perspective-toggle-circle');
-    if (circle) circle.style.display = activeTab === 'calc' ? '' : 'none';
+    if (circle) {
+        circle.style.display = shouldShowPerspectiveToggle ? '' : 'none';
+        circle.classList.toggle('is-corner', activeTab !== 'calc');
+        circle.classList.toggle('is-crayon-corner', activeTab === 'crayon');
+    }
+
+    const applyFloat = document.getElementById('apply-float-controller');
+    const applyPanel = document.getElementById('apply-float-panel');
+    const applyToggle = document.getElementById('apply-float-toggle');
+    if (applyFloat) applyFloat.style.display = activeTab === 'est' ? 'none' : '';
+    if (activeTab === 'est' && applyPanel && !applyPanel.hidden) {
+        applyPanel.hidden = true;
+        applyToggle?.setAttribute('aria-expanded', 'false');
+    }
 
     const mobileSwitch = document.getElementById('mobile-side-switch');
     if (mobileSwitch) mobileSwitch.style.display = activeTab === 'calc' ? '' : 'none';
@@ -5013,6 +5814,9 @@ function updateTabUI(activeTab) {
 
     if (activeTab === 'calc') {
         syncToggleCirclePosition();
+    } else if (circle) {
+        circle.style.left = '';
+        circle.style.right = '';
     }
 
     if (activeTab === 'est') {
@@ -5086,14 +5890,30 @@ function initListeners() {
     ['self', 'enemy'].forEach(side => {
         const apostleEnabled = inputs[side]?.mult?.apostleEnabled;
         const apostleSelect = inputs[side]?.mult?.apostle;
-        [apostleEnabled, apostleSelect].forEach(el => {
-            if (!el) return;
-            el.addEventListener('change', () => {
-                updateMainSkillList(side);
-                updateUI();
-                saveState();
-            });
-        });
+        const handleApostleControlChange = (sourceEl) => {
+            const shouldSyncDmgType = sourceEl === apostleSelect || (sourceEl === apostleEnabled && apostleEnabled.checked);
+            const syncedDmgType = shouldSyncDmgType && isSideAttacker(side) && syncDmgTypeFromApostle(side, { dispatchChange: true });
+            updateMainSkillList(side);
+            if (syncedDmgType) updateMainSkillList(side === 'self' ? 'enemy' : 'self');
+            updateUI();
+            saveState();
+        };
+        if (apostleEnabled) apostleEnabled.addEventListener('change', () => handleApostleControlChange(apostleEnabled));
+        if (apostleSelect) {
+            apostleSelect.addEventListener('change', () => handleApostleControlChange(apostleSelect));
+            apostleSelect.addEventListener('input', () => handleApostleControlChange(apostleSelect));
+        }
+    });
+    document.addEventListener('change', (e) => {
+        const select = e.target.closest?.('.apostle-select');
+        if (!select) return;
+        const side = select.id.startsWith('self-') ? 'self' : select.id.startsWith('enemy-') ? 'enemy' : '';
+        if (!side) return;
+        const syncedDmgType = isSideAttacker(side) && syncDmgTypeFromApostle(side, { dispatchChange: true });
+        updateMainSkillList(side);
+        if (syncedDmgType) updateMainSkillList(side === 'self' ? 'enemy' : 'self');
+        updateUI();
+        saveState();
     });
 
 inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI));
@@ -5149,6 +5969,8 @@ inputs.perspective.forEach(r => r.addEventListener('change', updatePerspectiveUI
         if (enemyPresetVal && enemyPresetVal.startsWith('e_')) {
             applyPreset('enemy', enemyPresetVal);
         } else {
+            renderApostleSkillEffectToggles('self');
+            renderApostleSkillEffectToggles('enemy');
             updateUI();
             updateMainSkillList();
         }
@@ -5605,22 +6427,26 @@ function estimateDefSide(rows, common) {
 }
 
 // --- Persistence & Initialization ---
-const STORAGE_KEY = 'trickcal_calc_state_v3.1';
-const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v3.0';
+const STORAGE_KEY = 'trickcal_calc_state_v3.2';
+const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v3.1';
+const LEGACY_OLD_STORAGE_KEY = 'trickcal_calc_state_v3.0';
 const ANCIENT_STORAGE_KEY = 'trickcal_calc_state_v1.8';
 const SPELL_STORAGE_KEY = `${STORAGE_KEY}:spell`;
 const LEGACY_SPELL_STORAGE_KEY = `${LEGACY_STORAGE_KEY}:spell`;
+const LEGACY_OLD_SPELL_STORAGE_KEY = `${LEGACY_OLD_STORAGE_KEY}:spell`;
 const ARTIFACT_PRESETS_KEY = `${STORAGE_KEY}:artifact-presets`;
 const LEGACY_ARTIFACT_PRESETS_KEY = `${LEGACY_STORAGE_KEY}:artifact-presets`;
+const LEGACY_OLD_ARTIFACT_PRESETS_KEY = `${LEGACY_OLD_STORAGE_KEY}:artifact-presets`;
 const SPELL_PRESETS_KEY = `${STORAGE_KEY}:spell-presets`;
 const LEGACY_SPELL_PRESETS_KEY = `${LEGACY_STORAGE_KEY}:spell-presets`;
+const LEGACY_OLD_SPELL_PRESETS_KEY = `${LEGACY_OLD_STORAGE_KEY}:spell-presets`;
 const ARTIFACT_PRESET_SLOT_COUNT = 9;
 let activeArtifactPresetSlotId = '';
 let activeSpellPresetSlotId = '';
 
 function loadArtifactPresets() {
     try {
-        const raw = getLocalStorageWithFallback(ARTIFACT_PRESETS_KEY, LEGACY_ARTIFACT_PRESETS_KEY);
+        const raw = getLocalStorageWithFallback(ARTIFACT_PRESETS_KEY, LEGACY_ARTIFACT_PRESETS_KEY, LEGACY_OLD_ARTIFACT_PRESETS_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
         if (!parsed || typeof parsed !== 'object') return {};
         return parsed;
@@ -5670,7 +6496,7 @@ function renderCalcSpellDeckPreview() {
 
 function loadSpellPresets() {
     try {
-        const raw = getLocalStorageWithFallback(SPELL_PRESETS_KEY, LEGACY_SPELL_PRESETS_KEY);
+        const raw = getLocalStorageWithFallback(SPELL_PRESETS_KEY, LEGACY_SPELL_PRESETS_KEY, LEGACY_OLD_SPELL_PRESETS_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
         if (!parsed || typeof parsed !== 'object') return {};
         return parsed;
@@ -6741,7 +7567,7 @@ function saveSpellSelectionsState() {
 
 function loadSpellSelectionsState() {
     try {
-        const raw = getLocalStorageWithFallback(SPELL_STORAGE_KEY, LEGACY_SPELL_STORAGE_KEY);
+        const raw = getLocalStorageWithFallback(SPELL_STORAGE_KEY, LEGACY_SPELL_STORAGE_KEY, LEGACY_OLD_SPELL_STORAGE_KEY);
         if (!raw) return false;
         const state = JSON.parse(raw);
         if (state?.selections) {
@@ -6810,7 +7636,7 @@ function migrateLegacyZeroBaseMultiplierInputs(state = {}) {
 
 function saveStatePatch(patch) {
     try {
-        const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY);
+        const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY, LEGACY_OLD_STORAGE_KEY);
         const state = raw ? JSON.parse(raw) : {};
         Object.assign(state, patch);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -6872,7 +7698,7 @@ function saveState() {
 }
 
 function loadState() {
-    const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY);
+    const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY, LEGACY_OLD_STORAGE_KEY);
     if (!raw) return;
     try {
         isRestoringState = true;
@@ -7032,6 +7858,7 @@ document.getElementById('reset-btn').addEventListener('click', () => {
     if (activeTab === 'calc') {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(LEGACY_STORAGE_KEY);
+        localStorage.removeItem(LEGACY_OLD_STORAGE_KEY);
         localStorage.removeItem(ANCIENT_STORAGE_KEY);
         location.reload();
     } else if (activeTab === 'crayon') {
@@ -7200,6 +8027,12 @@ document.addEventListener('keydown', (e) => {
     syncCrayonMobileControls();
 
     syncToggleCirclePosition = function(attempt = 0) {
+        if (circle.classList.contains('is-corner')) {
+            circle.style.left = '';
+            circle.style.right = '';
+            return;
+        }
+
         if (window.matchMedia('(max-width: 820px)').matches) {
             circle.style.left = '';
             circle.style.right = '1rem';

@@ -581,6 +581,30 @@ function collectSkillSelectionMetadata() {
     }));
 }
 
+function collectPresetSkillState(side) {
+    const metadata = collectSkillSelectionMetadata()[side] || {};
+    return {
+        apostleEnabled: !!inputs[side]?.mult?.apostleEnabled?.checked,
+        apostle: inputs[side]?.mult?.apostle?.value || '',
+        skillSelection: metadata
+    };
+}
+
+function restorePresetSkillState(side, state = {}) {
+    const mult = inputs[side]?.mult;
+    if (!mult || !state) return false;
+    if (mult.apostleEnabled && typeof state.apostleEnabled === 'boolean') {
+        mult.apostleEnabled.checked = state.apostleEnabled;
+    }
+    if (mult.apostle && typeof state.apostle === 'string') {
+        mult.apostle.value = state.apostle;
+    }
+    if (state.skillSelection) {
+        restoreSkillSelectionMetadata({ [side]: state.skillSelection });
+    }
+    return true;
+}
+
 function restoreSkillSelectionMetadata(state = {}) {
     ['self', 'enemy'].forEach(side => {
         const dropdown = inputs[side]?.mult?.skillDropdown;
@@ -3999,7 +4023,10 @@ function saveCustomPreset(side) {
     const name = prompt(side === 'self' ? 'キャラクタープリセット名を入力してください:' : 'エネミープリセット名を入力してください:');
     if (!name) return;
     
-    const stats = getValues()[side];
+    const stats = {
+        ...getValues()[side],
+        _skillState: collectPresetSkillState(side)
+    };
     const custom = loadCustomPresets();
     custom[side][name] = stats;
     localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(custom));
@@ -4065,6 +4092,8 @@ function populatePresets() {
 
 function applyPreset(side, value, shouldSave = true) {
     let presetData = null;
+    let presetSkillState = null;
+    let restoredSkillState = false;
     if (!value) {
         if (side === 'enemy') {
             inputs.enemy.phaseGroup.style.display = 'none';
@@ -4113,12 +4142,19 @@ function applyPreset(side, value, shouldSave = true) {
     } else if (value.startsWith('c_')) {
         const name = value.substring(2);
         stats = loadCustomPresets()[side][name];
+        presetSkillState = stats?._skillState || null;
     }
     
     if (stats) {
         Object.keys(stats).forEach(k => {
             if (inputs[side][k]) inputs[side][k].value = stats[k];
         });
+        if (presetSkillState) {
+            restoredSkillState = restorePresetSkillState(side, presetSkillState);
+            if (restoredSkillState && isSideAttacker(side)) {
+                syncDmgTypeFromApostle(side, { dispatchChange: true });
+            }
+        }
         
         if (value.startsWith('e_')) {
             const key = value.substring(2);
@@ -4129,10 +4165,11 @@ function applyPreset(side, value, shouldSave = true) {
         }
     }
     updateMainSkillList(side);
+    const hasRestoredSkillSelection = restoredSkillState && !!inputs[side]?.mult?.skillDropdown?.dataset.selectedSkillKey;
     const skillList = presetData?.skills;
     const initialSkillMult = !isApostleSkillSelectionEnabled(side) && Array.isArray(skillList) && skillList.length > 0 ? skillList[0].mult : 100;
-    if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = initialSkillMult;
-    if (inputs[side]?.mult?.skillDropdown) {
+    if (!hasRestoredSkillSelection && inputs[side]?.mult?.skill) inputs[side].mult.skill.value = initialSkillMult;
+    if (!hasRestoredSkillSelection && inputs[side]?.mult?.skillDropdown) {
         inputs[side].mult.skillDropdown.value = "";
         inputs[side].mult.skillDropdown.dataset.selectedSkillKey = "";
         inputs[side].mult.skillDropdown.dataset.selectedSkillCategory = "";

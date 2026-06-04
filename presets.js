@@ -170,16 +170,16 @@ const ENEMY_PRESETS = {
     "meow_ef_11": {
         name: "[EF/微辛1] M.E.O.W",
         hp: 401524,
-        atk_p: 1507,
-        atk_m: 1507,
-        def_p: 2792,
-        def_m: 2792,
+        atk_p: 1501,
+        atk_m: 1501,
+        def_p: 2795,
+        def_m: 2795,
         dmgType: "phys",
-        crit: 2370,
-        critDmg: 2370,
-        critRes: 1946,
-        critDmgRes: 1946,
-        special: 214,
+        crit: 2365,
+        critDmg: 2365,
+        critRes: 1945,
+        critDmgRes: 1945,
+        special: 214.286,
         weakness: {
             phys: { add: 75 }
         },
@@ -205,16 +205,16 @@ const ENEMY_PRESETS = {
     "meow_ef_12": {
         name: "[EF/微辛2] M.E.O.W",
         hp: 2179702,
-        atk_p: 3609,
-        atk_m: 3609,
-        def_p: 6696,
-        def_m: 6696,
+        atk_p: 3619,
+        atk_m: 3619,
+        def_p: 6695,
+        def_m: 6695,
         dmgType: "phys",
-        crit: 5674,
-        critDmg: 5674,
-        critRes: 4648,
-        critDmgRes: 4648,
-        special: 385,
+        crit: 5665,
+        critDmg: 5665,
+        critRes: 4645,
+        critDmgRes: 4645,
+        special: 385.714,
         weakness: {
             phys: { add: 75 }
         },
@@ -240,16 +240,16 @@ const ENEMY_PRESETS = {
     "meow_ef_21": {
         name: "[EF/小辛1] M.E.O.W",
         hp: 4745749,
-        atk_p: 5360,
-        atk_m: 5360,
-        def_p: 9946,
-        def_m: 9946,
+        atk_p: 5384,
+        atk_m: 5384,
+        def_p: 9945,
+        def_m: 9945,
         dmgType: "phys",
-        crit: 8436,
-        critDmg: 8436,
-        critRes: 6899,
-        critDmgRes: 6899,
-        special: 528,
+        crit: 8415,
+        critDmg: 8415,
+        critRes: 6895,
+        critDmgRes: 6895,
+        special: 528.571,
         weakness: {
             phys: { add: 75 }
         },
@@ -275,16 +275,16 @@ const ENEMY_PRESETS = {
     "meow_ef_22": {
         name: "[EF/小辛2] M.E.O.W",
         hp: 11848508,
-        atk_p: 8470,
-        atk_m: 8470,
-        def_p: 15796,
-        def_m: 15796,
+        atk_p: 8560,
+        atk_m: 8560,
+        def_p: 15795,
+        def_m: 15795,
         dmgType: "phys",
-        crit: 13400,
-        critDmg: 13400,
-        critRes: 10950,
-        critDmgRes: 10950,
-        special: 790,
+        crit: 13365,
+        critDmg: 13365,
+        critRes: 10945,
+        critDmgRes: 10945,
+        special: 785.714,
         weakness: {
             phys: { add: 75 }
         },
@@ -310,16 +310,16 @@ const ENEMY_PRESETS = {
     "meow_ef_31": {
         name: "[EF/中辛1] M.E.O.W",
         hp: 26286605,
-        atk_p: 12700,
-        atk_m: 12700,
-        def_p: 23594,
-        def_m: 23594,
+        atk_p: 12795,
+        atk_m: 12795,
+        def_p: 23595,
+        def_m: 23595,
         dmgType: "phys",
-        crit: 19986,
-        critDmg: 19986,
-        critRes: 16342,
-        critDmgRes: 16342,
-        special: 1129,
+        crit: 19965,
+        critDmg: 19965,
+        critRes: 16345,
+        critDmgRes: 16345,
+        special: 1128.571,
         weakness: {
             phys: { add: 75 }
         },
@@ -345,16 +345,16 @@ const ENEMY_PRESETS = {
     "meow_ef_32": {
         name: "[EF/中辛2]M.E.O.W",
         hp: 58588935,
-        atk_p: 19000,
-        atk_m: 19000,
-        def_p: 35280,
-        def_m: 35280,
+        atk_p: 19148,
+        atk_m: 19148,
+        def_p: 35295,
+        def_m: 35295,
         dmgType: "phys",
-        crit: 29900,
-        critDmg: 29900,
-        critRes: 24450,
-        critDmgRes: 24450,
-        special: 1643,
+        crit: 29865,
+        critDmg: 29865,
+        critRes: 24445,
+        critDmgRes: 24445,
+        special: 1642.857,
         weakness: {
             phys: { add: 75 }
         },
@@ -380,16 +380,16 @@ const ENEMY_PRESETS = {
     "meow_ef_41": {
         name: "[EF/麻辣1] M.E.O.W",
         hp: 127799868,
-        atk_p: 28100,
-        atk_m: 28100,
-        def_p: 52200,
-        def_m: 52200,
+        atk_p: 28325,
+        atk_m: 28325,
+        def_p: 52195,
+        def_m: 52195,
         dmgType: "phys",
-        crit: 44200,
-        critDmg: 44200,
-        critRes: 36100,
-        critDmgRes: 36100,
-        special: 2385,
+        crit: 44165,
+        critDmg: 44165,
+        critRes: 36145,
+        critDmgRes: 36145,
+        special: 2385.714,
         weakness: {
             phys: { add: 75 }
         },
@@ -415,16 +415,16 @@ const ENEMY_PRESETS = {
     "meow_ef_42": {
         name: "[EF/麻辣2] M.E.O.W",
         hp: 286321339,
-        atk_p: 42110,
-        atk_m: 42110,
-        def_p: 78200,
-        def_m: 78200,
+        atk_p: 42442,
+        atk_m: 42442,
+        def_p: 78195,
+        def_m: 78195,
         dmgType: "phys",
-        crit: 66180,
-        critDmg: 66180,
-        critRes: 54150,
-        critDmgRes: 54150,
-        special: 3528,
+        crit: 66165,
+        critDmg: 66165,
+        critRes: 54145,
+        critDmgRes: 54145,
+        special: 3528.571,
         weakness: {
             phys: { add: 75 }
         },
@@ -455,6 +455,122 @@ const ENEMY_PRESETS = {
             { action: "攻撃", name: "溜めレーザー 14発hit", mult: 4200, note: "AoE / 14発" }
         ]
     },
+    "meow_ef_31": {
+        name: "[EF/中辛1] R41リニュア",
+        hp: 26286605,
+        atk_p: 12795,
+        atk_m: 12795,
+        def_p: 23595,
+        def_m: 23595,
+        dmgType: "phys",
+        crit: 19965,
+        critDmg: 19965,
+        critRes: 16345,
+        critDmgRes: 16345,
+        special: 1128.571,
+        weakness: {
+            mag: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09908179, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19816359, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29724535, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39632714, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49540894, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+        ]
+    },
+    "meow_ef_32": {
+        name: "[EF/中辛2]R41リニュア",
+        hp: 58588935,
+        atk_p: 19148,
+        atk_m: 19148,
+        def_p: 35295,
+        def_m: 35295,
+        dmgType: "phys",
+        crit: 29865,
+        critDmg: 29865,
+        critRes: 24445,
+        critDmgRes: 24445,
+        special: 1642.857,
+        weakness: {
+            mag: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09938597, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19877194, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29815792, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39754389, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49692986, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+        ]
+    },
+    "meow_ef_41": {
+        name: "[EF/麻辣1] R41リニュア",
+        hp: 127799868,
+        atk_p: 28325,
+        atk_m: 28325,
+        def_p: 52195,
+        def_m: 52195,
+        dmgType: "phys",
+        crit: 44165,
+        critDmg: 44165,
+        critRes: 36145,
+        critDmgRes: 36145,
+        special: 2385.714,
+        weakness: {
+            mag: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09958470, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19916940, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29875410, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39833881, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49792351, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+        ]
+    },
+    "meow_ef_42": {
+        name: "[EF/麻辣2] R41リニュア",
+        hp: 286321339,
+        atk_p: 42442,
+        atk_m: 42442,
+        def_p: 78195,
+        def_m: 78195,
+        dmgType: "phys",
+        crit: 66165,
+        critDmg: 66165,
+        critRes: 54145,
+        critDmgRes: 54145,
+        special: 3528.571,
+        weakness: {
+            mag: { add: 75 }
+        },
+        phases: [
+            { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 2 (4/5)", mult: 1.09972275, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 3 (3/5)", mult: 1.19944550, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 4 (2/5)", mult: 1.29916825, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 5 (1/5)", mult: 1.39889100, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
+            { name: "Phase 6 (0/5)", mult: 1.49861376, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] }
+        ],
+        skills: [
+            { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+        ]
+    },
     "GTA_24": {
         name: "[GTA24]バンク蔵-憂鬱",
         hp: 4231046,
@@ -469,7 +585,7 @@ const ENEMY_PRESETS = {
         critDmgRes: 1,
         special: 100,
         skills: [
-            { name: "通常攻撃", mult: 100 },
+            { action: "攻撃", name: "通常攻撃", mult: 100 },
         ]
     },
     "dummy_enemy": {
@@ -486,15 +602,15 @@ const ENEMY_PRESETS = {
         critDmgRes: 20000,
         special: 100,
         skills: [
-            { name: "通常攻撃1", mult: 100 },
-            { name: "通常攻撃2", mult: 50 },
-            { name: "通常攻撃3", mult: 80 },
-            { name: "通常攻撃4", mult: 120 },
-            { name: "通常攻撃5", mult: 150 },
-            { name: "強攻撃1", mult: 200 },
-            { name: "強攻撃2", mult: 300 },
-            { name: "スキル攻撃1", mult: 500 },
-            { name: "スキル攻撃2", mult: 1000 }
+            { action: "攻撃", name: "通常攻撃1", mult: 100 },
+            { action: "攻撃", name: "通常攻撃2", mult: 50 },
+            { action: "攻撃", name: "通常攻撃3", mult: 80 },
+            { action: "攻撃", name: "通常攻撃4", mult: 120 },
+            { action: "攻撃", name: "通常攻撃5", mult: 150 },
+            { action: "攻撃", name: "強攻撃1", mult: 200 },
+            { action: "攻撃", name: "強攻撃2", mult: 300 },
+            { action: "攻撃", name: "スキル攻撃1", mult: 500 },
+            { action: "攻撃", name: "スキル攻撃2", mult: 1000 }
         ]
     }
 };

@@ -766,6 +766,57 @@ const CARD_LIBRARY = {
             ]
         },
         {
+            id: "relic_listy_replica_glove",
+            kind: "artifact",
+            rarity: "伝説",
+            signature: true,
+            favoriteCharacter: "リスティ",
+            name: "リスティの模造グローブ",
+            cost: 19,
+            bonusesByStar: [
+                { atkP: 14.9, critDmgP: 8.0 },
+                { atkP: 18.6, critDmgP: 10.0 },
+                { atkP: 22.4, critDmgP: 12.0 },
+                { atkP: 26.1, critDmgP: 13.9 },
+                { atkP: 29.8, critDmgP: 15.9 }
+            ],
+            conditionalEffects: [
+                {
+                    id: "normal_attack_6_crit_rate_up",
+                    type: "toggle",
+                    label: "通常攻撃6回ごと 会心率増加",
+                    shortLabel: "6攻撃ごと 会心率+",
+                    nonStacking: true,
+                    bonusesByStar: [
+                        { critRateP: 18.0 },
+                        { critRateP: 21.0 },
+                        { critRateP: 24.0 },
+                        { critRateP: 27.0 },
+                        { critRateP: 30.0 }
+                    ],
+                    descriptionByStar: [
+                        "12秒間 / この効果はスタックしない",
+                        "12秒間 / この効果はスタックしない",
+                        "12秒間 / この効果はスタックしない",
+                        "12秒間 / この効果はスタックしない",
+                        "12秒間 / この効果はスタックしない"
+                    ]
+                },
+                {
+                    id: "signature_skill",
+                    type: "info",
+                    label: "Lv.1 強化攻撃 強化",
+                    description: "3回攻撃するごとに敵をハッキングし、確定会心物理ダメージを与える。強化攻撃使用後、自身のSPを回復する。"
+                },
+                {
+                    id: "signature_lv3",
+                    type: "info",
+                    label: "Lv.3",
+                    description: "物理攻撃力・会心・会心ダメージ+9%"
+                }
+            ]
+        },
+        {
             id: "relic_dragon_sword",
             kind: "artifact",
             rarity: "伝説",
@@ -2260,6 +2311,7 @@ const CARD_SOLDER_DATA = {
     relic_blanse_bouquet: { 1: { critRateP: 1.7, critDmgP: 1.1 }, 2: { critRateP: 3.3, critDmgP: 2.1 } },
     relic_picola_pouch: { 1: { atkP: 4.6, healingP: 3.7 }, 2: { atkP: 9.2, healingP: 7.4 } },
     relic_chloe_sewing_chest: { 1: { hasteP: 4.9, critResP: 3.7 }, 2: { hasteP: 9.9, critResP: 7.4 } },
+    relic_listy_replica_glove: { 1: { atkP: 3.8, critDmgP: 2.0 }, 2: { atkP: 7.5, critDmgP: 4.0 } },
     relic_shion_black_cloak: { 1: { atkP: 7.9, critRateP: 3.3 }, 2: { atkP: 15.8, critRateP: 6.6 } },
     relic_naia_watergun: { 1: { hpP: 4.9, defP: 3.8 }, 2: { hpP: 9.9, defP: 7.5 } },
     relic_shupan_backpack: { 1: { hpP: 6.4, atkP: 4.8 }, 2: { hpP: 12.8, atkP: 9.7 } },

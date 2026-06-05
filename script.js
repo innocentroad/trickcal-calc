@@ -3752,7 +3752,9 @@ function updateCrayonAsideAutoSummary(sideKey) {
         'atk-p': bonus.atkP,
         'def-p': bonus.defP,
         crit: bonus.crit,
+        'crit-dmg': bonus.critDmg,
         critres: bonus.critRes,
+        'crit-dmg-res': bonus.critDmgRes,
         'atk-m': bonus.atkM,
         'def-m': bonus.defM
     };
@@ -3882,17 +3884,25 @@ function getValues() {
             atk: activeAside('atk', 'cur').val,
             def: activeAside('def', 'cur').val,
             crit: aBuff('aside-crit-cur').val,
-            critRes: aBuff('aside-critres-cur').val
+            critDmg: aBuff('aside-crit-dmg-cur').val,
+            critRes: aBuff('aside-critres-cur').val,
+            critDmgRes: aBuff('aside-crit-dmg-res-cur').val
         };
 
         const asideTgtAtk = activeAside('atk', 'tgt');
         const asideTgtDef = activeAside('def', 'tgt');
+        const asideTgtCrit = aBuff('aside-crit-tgt');
+        const asideTgtCritDmg = aBuff('aside-crit-dmg-tgt');
+        const asideTgtCritRes = aBuff('aside-critres-tgt');
+        const asideTgtCritDmgRes = aBuff('aside-crit-dmg-res-tgt');
         const asideTgt = {
             hp: aBuff('aside-hp-tgt').str === '' ? asideCur.hp : aBuff('aside-hp-tgt').val,
             atk: asideTgtAtk.str === '' ? asideCur.atk : asideTgtAtk.val,
             def: asideTgtDef.str === '' ? asideCur.def : asideTgtDef.val,
-            crit: aBuff('aside-crit-tgt').str === '' ? asideCur.crit : aBuff('aside-crit-tgt').val,
-            critRes: aBuff('aside-critres-tgt').str === '' ? asideCur.critRes : aBuff('aside-critres-tgt').val
+            crit: asideTgtCrit.str === '' ? asideCur.crit : asideTgtCrit.val,
+            critDmg: asideTgtCritDmg.str === '' ? asideCur.critDmg : asideTgtCritDmg.val,
+            critRes: asideTgtCritRes.str === '' ? asideCur.critRes : asideTgtCritRes.val,
+            critDmgRes: asideTgtCritDmgRes.str === '' ? asideCur.critDmgRes : asideTgtCritDmgRes.val
         };
         const asideAutoCur = getCrayonAsideAutoBonus('cur');
         const asideAutoTgt = getCrayonAsideAutoBonus('tgt');
@@ -3912,18 +3922,18 @@ function getValues() {
         applyExtra(tgtBuffs, 'def', asideAutoTgt[activeDefKey]);
         
         applyExtra(curBuffs, 'crit', fCurBuff + asideCur.crit);
-        applyExtra(curBuffs, 'critDmg', fCurBuff + asideCur.crit);
+        applyExtra(curBuffs, 'critDmg', fCurBuff + asideCur.critDmg);
         applyExtra(curBuffs, 'critRes', fCurBuff + asideCur.critRes);
-        applyExtra(curBuffs, 'critDmgRes', fCurBuff + asideCur.critRes);
+        applyExtra(curBuffs, 'critDmgRes', fCurBuff + asideCur.critDmgRes);
         applyExtra(curBuffs, 'crit', asideAutoCur.crit);
         applyExtra(curBuffs, 'critDmg', asideAutoCur.critDmg);
         applyExtra(curBuffs, 'critRes', asideAutoCur.critRes);
         applyExtra(curBuffs, 'critDmgRes', asideAutoCur.critDmgRes);
 
         applyExtra(tgtBuffs, 'crit', fTgtBuff + asideTgt.crit);
-        applyExtra(tgtBuffs, 'critDmg', fTgtBuff + asideTgt.crit);
+        applyExtra(tgtBuffs, 'critDmg', fTgtBuff + asideTgt.critDmg);
         applyExtra(tgtBuffs, 'critRes', fTgtBuff + asideTgt.critRes);
-        applyExtra(tgtBuffs, 'critDmgRes', fTgtBuff + asideTgt.critRes);
+        applyExtra(tgtBuffs, 'critDmgRes', fTgtBuff + asideTgt.critDmgRes);
         applyExtra(tgtBuffs, 'crit', asideAutoTgt.crit);
         applyExtra(tgtBuffs, 'critDmg', asideAutoTgt.critDmg);
         applyExtra(tgtBuffs, 'critRes', asideAutoTgt.critRes);
@@ -3953,7 +3963,7 @@ function getValues() {
         // Return multipliers
         const mult = (key) => (1 + tgtBuffs[key]) / (1 + curBuffs[key]);
         const hasAsideAutoDiff = ['hp','atk','def','crit','critDmg','critRes','critDmgRes'].some(k => curBuffs[k] !== tgtBuffs[k]);
-        const hasDiff = reqCost !== 0 || fCurBuff !== fTgtBuff || ['hp','atk','def','crit','critRes'].some(k => asideCur[k] !== asideTgt[k]) || hasAsideAutoDiff;
+        const hasDiff = reqCost !== 0 || fCurBuff !== fTgtBuff || ['hp','atk','def','crit','critDmg','critRes','critDmgRes'].some(k => asideCur[k] !== asideTgt[k]) || hasAsideAutoDiff;
         const applyEnabled = !!document.getElementById('crayon-apply-toggle')?.checked;
         return {
             hp: { new: mult('hp'), cur: 1 },

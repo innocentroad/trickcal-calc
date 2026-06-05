@@ -84,6 +84,9 @@ const ENEMY_PRESETS = {
         critRes: 36146,
         critDmgRes: 36146,
         special: 2385.714,
+        modifiers: {
+            debuffs: { anger: 200 }
+        },
         skills: [
             { action: "攻撃", name: "普通攻撃", mult: 100 },
             { action: "攻撃", name: "ピコハン", mult: 100, note: "AoE / 気絶" },
@@ -109,6 +112,9 @@ const ENEMY_PRESETS = {
         critRes: 54146,
         critDmgRes: 54146,
         special: 3528.571,
+        modifiers: {
+            debuffs: { anger: 200 }
+        },
         skills: [
             { action: "攻撃", name: "普通攻撃", mult: 100 },
             { action: "攻撃", name: "ピコハン", mult: 100, note: "AoE / 気絶" },
@@ -128,12 +134,15 @@ const ENEMY_PRESETS = {
         atk_m: 24090,
         def_p: 52195,
         def_m: 52195,
-        dmgType: 'mag',
+        dmgType: 'phys',
         crit: 32120,
         critDmg: 32130,
         critRes: 36146,
         critDmgRes: 36146,
         special: 2385.714,
+        modifiers: {
+            debuffs: { anger: 200 }
+        },
         skills: [
             { action: "攻撃", name: "普通攻撃", mult: 100, note: "2段: 50%*2" },
             { action: "攻撃", name: "叩きつけ", mult: 150 },
@@ -151,12 +160,15 @@ const ENEMY_PRESETS = {
         atk_m: 36090,
         def_p: 78195,
         def_m: 78195,
-        dmgType: 'mag',
+        dmgType: 'phys',
         crit: 48120,
         critDmg: 48120,
         critRes: 54146,
         critDmgRes: 54146,
         special: 3528.571,
+        modifiers: {
+            debuffs: { anger: 200 }
+        },
         skills: [
             { action: "攻撃", name: "普通攻撃", mult: 100, note: "2段: 50%×2" },
             { action: "攻撃", name: "叩きつけ", mult: 150 },
@@ -165,6 +177,50 @@ const ENEMY_PRESETS = {
             { action: "攻撃", name: "突進", mult: 350, note: "2段×n: (175%×2)×n" },
             { action: "攻撃", name: "突進", mult: 241, note: "最終段" },
             { action: "攻撃", name: "吸い込み", mult: 650, note: "16段+1段: 25%×16+250%" }
+        ]
+    },
+    "Isamurayon_d_15": {
+        name: "[次元15] イサムレヨン",
+        hp: 1323593540,
+        atk_p: 28105,
+        atk_m: 28105,
+        def_p: 76295,
+        def_m: 76295,
+        dmgType: 'phys',
+        crit: 44180,
+        critDmg: 44180,
+        critRes: 32115,
+        critDmgRes: 32115,
+        special: 3528.571,
+        modifiers: {
+            debuffs: { anger: 200 }
+        },
+        skills: [
+            { name: "普通攻撃", mult:100  },
+            { name: "薙ぎ払い", mult:175  },
+            { name: "縦振り", mult:400  }
+        ]
+    },
+"Isamurayon_d_18": {
+        name: "[次元18] イサムレヨン",
+        hp: 2972765824,
+        atk_p: 42105,
+        atk_m: 42105,
+        def_p: 114295,
+        def_m: 114295,
+        dmgType: 'phys',
+        crit: 66180,
+        critDmg: 66180,
+        critRes: 48115,
+        critDmgRes: 48115,
+        special: 3528.571,
+        modifiers: {
+            debuffs: { anger: 200 }
+        },
+        skills: [
+            { name: "普通攻撃", mult:100  },
+            { name: "薙ぎ払い", mult:175  },
+            { name: "縦振り", mult:400  }
         ]
     },
     "meow_ef_11": {
@@ -455,7 +511,7 @@ const ENEMY_PRESETS = {
             { action: "攻撃", name: "溜めレーザー 14発hit", mult: 4200, note: "AoE / 14発" }
         ]
     },
-    "meow_ef_31": {
+    "R41Renewa_ef_31": {
         name: "[EF/中辛1] R41リニュア",
         hp: 26286605,
         atk_p: 12795,
@@ -471,6 +527,10 @@ const ENEMY_PRESETS = {
         weakness: {
             mag: { add: 75 }
         },
+        modifiers: {
+            debuffs: { takenDmg: 30, painTakenDmg: 30 },
+            targetDebuffs: { breakTakenDmg: 45 }
+        },
         phases: [
             { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
             { name: "Phase 2 (4/5)", mult: 1.09908179, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
@@ -481,10 +541,21 @@ const ENEMY_PRESETS = {
         ],
         skills: [
             { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
-            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" },
+            { action: "攻撃", name: "斬り上げ", mult: 200, note: "AoE / デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ2hit", mult: 600, note: "AoE / デバフ:破壊 / 2発:200%+400%" },
+            { action: "攻撃", name: "ドローン砲撃", mult: 300, note: "ドローン数で1～3発?" },
+            { action: "攻撃", name: "斬り上げ+振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ+回転振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "突き(ビーム前)", mult: 300, note: "AoE" },
+            { action: "攻撃", name: "ビーム", mult: 1250, note: "AoE / 5発: 250%×5" },
+            { action: "攻撃", name: "ビーム(ドローン追撃)", mult: 500, note: "AoE / ドローン数で1～2発?" },
+            { action: "攻撃", name: "重力球", mult: 600, note: "AoE / 火傷" },
+            { action: "攻撃", name: "着陸（重力球破壊失敗時）", mult: 1000, note: "AoE" },
+            { action: "攻撃", name: "時間停止ドローン", mult: 2030, note: "10体: 203%×10?" }
         ]
     },
-    "meow_ef_32": {
+    "R41Renewa_ef_32": {
         name: "[EF/中辛2]R41リニュア",
         hp: 58588935,
         atk_p: 19148,
@@ -500,6 +571,10 @@ const ENEMY_PRESETS = {
         weakness: {
             mag: { add: 75 }
         },
+        modifiers: {
+            debuffs: { takenDmg: 30, painTakenDmg: 30 },
+            targetDebuffs: { breakTakenDmg: 45 }
+        },
         phases: [
             { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
             { name: "Phase 2 (4/5)", mult: 1.09938597, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
@@ -510,10 +585,21 @@ const ENEMY_PRESETS = {
         ],
         skills: [
             { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
-            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" },
+            { action: "攻撃", name: "斬り上げ", mult: 200, note: "AoE / デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ2hit", mult: 600, note: "AoE / デバフ:破壊 / 2発:200%+400%" },
+            { action: "攻撃", name: "ドローン砲撃", mult: 300, note: "ドローン数で1～3発?" },
+            { action: "攻撃", name: "斬り上げ+振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ+回転振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "突き(ビーム前)", mult: 300, note: "AoE" },
+            { action: "攻撃", name: "ビーム", mult: 1250, note: "AoE / 5発: 250%×5" },
+            { action: "攻撃", name: "ビーム(ドローン追撃)", mult: 500, note: "AoE / ドローン数で1～2発?" },
+            { action: "攻撃", name: "重力球", mult: 600, note: "AoE / 火傷" },
+            { action: "攻撃", name: "着陸（重力球破壊失敗時）", mult: 1000, note: "AoE" },
+            { action: "攻撃", name: "時間停止ドローン", mult: 2030, note: "10体: 203%×10?" }
         ]
     },
-    "meow_ef_41": {
+    "R41Renewa_ef_41": {
         name: "[EF/麻辣1] R41リニュア",
         hp: 127799868,
         atk_p: 28325,
@@ -529,6 +615,10 @@ const ENEMY_PRESETS = {
         weakness: {
             mag: { add: 75 }
         },
+        modifiers: {
+            debuffs: { takenDmg: 30, painTakenDmg: 30 },
+            targetDebuffs: { breakTakenDmg: 45 }
+        },
         phases: [
             { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
             { name: "Phase 2 (4/5)", mult: 1.09958470, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
@@ -539,10 +629,21 @@ const ENEMY_PRESETS = {
         ],
         skills: [
             { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
-            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" },
+            { action: "攻撃", name: "斬り上げ", mult: 200, note: "AoE / デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ2hit", mult: 600, note: "AoE / デバフ:破壊 / 2発:200%+400%" },
+            { action: "攻撃", name: "ドローン砲撃", mult: 300, note: "ドローン数で1～3発?" },
+            { action: "攻撃", name: "斬り上げ+振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ+回転振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "突き(ビーム前)", mult: 300, note: "AoE" },
+            { action: "攻撃", name: "ビーム", mult: 1250, note: "AoE / 5発: 250%×5" },
+            { action: "攻撃", name: "ビーム(ドローン追撃)", mult: 500, note: "AoE / ドローン数で1～2発?" },
+            { action: "攻撃", name: "重力球", mult: 600, note: "AoE / 火傷" },
+            { action: "攻撃", name: "着陸（重力球破壊失敗時）", mult: 1000, note: "AoE" },
+            { action: "攻撃", name: "時間停止ドローン", mult: 2030, note: "10体: 203%×10?" }
         ]
     },
-    "meow_ef_42": {
+    "R41Renewa_ef_42": {
         name: "[EF/麻辣2] R41リニュア",
         hp: 286321339,
         atk_p: 42442,
@@ -558,6 +659,10 @@ const ENEMY_PRESETS = {
         weakness: {
             mag: { add: 75 }
         },
+        modifiers: {
+            debuffs: { takenDmg: 30, painTakenDmg: 30 },
+            targetDebuffs: { breakTakenDmg: 45 }
+        },
         phases: [
             { name: "Phase 1 (5/5)", mult: 1.0, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
             { name: "Phase 2 (4/5)", mult: 1.09972275, scaleStats: ['hp', 'atk_p', 'atk_m', 'def_p', 'def_m', 'crit', 'critDmg', 'critRes', 'critDmgRes'] },
@@ -568,7 +673,18 @@ const ENEMY_PRESETS = {
         ],
         skills: [
             { action: "攻撃", name: "光弾", mult: 150, note: "RNG / 3発: 50%×3" },
-            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" }
+            { action: "攻撃", name: "薙ぎ払い", mult: 200, note: "AoE" },
+            { action: "攻撃", name: "斬り上げ", mult: 200, note: "AoE / デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ2hit", mult: 600, note: "AoE / デバフ:破壊 / 2発:200%+400%" },
+            { action: "攻撃", name: "ドローン砲撃", mult: 300, note: "ドローン数で1～3発?" },
+            { action: "攻撃", name: "斬り上げ+振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "斬り上げ+回転振り下ろし", mult: 0, note: "デバフ:破壊" },
+            { action: "攻撃", name: "突き(ビーム前)", mult: 300, note: "AoE" },
+            { action: "攻撃", name: "ビーム", mult: 1250, note: "AoE / 5発: 250%×5" },
+            { action: "攻撃", name: "ビーム(ドローン追撃)", mult: 500, note: "AoE / ドローン数で1～2発?" },
+            { action: "攻撃", name: "重力球", mult: 600, note: "AoE / 火傷" },
+            { action: "攻撃", name: "着陸（重力球破壊失敗時）", mult: 1000, note: "AoE" },
+            { action: "攻撃", name: "時間停止ドローン", mult: 2030, note: "10体: 203%×10?" }
         ]
     },
     "GTA_24": {

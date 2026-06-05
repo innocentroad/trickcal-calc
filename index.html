@@ -19,7 +19,7 @@
     </script>
     <script>
         try {
-            const raw = localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
+            const raw = localStorage.getItem('trickcal_calc_state_v3.3') || localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
             const state = raw ? JSON.parse(raw) : null;
             document.documentElement.dataset.initialPerspective = state?.perspective || 'self';
             document.documentElement.dataset.initialTab = state?.tab || 'calc';
@@ -97,7 +97,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v3.2</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v3.3</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>選択</button>
@@ -170,7 +170,7 @@
 <input type="radio" name="perspective" id="perspective-enemy" value="enemy" style="display:none;">
 <script>
     try {
-        const raw = localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
+        const raw = localStorage.getItem('trickcal_calc_state_v3.3') || localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
         const state = raw ? JSON.parse(raw) : null;
         const savedPerspective = state?.perspective;
         if (savedPerspective === 'enemy') {
@@ -364,26 +364,55 @@
         <div class="dynamic-section self-debuff-section">
             <h3 class="stat-cat-header">バフ / デバフ</h3>
             <div class="multipliers-grid">
-                <div class="input-group stat-input-enemy">
+                <div class="input-group stat-input-enemy debuff-attacker-only">
                     <label>毒</label>
                     <select id="self-debuff-poison">
                         <option value="0">0%</option>
-                        <option value="-11">-11%</option>
-                        <option value="-22">-22%</option>
-                        <option value="-33">-33%</option>
-                        <option value="-44">-44%</option>
-                        <option value="-55">-55%</option>
-                        <option value="-66">-66%</option>
-                        <option value="-77">-77%</option>
-                        <option value="-88">-88%</option>
-                        <option value="-99">-99%</option>
+                        <option value="-11">[1] -11%</option>
+                        <option value="-22">[2] -22%</option>
+                        <option value="-33">[3] -33%</option>
+                        <option value="-44">[4] -44%</option>
+                        <option value="-55">[5] -55%</option>
+                        <option value="-66">[6] -66%</option>
+                        <option value="-77">[7] -77%</option>
+                        <option value="-88">[8] -88%</option>
+                        <option value="-99">[9] -99%</option>
                     </select>
                 </div>
-                <div class="input-group stat-input-enemy">
+                <div class="input-group stat-input-enemy debuff-attacker-only">
                     <label>ノイズ</label>
                     <select id="self-debuff-noise">
                         <option value="0">0%</option>
                         <option value="-50">-50%</option>
+                    </select>
+                </div>
+                <div class="input-group stat-input-enemy debuff-defender-only boss-target-debuff debuff-role-hidden">
+                    <label>破壊</label>
+                    <select id="self-debuff-break-taken-dmg">
+                        <option value="0">0%</option>
+                        <option value="5">[1] +5%</option>
+                        <option value="10">[2] +10%</option>
+                        <option value="15">[3] +15%</option>
+                        <option value="20">[4] +20%</option>
+                        <option value="25">[5] +25%</option>
+                        <option value="30">[6] +30%</option>
+                        <option value="35">[7] +35%</option>
+                        <option value="40">[8] +40%</option>
+                        <option value="45">[9] +45%</option>
+                    </select>
+                </div>
+                <div class="input-group stat-input-enemy debuff-defender-only preset-owned-debuff debuff-role-hidden">
+                    <label>苦痛時被ダメ増</label>
+                    <select id="self-debuff-pain-taken-dmg">
+                        <option value="0">0%</option>
+                        <option value="30">+30%</option>
+                    </select>
+                </div>
+                <div class="input-group stat-input-enemy debuff-defender-only preset-owned-debuff debuff-role-hidden">
+                    <label>被ダメ減</label>
+                    <select id="self-debuff-taken-dmg">
+                        <option value="0">0%</option>
+                        <option value="30">30%</option>
                     </select>
                 </div>
             </div>
@@ -700,29 +729,29 @@
         <div class="dynamic-section enemy-debuff-section">
             <h3 class="stat-cat-header">バフ / デバフ</h3>
             <div class="multipliers-grid">
-                <div class="input-group stat-input-enemy">
+                <div class="input-group stat-input-enemy debuff-attacker-only">
                     <label>毒</label>
                     <select id="enemy-debuff-poison">
                         <option value="0">0%</option>
-                        <option value="-11">-11%</option>
-                        <option value="-22">-22%</option>
-                        <option value="-33">-33%</option>
-                        <option value="-44">-44%</option>
-                        <option value="-55">-55%</option>
-                        <option value="-66">-66%</option>
-                        <option value="-77">-77%</option>
-                        <option value="-88">-88%</option>
-                        <option value="-99">-99%</option>
+                        <option value="-11">[1] -11%</option>
+                        <option value="-22">[2] -22%</option>
+                        <option value="-33">[3] -33%</option>
+                        <option value="-44">[4] -44%</option>
+                        <option value="-55">[5] -55%</option>
+                        <option value="-66">[6] -66%</option>
+                        <option value="-77">[7] -77%</option>
+                        <option value="-88">[8] -88%</option>
+                        <option value="-99">[9] -99%</option>
                     </select>
                 </div>
-                <div class="input-group stat-input-enemy">
+                <div class="input-group stat-input-enemy debuff-attacker-only">
                     <label>ノイズ</label>
                     <select id="enemy-debuff-noise">
                         <option value="0">0%</option>
                         <option value="-50">-50%</option>
                     </select>
                 </div>
-                <div class="input-group stat-input-enemy">
+                <div class="input-group stat-input-enemy debuff-attacker-only preset-owned-attacker-debuff debuff-role-hidden">
                     <label>怒り</label>
                     <select id="enemy-debuff-anger">
                         <option value="0">0%</option>
@@ -731,6 +760,35 @@
                         <option value="120">120%</option>
                         <option value="160">160%</option>
                         <option value="200">200%</option>
+                    </select>
+                </div>
+                <div class="input-group stat-input-enemy debuff-defender-only boss-target-debuff debuff-role-hidden">
+                    <label>破壊</label>
+                    <select id="enemy-debuff-break-taken-dmg">
+                        <option value="0">0%</option>
+                        <option value="5">[1] +5%</option>
+                        <option value="10">[2] +10%</option>
+                        <option value="15">[3] +15%</option>
+                        <option value="20">[4] +20%</option>
+                        <option value="25">[5] +25%</option>
+                        <option value="30">[6] +30%</option>
+                        <option value="35">[7] +35%</option>
+                        <option value="40">[8] +40%</option>
+                        <option value="45">[9] +45%</option>
+                    </select>
+                </div>
+                <div class="input-group stat-input-enemy debuff-defender-only preset-owned-debuff debuff-role-hidden">
+                    <label>苦痛時被ダメ増</label>
+                    <select id="enemy-debuff-pain-taken-dmg">
+                        <option value="0">0%</option>
+                        <option value="30">+30%</option>
+                    </select>
+                </div>
+                <div class="input-group stat-input-enemy debuff-defender-only preset-owned-debuff debuff-role-hidden">
+                    <label>被ダメ減</label>
+                    <select id="enemy-debuff-taken-dmg">
+                        <option value="0">0%</option>
+                        <option value="30">30%</option>
                     </select>
                 </div>
             </div>
@@ -1009,7 +1067,44 @@
                                 
                                 <!-- Aside (Current) -->
                                 <div class="crayon-board-side">
-                                    <h3 class="board-title">アサイド <span class="board-desc">(手動追加バフ)</span></h3>
+                                    <h3 class="board-title">アサイド</h3>
+                                    <div class="crayon-aside-auto" data-crayon-aside-side="cur">
+                                        <div class="crayon-aside-auto-controls">
+                                            <span class="crayon-aside-auto-label">全体効果</span>
+                                        </div>
+                                        <div id="crayon-aside-auto-list-cur" class="crayon-aside-auto-list"></div>
+                                        <div class="board-grid-side aside-grid-side crayon-aside-auto-summary">
+                                            <div class="crayon-input-group">
+                                                <label>HP (%)</label>
+                                                <output id="crayon-aside-auto-hp-cur">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>物攻 (%)</label>
+                                                <output id="crayon-aside-auto-atk-p-cur">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>物防 (%)</label>
+                                                <output id="crayon-aside-auto-def-p-cur">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>会心 (%)</label>
+                                                <output id="crayon-aside-auto-crit-cur">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>会心抵 (%)</label>
+                                                <output id="crayon-aside-auto-critres-cur">0</output>
+                                            </div>
+                                            <div class="crayon-input-group aside-magic-atk">
+                                                <label>魔攻 (%)</label>
+                                                <output id="crayon-aside-auto-atk-m-cur">0</output>
+                                            </div>
+                                            <div class="crayon-input-group aside-magic-def">
+                                                <label>魔防 (%)</label>
+                                                <output id="crayon-aside-auto-def-m-cur">0</output>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="crayon-aside-manual-title">手動追加バフ</h4>
                                     <div class="board-grid-side aside-grid-side">
                                         <div class="crayon-input-group">
                                             <label>HP (%)</label>
@@ -1164,7 +1259,44 @@
                                 
                                 <!-- Aside (Target) -->
                                 <div class="crayon-board-side">
-                                    <h3 class="board-title">アサイド <span class="board-desc">(手動追加バフ)</span></h3>
+                                    <h3 class="board-title">アサイド</h3>
+                                    <div class="crayon-aside-auto" data-crayon-aside-side="tgt">
+                                        <div class="crayon-aside-auto-controls">
+                                            <span class="crayon-aside-auto-label">全体効果</span>
+                                        </div>
+                                        <div id="crayon-aside-auto-list-tgt" class="crayon-aside-auto-list"></div>
+                                        <div class="board-grid-side aside-grid-side crayon-aside-auto-summary">
+                                            <div class="crayon-input-group">
+                                                <label>HP (%)</label>
+                                                <output id="crayon-aside-auto-hp-tgt">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>物攻 (%)</label>
+                                                <output id="crayon-aside-auto-atk-p-tgt">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>物防 (%)</label>
+                                                <output id="crayon-aside-auto-def-p-tgt">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>会心 (%)</label>
+                                                <output id="crayon-aside-auto-crit-tgt">0</output>
+                                            </div>
+                                            <div class="crayon-input-group">
+                                                <label>会心抵 (%)</label>
+                                                <output id="crayon-aside-auto-critres-tgt">0</output>
+                                            </div>
+                                            <div class="crayon-input-group aside-magic-atk">
+                                                <label>魔攻 (%)</label>
+                                                <output id="crayon-aside-auto-atk-m-tgt">0</output>
+                                            </div>
+                                            <div class="crayon-input-group aside-magic-def">
+                                                <label>魔防 (%)</label>
+                                                <output id="crayon-aside-auto-def-m-tgt">0</output>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="crayon-aside-manual-title">手動追加バフ</h4>
                                     <div class="board-grid-side aside-grid-side">
                                         <div class="crayon-input-group">
                                             <label>HP (%)</label>

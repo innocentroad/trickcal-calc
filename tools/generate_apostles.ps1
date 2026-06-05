@@ -49,6 +49,8 @@ $keyMap = @{
     "値の種類" = "valueKind"
     "値分類" = "valueClass"
     "効果タイプ" = "effectType"
+    "発動条件" = "condition"
+    "条件" = "condition"
     "効果対象" = "effectTarget"
     "対象スキル" = "targetSkill"
     "参照" = "reference"
@@ -78,15 +80,21 @@ $allowedValueClasses = @(
     "固定値",
     "持続時間",
     "状態付与",
+    "状態解除",
     "状態免疫",
+    "免疫",
     "ヒット数",
     "対象数",
     "回数",
+    "被弾回数",
     "周期",
     "クールタイム",
     "条件",
     "SP量",
-    "スキル変更"
+    "スキル変更",
+    "最大スタック",
+    "解除",
+    "召喚"
 )
 
 $validationWarnings = @()
@@ -166,7 +174,7 @@ function Extract-Levels($data) {
 }
 
 function Has-EffectPayload($data) {
-    foreach ($key in @("valueKind", "valueClass", "effectType", "effectTarget", "targetSkill", "reference", "duration", "fixedValue", "levels")) {
+    foreach ($key in @("valueKind", "valueClass", "effectType", "condition", "effectTarget", "targetSkill", "reference", "duration", "fixedValue", "levels")) {
         if ($data.Contains($key) -and (Has-Value $data[$key])) { return $true }
     }
     return $false
@@ -361,6 +369,33 @@ function Add-FavoriteCardEffect($apostle, $row) {
     $group.effects = Add-EffectIfPresent $group.effects $data
 }
 
+function New-ApostleData($id, $name, $basic = $null) {
+    if ($null -eq $basic) { $basic = [ordered]@{} }
+    return [ordered]@{
+        id = $id
+        name = $name
+        basic = $basic
+        statTypes = [ordered]@{}
+        skills = @()
+        favoriteCard = [ordered]@{}
+        aside = [ordered]@{
+            levels = [ordered]@{}
+        }
+        board = $null
+    }
+}
+
+function Ensure-ApostleFromRow($byId, $row) {
+    if (-not $row.id) { return $null }
+    if (-not $byId.Contains($row.id)) {
+        $name = Get-RowValue $row "name"
+        if (-not $name) { $name = $row.id }
+        $byId[$row.id] = New-ApostleData $row.id $name
+        $script:validationWarnings += "basic row missing, created placeholder apostle: $($row.id)"
+    }
+    return $byId[$row.id]
+}
+
 New-Item -ItemType Directory -Force -Path $csvDir | Out-Null
 
 foreach ($name in $sheets.Keys) {
@@ -401,24 +436,16 @@ foreach ($row in $basicRows) {
         }
     }
 
-    $byId[$row.id] = [ordered]@{
-        id = $row.id
-        name = $row.name
-        basic = $basic
-        statTypes = $statTypes
-        skills = @()
-        favoriteCard = [ordered]@{}
-        aside = [ordered]@{
-            levels = [ordered]@{}
-        }
-        board = $null
-    }
+    $apostle = New-ApostleData $row.id $row.name $basic
+    $apostle.statTypes = $statTypes
+    $byId[$row.id] = $apostle
 }
 
 foreach ($row in $skillRows) {
-    if (-not $row.id -or -not $byId.Contains($row.id)) { continue }
-    $byId[$row.id].skills = Add-GroupedEffect `
-        $byId[$row.id].skills `
+    $apostle = Ensure-ApostleFromRow $byId $row
+    if (-not $apostle) { continue }
+    $apostle.skills = Add-GroupedEffect `
+        $apostle.skills `
         $row `
         @("skillType", "skillName") `
         @("no", "skillType", "skillName", "description", "stunSeconds", "cooldownSeconds") `
@@ -426,22 +453,26 @@ foreach ($row in $skillRows) {
 }
 
 foreach ($row in $favoriteCardRows) {
-    if (-not $row.id -or -not $byId.Contains($row.id)) { continue }
-    Add-FavoriteCardEffect $byId[$row.id] $row
+    $apostle = Ensure-ApostleFromRow $byId $row
+    if (-not $apostle) { continue }
+    Add-FavoriteCardEffect $apostle $row
 }
 
 foreach ($row in $asideStatRows) {
-    if (-not $row.id -or -not $byId.Contains($row.id)) { continue }
-    Add-AsideStat $byId[$row.id] $row
+    $apostle = Ensure-ApostleFromRow $byId $row
+    if (-not $apostle) { continue }
+    Add-AsideStat $apostle $row
 }
 
 foreach ($row in $asideSpecialRows) {
-    if (-not $row.id -or -not $byId.Contains($row.id)) { continue }
-    Add-AsideSpecial $byId[$row.id] $row
+    $apostle = Ensure-ApostleFromRow $byId $row
+    if (-not $apostle) { continue }
+    Add-AsideSpecial $apostle $row
 }
 
 foreach ($row in $boardRows) {
-    if (-not $row.id -or -not $byId.Contains($row.id)) { continue }
+    $apostle = Ensure-ApostleFromRow $byId $row
+    if (-not $apostle) { continue }
 
     $board = Compact-Row $row
     $cells = [ordered]@{}
@@ -454,7 +485,7 @@ foreach ($row in $boardRows) {
     }
 
     $board["cells"] = $cells
-    $byId[$row.id].board = $board
+    $apostle.board = $board
 }
 
 foreach ($apostle in $byId.Values) {

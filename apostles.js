@@ -14,6 +14,24 @@ const APOSTLE_LIBRARY = [
       "attackType": "物理",
       "initialSp": 0,
       "spRecoveryPerSecond": 30,
+      "Rank2\n全体効果1": "会心 +24",
+      "Rank2\n全体効果2": "会心ダメージ +24",
+      "Rank3\n全体効果1": "会心抵抗 +24",
+      "Rank3\n全体効果2": "会心DMG抵抗 +24",
+      "Rank4\n全体効果1": "HP +234",
+      "Rank4\n全体効果2": "物理攻撃力 +16",
+      "Rank5\n全体効果1": "魔法攻撃力 +16",
+      "Rank5\n全体効果2": "物理防御力 +33",
+      "Rank6\n全体効果1": "魔法防御力 +33",
+      "Rank6\n全体効果2": "会心 +24",
+      "Rank7\n全体効果1": "会心ダメージ +24",
+      "Rank7\n全体効果2": "会心抵抗 +24",
+      "Rank8\n全体効果1": "会心DMG抵抗 +24",
+      "Rank8\n全体効果2": "HP +234",
+      "Rank9\n全体効果1": "物理攻撃力 +16",
+      "Rank9\n全体効果2": "魔法攻撃力 +16",
+      "Rank10\n全体効果1": "物理防御力 +33",
+      "Rank10\n全体効果2": "魔法防御力 +33",
       "boardType": "防御+抵抗",
       "boardShape": "エルフTypeA"
     },
@@ -322,6 +340,24 @@ const APOSTLE_LIBRARY = [
       "attackType": "魔法",
       "initialSp": 0,
       "spRecoveryPerSecond": 44,
+      "Rank2\n全体効果1": "物理攻撃力 +16",
+      "Rank2\n全体効果2": "魔法攻撃力 +16",
+      "Rank3\n全体効果1": "物理防御力 +33",
+      "Rank3\n全体効果2": "魔法防御力 +33",
+      "Rank4\n全体効果1": "会心 +24",
+      "Rank4\n全体効果2": "会心ダメージ +24",
+      "Rank5\n全体効果1": "会心抵抗 +24",
+      "Rank5\n全体効果2": "会心DMG抵抗 +24",
+      "Rank6\n全体効果1": "HP +234",
+      "Rank6\n全体効果2": "物理攻撃力 +16",
+      "Rank7\n全体効果1": "魔法攻撃力 +16",
+      "Rank7\n全体効果2": "物理防御力 +33",
+      "Rank8\n全体効果1": "魔法防御力 +33",
+      "Rank8\n全体効果2": "会心 +24",
+      "Rank9\n全体効果1": "会心ダメージ +24",
+      "Rank9\n全体効果2": "会心抵抗 +24",
+      "Rank10\n全体効果1": "会心DMG抵抗 +24",
+      "Rank10\n全体効果2": "HP +234",
       "boardType": "攻撃+防御",
       "boardShape": "魔女TypeC"
     },
@@ -567,10 +603,39 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "中列",
       "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 40,
+      "Rank2\n全体効果1": "物理防御力 +33",
+      "Rank2\n全体効果2": "魔法防御力 +33",
+      "Rank3\n全体効果1": "会心 +24",
+      "Rank3\n全体効果2": "会心ダメージ +24",
+      "Rank4\n全体効果1": "会心抵抗 +24",
+      "Rank4\n全体効果2": "会心DMG抵抗 +24",
+      "Rank5\n全体効果1": "HP +234",
+      "Rank5\n全体効果2": "物理攻撃力 +16",
+      "Rank6\n全体効果1": "魔法攻撃力 +16",
+      "Rank6\n全体効果2": "物理防御力 +33",
+      "Rank7\n全体効果1": "魔法防御力 +33",
+      "Rank7\n全体効果2": "会心 +24",
+      "Rank8\n全体効果1": "会心ダメージ +24",
+      "Rank8\n全体効果2": "会心抵抗 +24",
+      "Rank9\n全体効果1": "会心DMG抵抗 +24",
+      "Rank9\n全体効果2": "HP +234",
+      "Rank10\n全体効果1": "物理攻撃力 +16",
+      "Rank10\n全体効果2": "魔法攻撃力 +16",
       "boardType": "会心+HP",
       "boardShape": "幽霊TypeC"
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -1020,10 +1085,39 @@ const APOSTLE_LIBRARY = [
       "role": "守備",
       "position": "前列",
       "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30,
+      "Rank2\n全体効果1": "会心抵抗 +24",
+      "Rank2\n全体効果2": "会心DMG抵抗 +24",
+      "Rank3\n全体効果1": "HP +234",
+      "Rank3\n全体効果2": "物理攻撃力 +16",
+      "Rank4\n全体効果1": "魔法攻撃力 +16",
+      "Rank4\n全体効果2": "物理防御力 +33",
+      "Rank5\n全体効果1": "魔法防御力 +33",
+      "Rank5\n全体効果2": "会心 +24",
+      "Rank6\n全体効果1": "会心ダメージ +24",
+      "Rank6\n全体効果2": "会心抵抗 +24",
+      "Rank7\n全体効果1": "会心DMG抵抗 +24",
+      "Rank7\n全体効果2": "HP +234",
+      "Rank8\n全体効果1": "物理攻撃力 +16",
+      "Rank8\n全体効果2": "魔法攻撃力 +16",
+      "Rank9\n全体効果1": "物理防御力 +33",
+      "Rank9\n全体効果2": "魔法防御力 +33",
+      "Rank10\n全体効果1": "会心 +24",
+      "Rank10\n全体効果2": "会心ダメージ +24",
       "boardType": "抵抗+会心",
       "boardShape": "エルフTypeE"
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkP": 2,
+      "defP": 5,
+      "defM": 5,
+      "crit": 2,
+      "critDmg": 2,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -1191,10 +1285,21 @@ const APOSTLE_LIBRARY = [
       "role": "守備",
       "position": "前列",
       "attackType": "魔法",
+      "initialSp": 160,
+      "spRecoveryPerSecond": 40,
       "boardType": "攻撃+防御",
       "boardShape": "エルフTypeC"
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkM": 2,
+      "defP": 5,
+      "defM": 5,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 5,
+      "critDmgRes": 5
+    },
     "skills": [
       {
         "effects": [
@@ -4428,6 +4533,27 @@ const APOSTLE_LIBRARY = [
             }
           },
           {
+            "valueKind": "基本攻撃回数",
+            "valueClass": "回数",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 2
+          },
+          {
+            "valueKind": "遺物1個ごとの追加攻撃回数",
+            "valueClass": "回数",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 1
+          },
+          {
+            "valueKind": "最大追加攻撃回数",
+            "valueClass": "回数",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 3
+          },
+          {
             "valueKind": "遺物0：総物理ダメージ",
             "valueClass": "倍率",
             "effectType": "攻撃",
@@ -4506,27 +4632,6 @@ const APOSTLE_LIBRARY = [
               "11": 3250,
               "12": 3425
             }
-          },
-          {
-            "valueKind": "基本攻撃回数",
-            "valueClass": "回数",
-            "effectType": "攻撃",
-            "effectTarget": "敵",
-            "fixedValue": 2
-          },
-          {
-            "valueKind": "遺物1個ごとの追加攻撃回数",
-            "valueClass": "回数",
-            "effectType": "攻撃",
-            "effectTarget": "敵",
-            "fixedValue": 1
-          },
-          {
-            "valueKind": "最大追加攻撃回数",
-            "valueClass": "回数",
-            "effectType": "攻撃",
-            "effectTarget": "敵",
-            "fixedValue": 3
           }
         ],
         "skillType": "低学年",
@@ -5495,7 +5600,10 @@ const APOSTLE_LIBRARY = [
                   "9": 40,
                   "10": 42,
                   "11": 44,
-                  "12": 46
+                  "12": 46,
+                  "13": 48,
+                  "14": 50,
+                  "15": 52
                 }
               },
               {
@@ -10817,7 +10925,10 @@ const APOSTLE_LIBRARY = [
                   "9": 1080,
                   "10": 1140,
                   "11": 1200,
-                  "12": 1260
+                  "12": 1260,
+                  "13": 1320,
+                  "14": 1380,
+                  "15": 1440
                 }
               },
               {
@@ -10838,7 +10949,10 @@ const APOSTLE_LIBRARY = [
                   "9": 20,
                   "10": 21,
                   "11": 22,
-                  "12": 23
+                  "12": 23,
+                  "13": 24,
+                  "14": 25,
+                  "15": 26
                 }
               },
               {
@@ -10858,7 +10972,10 @@ const APOSTLE_LIBRARY = [
                   "9": 19,
                   "10": 20,
                   "11": 21,
-                  "12": 22
+                  "12": 22,
+                  "13": 23,
+                  "14": 24,
+                  "15": 25
                 }
               },
               {
@@ -10878,7 +10995,10 @@ const APOSTLE_LIBRARY = [
                   "9": 19,
                   "10": 20,
                   "11": 21,
-                  "12": 22
+                  "12": 22,
+                  "13": 23,
+                  "14": 24,
+                  "15": 25
                 }
               },
               {
@@ -10899,7 +11019,10 @@ const APOSTLE_LIBRARY = [
                   "9": 9,
                   "10": 10,
                   "11": 11,
-                  "12": 12
+                  "12": 12,
+                  "13": 13,
+                  "14": 14,
+                  "15": 15
                 }
               },
               {
@@ -12484,76 +12607,68 @@ const APOSTLE_LIBRARY = [
         "cooldownSeconds": 32
       },
       {
-        "effects": {
-          "valueKind": "対象苦痛状態時与ダメージ量増加",
-          "valueClass": "倍率",
-          "effectType": "パッシブ",
-          "effectTarget": "自身",
-          "levels": {
-            "1": 20,
-            "2": 23,
-            "3": 26,
-            "4": 29,
-            "5": 32,
-            "6": 35,
-            "7": 38,
-            "8": 41,
-            "9": 44,
-            "10": 47,
-            "11": 50,
-            "12": 53
+        "effects": [
+          {
+            "valueKind": "対象苦痛状態時与ダメージ量増加",
+            "valueClass": "倍率",
+            "effectType": "パッシブ",
+            "effectTarget": "自身",
+            "levels": {
+              "1": 20,
+              "2": 23,
+              "3": 26,
+              "4": 29,
+              "5": 32,
+              "6": 35,
+              "7": 38,
+              "8": 41,
+              "9": 44,
+              "10": 47,
+              "11": 50,
+              "12": 53
+            }
+          },
+          {
+            "valueKind": "対象火傷状態時与ダメージ量増加",
+            "valueClass": "倍率",
+            "effectType": "パッシブ",
+            "effectTarget": "自身",
+            "levels": {
+              "1": 20,
+              "2": 23,
+              "3": 26,
+              "4": 29,
+              "5": 32,
+              "6": 35,
+              "7": 38,
+              "8": 41,
+              "9": 44,
+              "10": 47,
+              "11": 50,
+              "12": 53
+            }
+          },
+          {
+            "valueKind": "対象毒状態時与ダメージ量増加",
+            "valueClass": "倍率",
+            "effectType": "パッシブ",
+            "effectTarget": "自身",
+            "levels": {
+              "1": 20,
+              "2": 23,
+              "3": 26,
+              "4": 29,
+              "5": 32,
+              "6": 35,
+              "7": 38,
+              "8": 41,
+              "9": 44,
+              "10": 47,
+              "11": 50,
+              "12": 53
+            }
           }
-        },
-        "skillType": "パッシブ",
-        "skillName": "パッシブスキル",
-        "description": "敵が苦痛、火傷、毒状態の場合、状態異常の種類数に応じてダメージが増加する。"
-      },
-      {
-        "effects": {
-          "valueKind": "対象火傷状態時与ダメージ量増加",
-          "valueClass": "倍率",
-          "effectType": "パッシブ",
-          "effectTarget": "自身",
-          "levels": {
-            "1": 20,
-            "2": 23,
-            "3": 26,
-            "4": 29,
-            "5": 32,
-            "6": 35,
-            "7": 38,
-            "8": 41,
-            "9": 44,
-            "10": 47,
-            "11": 50,
-            "12": 53
-          }
-        },
-        "skillType": "パッシブ",
-        "skillName": "パッシブスキル",
-        "description": "敵が苦痛、火傷、毒状態の場合、状態異常の種類数に応じてダメージが増加する。"
-      },
-      {
-        "effects": {
-          "valueKind": "対象毒状態時与ダメージ量増加",
-          "valueClass": "倍率",
-          "effectType": "パッシブ",
-          "effectTarget": "自身",
-          "levels": {
-            "1": 20,
-            "2": 23,
-            "3": 26,
-            "4": 29,
-            "5": 32,
-            "6": 35,
-            "7": 38,
-            "8": 41,
-            "9": 44,
-            "10": 47,
-            "11": 50,
-            "12": 53
-          }
-        },
+        ],
         "skillType": "パッシブ",
         "skillName": "パッシブスキル",
         "description": "敵が苦痛、火傷、毒状態の場合、状態異常の種類数に応じてダメージが増加する。"
@@ -15232,7 +15347,7 @@ const APOSTLE_LIBRARY = [
               "fixedValue": 3
             }
           ],
-          "description": "召喚獣の自爆ダメージが増加する（その他倍率として計算）。召喚獣が破壊されると、自身のSPを回復する。高学年スキル使用時、一定時間、モモの被ダメージ量が減少する。"
+          "description": "召喚獣の自爆ダメージが増加する。召喚獣が破壊されると、自身のSPを回復する。高学年スキル使用時、一定時間、モモの被ダメージ量が減少する。"
         },
         "3": {
           "name": "モモ～ハッ！",
@@ -17428,6 +17543,385 @@ const APOSTLE_LIBRARY = [
         "3-4": "全体防御"
       }
     }
+  },
+  {
+    "id": "risty",
+    "name": "リスティ",
+    "basic": {},
+    "statTypes": {},
+    "skills": [
+      {
+        "effects": [
+          {
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "敵/HP最高/範囲",
+            "levels": {
+              "1": 135,
+              "2": 148,
+              "3": 161,
+              "4": 174,
+              "5": 187,
+              "6": 200,
+              "7": 213,
+              "8": 226,
+              "9": 239,
+              "10": 252,
+              "11": 265,
+              "12": 278,
+              "13": 291,
+              "14": 304,
+              "15": 317
+            }
+          },
+          {
+            "valueKind": "最後の一撃の物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "敵/HP最高/範囲",
+            "levels": {
+              "1": 270,
+              "2": 297,
+              "3": 324,
+              "4": 351,
+              "5": 378,
+              "6": 405,
+              "7": 432,
+              "8": 459,
+              "9": 486,
+              "10": 513,
+              "11": 540,
+              "12": 567,
+              "13": 594,
+              "14": 621,
+              "15": 648
+            }
+          },
+          {
+            "valueKind": "再探索",
+            "valueClass": "回数",
+            "effectType": "条件",
+            "effectTarget": "敵が倒されなかった場合",
+            "fixedValue": 3
+          }
+        ],
+        "skillType": "低学年",
+        "skillName": "テクノマンシー",
+        "description": "HPが最も高い敵に範囲物理ダメージを与える。敵が倒されなかった場合、最大3回まで再度敵を探し出し範囲物理ダメージを与える。最後の一撃はより高いダメージを与える。"
+      },
+      {
+        "effects": [
+          {
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "残りHP割合が最も低い敵3体",
+            "levels": {
+              "1": 40,
+              "2": 43,
+              "3": 45,
+              "4": 48,
+              "5": 51,
+              "6": 53,
+              "7": 56,
+              "8": 59,
+              "9": 61,
+              "10": 64,
+              "11": 67,
+              "12": 69,
+              "13": 72,
+              "14": 75,
+              "15": 77
+            }
+          },
+          {
+            "valueKind": "ブロック数",
+            "valueClass": "ヒット数",
+            "effectType": "攻撃",
+            "effectTarget": "残りHP割合が最も低い敵3体",
+            "fixedValue": 10
+          },
+          {
+            "valueKind": "対象数",
+            "valueClass": "対象数",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 3
+          },
+          {
+            "valueKind": "最後の一撃の物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "残りHP割合が最も低い敵3体",
+            "levels": {
+              "1": 160,
+              "2": 171,
+              "3": 181,
+              "4": 192,
+              "5": 203,
+              "6": 213,
+              "7": 224,
+              "8": 235,
+              "9": 245,
+              "10": 256,
+              "11": 267,
+              "12": 277,
+              "13": 288,
+              "14": 299,
+              "15": 309
+            }
+          },
+          {
+            "valueKind": "気絶",
+            "valueClass": "状態付与",
+            "effectType": "デバフ",
+            "effectTarget": "敵"
+          },
+          {
+            "valueKind": "気絶",
+            "valueClass": "持続時間",
+            "effectType": "デバフ",
+            "effectTarget": "敵",
+            "fixedValue": 3
+          }
+        ],
+        "skillType": "高学年",
+        "skillName": "ボクセルグリッチ",
+        "description": "残りHP割合が最も低い敵3体にブロックを10個ずつ落として物理ダメージを与える。最後に落ちるブロックはより高いダメージを与え、気絶を付与する。スキル発動中に対象を変更できる。",
+        "cooldownSeconds": 26
+      },
+      {
+        "effects": {
+          "valueKind": "気絶",
+          "valueClass": "持続時間",
+          "effectType": "パッシブ",
+          "effectTarget": "敵",
+          "reference": "高学年スキル",
+          "levels": {
+            "1": 4,
+            "2": 4.2,
+            "3": 4.4,
+            "4": 4.6,
+            "5": 4.8,
+            "6": 5,
+            "7": 5.2,
+            "8": 5.4,
+            "9": 5.6,
+            "10": 5.8,
+            "11": 6,
+            "12": 6.2,
+            "13": 6.4,
+            "14": 6.6,
+            "15": 6.8
+          }
+        },
+        "skillType": "パッシブ",
+        "skillName": "パッシブスキル",
+        "description": "高学年スキルの気絶の持続時間が変更される。"
+      },
+      {
+        "effects": {
+          "valueKind": "物理ダメージ",
+          "valueClass": "倍率",
+          "effectType": "攻撃",
+          "effectTarget": "敵",
+          "fixedValue": 80
+        },
+        "skillType": "普通攻撃_基本",
+        "skillName": "基本",
+        "description": "飲み干した缶を投げて敵に物理ダメージを与える。"
+      },
+      {
+        "effects": [
+          {
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 120
+          },
+          {
+            "valueKind": "確定会心",
+            "valueClass": "固定値",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 1
+          },
+          {
+            "valueKind": "発動条件",
+            "valueClass": "回数",
+            "effectType": "条件",
+            "effectTarget": "自身",
+            "reference": "普通攻撃",
+            "fixedValue": 4
+          }
+        ],
+        "skillType": "普通攻撃_強化",
+        "skillName": "強化",
+        "description": "4回攻撃するごとに敵の個人情報を収集し、確定会心物理ダメージを与える。"
+      }
+    ],
+    "favoriteCard": {
+      "name": "リスティの模造グローブ",
+      "kind": "遺物",
+      "levels": {
+        "1": [
+          {
+            "effects": [
+              {
+                "valueKind": "ハッキング",
+                "valueClass": "固定値",
+                "effectType": "条件",
+                "effectTarget": "敵",
+                "fixedValue": 3
+              },
+              {
+                "valueKind": "確定会心物理ダメージ",
+                "valueClass": "条件",
+                "effectType": "攻撃",
+                "effectTarget": "敵"
+              },
+              {
+                "valueKind": "SP回復",
+                "valueClass": "固定値",
+                "effectType": "バフ",
+                "effectTarget": "自身"
+              }
+            ],
+            "targetSkill": "普通攻撃_強化",
+            "skillName": "強化",
+            "description": "3回攻撃するごとに敵をハッキングし、確定会心物理ダメージを与える。強化攻撃使用後、自身のSPを回復する。"
+          }
+        ],
+        "3": [
+          {
+            "effects": [
+              {
+                "valueKind": "物理攻撃力増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9
+              },
+              {
+                "valueKind": "会心ステータス増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9
+              },
+              {
+                "valueKind": "会心ダメージ増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9
+              }
+            ],
+            "targetSkill": "愛用Lv3",
+            "skillName": "愛用Lv3",
+            "description": "リスティの物理攻撃力増加9%、会心増加9%、会心ダメージ増加9%"
+          }
+        ]
+      }
+    },
+    "aside": {
+      "name": "本日のPOTG",
+      "levels": {
+        "1": {
+          "name": "リーグ・オブ・エルフ最強者",
+          "stats": [
+            {
+              "statApplyTo": "本人",
+              "statName": "最大HP",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "物理攻撃力",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心ダメージ",
+              "increaseP": 6
+            }
+          ],
+          "effects": []
+        },
+        "2": {
+          "name": "天才ハッカーの登場",
+          "stats": [],
+          "effects": [
+            {
+              "valueKind": "SP回復",
+              "valueClass": "倍率",
+              "effectType": "回復",
+              "effectTarget": "自身",
+              "targetSkill": "低学年スキル",
+              "fixedValue": 75
+            },
+            {
+              "valueKind": "SP回復クールタイム",
+              "valueClass": "クールタイム",
+              "effectType": "回復",
+              "effectTarget": "自身",
+              "targetSkill": "低学年スキル",
+              "fixedValue": 10
+            },
+            {
+              "valueKind": "追加物理ダメージ",
+              "valueClass": "倍率",
+              "effectType": "攻撃",
+              "effectTarget": "残りHP割合が最も低い敵3体",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 160
+            },
+            {
+              "valueKind": "追加攻撃",
+              "valueClass": "回数",
+              "effectType": "攻撃",
+              "effectTarget": "残りHP割合が最も低い敵3体",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 3
+            }
+          ],
+          "description": "低学年スキルで敵を退治すると、SPを回復する。高学年スキル使用後、残りHP割合が最も低い敵3体に追加で3回物理ダメージを与える。"
+        },
+        "3": {
+          "name": "リスティのスーパーセーブ",
+          "stats": [
+            {
+              "statApplyTo": "全体",
+              "statName": "会心ダメージ",
+              "increaseP": 3
+            },
+            {
+              "statApplyTo": "全体",
+              "statName": "物理防御力",
+              "increaseP": 3
+            }
+          ],
+          "effects": [
+            {
+              "valueKind": "SP回復量",
+              "valueClass": "固定値",
+              "effectType": "バフ",
+              "effectTarget": "後列の味方",
+              "fixedValue": 4
+            }
+          ],
+          "description": "後列の味方の1秒ごとのSP回復量を増加させる。"
+        }
+      }
+    },
+    "board": null
   }
 ];
 

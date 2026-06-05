@@ -1863,7 +1863,7 @@ const CARD_LIBRARY = {
             kind: "spell",
             rarity: "希少",
             name: "前衛隊",
-            cost: 18,
+            cost: 20,
             bonusesByStar: [
                 { defP: 9.9 },
                 { defP: 12.3 },
@@ -1906,7 +1906,7 @@ const CARD_LIBRARY = {
             kind: "spell",
             rarity: "希少",
             name: "後衛隊",
-            cost: 18,
+            cost: 20,
             bonusesByStar: [{}, {}, {}, {}, {}],
             conditionalEffects: [
                 { id: "backline_haste", type: "info", label: "攻撃速度増加", description: "7.9/9.9/11.8/13.8/15.8%" },

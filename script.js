@@ -46,7 +46,10 @@ const inputs = {
         },
         debuffs: {
             poison: document.getElementById('self-debuff-poison'),
-            noise: document.getElementById('self-debuff-noise')
+            noise: document.getElementById('self-debuff-noise'),
+            breakTakenDmg: document.getElementById('self-debuff-break-taken-dmg'),
+            painTakenDmg: document.getElementById('self-debuff-pain-taken-dmg'),
+            takenDmg: document.getElementById('self-debuff-taken-dmg')
         }
     },
     
@@ -87,10 +90,15 @@ const inputs = {
         debuffs: {
             poison: document.getElementById('enemy-debuff-poison'),
             noise: document.getElementById('enemy-debuff-noise'),
-            anger: document.getElementById('enemy-debuff-anger')
+            anger: document.getElementById('enemy-debuff-anger'),
+            breakTakenDmg: document.getElementById('enemy-debuff-break-taken-dmg'),
+            painTakenDmg: document.getElementById('enemy-debuff-pain-taken-dmg'),
+            takenDmg: document.getElementById('enemy-debuff-taken-dmg')
         }
     }
 };
+
+let crayonAsideAutoSelections = { cur: [], tgt: [] };
 
 const hpSurvivalToggle = document.getElementById('hp-survival-toggle');
 const hpSurvivalToggleEnemy = document.getElementById('hp-survival-toggle-enemy');
@@ -576,7 +584,8 @@ function collectSkillSelectionMetadata() {
             category: dropdown?.dataset.selectedSkillCategory || '',
             disabledEffects,
             enabledEffects,
-            levels
+            levels,
+            levelsByApostle: getSavedApostleSkillLevelsByApostle(side)
         }];
     }));
 }
@@ -613,7 +622,16 @@ function restoreSkillSelectionMetadata(state = {}) {
         dropdown.dataset.selectedSkillCategory = state[side].category || '';
         dropdown.dataset.disabledSkillEffectKeys = JSON.stringify(state[side].disabledEffects || []);
         dropdown.dataset.enabledSkillEffectKeys = JSON.stringify(state[side].enabledEffects || []);
+        dropdown.dataset.skillLevelsByApostle = JSON.stringify(state[side].levelsByApostle || {});
         dropdown.dataset.skillLevels = JSON.stringify(state[side].levels || {});
+        const apostleId = inputs[side]?.mult?.apostle?.value || '';
+        const levelsByApostle = getSavedApostleSkillLevelsByApostle(side);
+        if (apostleId) {
+            dropdown.dataset.currentApostleId = apostleId;
+            if (levelsByApostle[apostleId]) {
+                dropdown.dataset.skillLevels = JSON.stringify(levelsByApostle[apostleId]);
+            }
+        }
         syncApostleSkillChoiceActive(side);
     });
 }
@@ -918,10 +936,39 @@ function collectCardImageUrls() {
 
     addUrl('img/Card/cost.webp');
     addUrl('img/Card/sunshine_token.webp');
+    addUrl('img/Card/sunshine_token_mini.webp');
     addUrl('img/Card/Card_Signature.webp');
     addUrl('img/Card/Card_Legendary.webp');
     addUrl('img/Card/Card_Unique.webp');
     addUrl('img/Card/Card_Rare.webp');
+    addUrl('img/Card/Card_Grade_1.webp');
+
+    [
+        'img/HP.webp',
+        'img/SP.webp',
+        'img/SP回復.webp',
+        'img/物理攻撃力.webp',
+        'img/魔法攻撃力.webp',
+        'img/物理防御力.webp',
+        'img/魔法防御力.webp',
+        'img/会心.webp',
+        'img/会心ダメージ.webp',
+        'img/会心抵抗.webp',
+        'img/会心DMG抵抗.webp',
+        'img/性格_活発.webp',
+        'img/性格_狂気.webp',
+        'img/性格_純粋.webp',
+        'img/性格_憂鬱.webp',
+        'img/性格_冷静.webp',
+        'img/種族_？？？.webp',
+        'img/種族_エルフ.webp',
+        'img/種族_獣人.webp',
+        'img/種族_精霊.webp',
+        'img/種族_魔女.webp',
+        'img/種族_幽霊.webp',
+        'img/種族_妖精.webp',
+        'img/種族_竜族.webp'
+    ].forEach(addUrl);
 
     if (typeof CARD_LIBRARY !== 'undefined') {
         ['artifacts', 'spells'].forEach((category) => {
@@ -934,11 +981,105 @@ function collectCardImageUrls() {
         });
     }
 
+    getApostleLibrary().forEach(apostle => {
+        const icon = getApostleIconPath(apostle);
+        addUrl(icon);
+    });
+
+    getCrayonAsideAutoOptions().forEach(option => addUrl(getCrayonAsideAutoIconPath(option)));
+
     return Array.from(urls);
 }
 
-function preloadCardImages() {
-    collectCardImageUrls().forEach((src) => {
+function getApostleIconStem(apostleOrId) {
+    const id = typeof apostleOrId === 'string' ? apostleOrId : (apostleOrId?.id || '');
+    const map = {
+        allet: 'Allet',
+        amelia: 'Amelia',
+        ashur: 'Ashur',
+        aya: 'Aya',
+        belita: 'Belita',
+        beni: 'Beni',
+        bigwood: 'BigWood',
+        blanchet: 'Blanchet',
+        butter: 'Butter',
+        canna: 'Canna',
+        carren: 'Carren',
+        chloe: 'Chloe',
+        chopi: 'Chopi',
+        cuee: 'Cuee',
+        diana: 'Diana',
+        ed: 'Ed',
+        elena: 'Elena',
+        epica: 'Epica',
+        erpin: 'Erpin',
+        espi: 'Espi',
+        festa: 'Festa',
+        fricle: 'Fricle',
+        gabia: 'Gabia',
+        haley: 'Haley',
+        hilde: 'Hilde',
+        ifrit: 'Ifrit',
+        jade: 'Jade',
+        jubee: 'Jubee',
+        kidian: 'Kidian',
+        kommy: 'Kommy',
+        kyuri: 'Cuee',
+        kyarot: 'Kyarot',
+        layze: 'Lazy',
+        lazy: 'Lazy',
+        leets: 'Leets',
+        levi: 'Levi',
+        maestromk2: 'MaestroMK2',
+        mago: 'Mago',
+        maison: 'Maison',
+        marie: 'Marie',
+        mayo: 'Mayo',
+        meluna: 'Meluna',
+        momo: 'Momo',
+        mynx: 'Mynx',
+        naia: 'Naia',
+        ner: 'Ner',
+        patula: 'Patula',
+        picora: 'Picora',
+        posher: 'Posher',
+        rim: 'Rim',
+        risty: 'Risty',
+        rohne: 'Rohne',
+        rudd: 'Rude',
+        rude: 'Rude',
+        rufo: 'Rufo',
+        sari: 'Sari',
+        selene: 'Selline',
+        shady: 'Shady',
+        shaydi: 'Shady',
+        shoupan: 'Shoupan',
+        silphir: 'Silphir',
+        sist: 'Sist',
+        snorky: 'Snorky',
+        speaki: 'Speaki',
+        sylla: 'Sylla',
+        taida: 'Taida',
+        ui: 'Ui',
+        velvet: 'Velvet',
+        veroo: 'Veroo',
+        vivi: 'Vivi',
+        xion: 'Xion',
+        yomi: 'Yomi',
+        yumimi: 'Yumimi'
+    };
+    if (map[id]) return map[id];
+    const name = typeof apostleOrId === 'string' ? '' : (apostleOrId?.basic?.icon || apostleOrId?.icon || '');
+    return name || id.replace(/(^|_)([a-z])/g, (_, prefix, char) => char.toUpperCase());
+}
+
+function getApostleIconPath(apostleOrId) {
+    const stem = getApostleIconStem(apostleOrId);
+    return stem ? `img/Chara/${stem}.webp` : '';
+}
+
+function preloadImageUrls(urls) {
+    urls.forEach((src) => {
         if (preloadedCardImages.has(src)) return;
         const img = new Image();
         img.decoding = 'async';
@@ -948,11 +1089,19 @@ function preloadCardImages() {
     return preloadedCardImages.size;
 }
 
+function preloadCardImages() {
+    return preloadImageUrls(collectCardImageUrls());
+}
+
+function preloadUiImages() {
+    return preloadImageUrls(collectCardImageUrls());
+}
+
 function scheduleCardImagePreload() {
     if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(preloadCardImages, { timeout: 1200 });
+        window.requestIdleCallback(preloadUiImages, { timeout: 1200 });
     } else {
-        window.setTimeout(preloadCardImages, 250);
+        window.setTimeout(preloadUiImages, 250);
     }
 }
 
@@ -2297,8 +2446,19 @@ function updateFinalModifierSummary(v, result = null, overrideSelf = null) {
     if (weaknessAdd) {
         multiplierChips.push(createModifierChip('弱点補正', formatSignedPercent(weaknessAdd), 'muted'));
     }
+    if (v.common.defenderBreakTakenDmgUpP) {
+        multiplierChips.push(createModifierChip('破壊 被ダメ増', formatSignedPercent(v.common.defenderBreakTakenDmgUpP), 'muted'));
+    }
+    if (v.common.defenderPainTakenDmgUpP) {
+        multiplierChips.push(createModifierChip('苦痛時 被ダメ増', formatSignedPercent(v.common.defenderPainTakenDmgUpP), 'muted'));
+    }
+    if (v.common.defenderTakenDmgReductionP) {
+        const label = v.common.defenderTakenDmgReductionP >= 0 ? '被ダメ減' : '被ダメ増';
+        multiplierChips.push(createModifierChip(label, formatSignedPercent(Math.abs(v.common.defenderTakenDmgReductionP)), 'muted'));
+    }
     if (v.common.takenDmgP) {
-        multiplierChips.push(createModifierChip('被ダメ減', formatSignedPercent(v.common.takenDmgP), 'muted'));
+        const totalLabel = v.common.takenDmgP >= 0 ? '被ダメ減合計' : '被ダメ増合計';
+        multiplierChips.push(createModifierChip(totalLabel, formatSignedPercent(Math.abs(v.common.takenDmgP)), 'muted'));
     }
     if (v.common.attackerDmgDownPoisonP) {
         multiplierChips.push(createModifierChip('毒', formatSignedPercent(-v.common.attackerDmgDownPoisonP), 'muted'));
@@ -3505,6 +3665,161 @@ function initializeSpellTab() {
     setCalcSpellSelectedPanelOpen(isCalcSpellSelectedPanelOpen);
 }
 
+function getCrayonAsideAutoOptions() {
+    return getApostleLibrary().flatMap(apostle => {
+        const levels = apostle?.aside?.levels || {};
+        return Object.entries(levels).flatMap(([level, data]) => {
+            const stats = normalizeApostleSkillEntries(data?.stats)
+                .filter(stat => String(stat?.statApplyTo || '').includes('全体'))
+                .map(stat => ({
+                    statName: String(stat?.statName || ''),
+                    value: Number(stat?.increaseP ?? stat?.increase ?? stat?.value)
+                }))
+                .filter(stat => stat.statName && Number.isFinite(stat.value) && stat.value !== 0);
+            if (stats.length === 0) return [];
+            const label = `${apostle.name} Lv${level}`;
+            return [{
+                id: `${apostle.id}:aside:${level}`,
+                apostleId: apostle.id,
+                apostleName: apostle.name,
+                asideName: apostle.aside?.name || '',
+                level: String(level),
+                levelName: data?.name || '',
+                label,
+                stats
+            }];
+        });
+    }).sort((a, b) => a.label.localeCompare(b.label, 'ja'));
+}
+
+function getCrayonAsideAutoOptionById(id) {
+    return getCrayonAsideAutoOptions().find(option => option.id === id) || null;
+}
+
+function getCrayonAsideAutoIconPath(option) {
+    return getApostleIconPath(option?.apostleId || '');
+}
+
+function formatCrayonAsideAutoStat(stat) {
+    const value = Number(stat?.value);
+    if (!Number.isFinite(value)) return '';
+    return `${stat.statName}+${formatApostleMultiplierValue(value)}%`;
+}
+
+function getCrayonAsideAutoSummary(option) {
+    if (!option) return '';
+    return option.stats.map(formatCrayonAsideAutoStat).filter(Boolean).join(' / ');
+}
+
+function applyCrayonAsideAutoStat(bonus, statName, value) {
+    const val = Number(value) / 100;
+    if (!Number.isFinite(val)) return;
+    const name = String(statName || '');
+    if (/最大?HP|HP/.test(name)) bonus.hp += val;
+    else if (/物理攻撃力/.test(name)) bonus.atkP += val;
+    else if (/魔法攻撃力/.test(name)) bonus.atkM += val;
+    else if (/攻撃力/.test(name)) { bonus.atkP += val; bonus.atkM += val; }
+    else if (/物理防御力/.test(name)) bonus.defP += val;
+    else if (/魔法防御力/.test(name)) bonus.defM += val;
+    else if (/防御力/.test(name)) { bonus.defP += val; bonus.defM += val; }
+    else if (/会心ダメージ抵抗|会心DMG抵抗/.test(name)) bonus.critDmgRes += val;
+    else if (/会心抵抗|被会心/.test(name)) bonus.critRes += val;
+    else if (/会心ダメージ|会心DMG/.test(name)) bonus.critDmg += val;
+    else if (/^会心$|会心率/.test(name)) bonus.crit += val;
+}
+
+function getCrayonAsideAutoBonus(sideKey) {
+    const bonus = { hp: 0, atkP: 0, atkM: 0, defP: 0, defM: 0, crit: 0, critDmg: 0, critRes: 0, critDmgRes: 0 };
+    (crayonAsideAutoSelections[sideKey] || []).forEach(id => {
+        const option = getCrayonAsideAutoOptionById(id);
+        if (!option) return;
+        option.stats.forEach(stat => applyCrayonAsideAutoStat(bonus, stat.statName, stat.value));
+    });
+    return bonus;
+}
+
+function formatCrayonAsideAutoOutputValue(value) {
+    const numeric = Number(value) * 100;
+    if (!Number.isFinite(numeric) || Math.abs(numeric) < 0.0001) return '0';
+    return formatApostleMultiplierValue(numeric);
+}
+
+function updateCrayonAsideAutoSummary(sideKey) {
+    const suffix = sideKey === 'cur' ? 'cur' : 'tgt';
+    const bonus = getCrayonAsideAutoBonus(sideKey);
+    const values = {
+        hp: bonus.hp,
+        'atk-p': bonus.atkP,
+        'def-p': bonus.defP,
+        crit: bonus.crit,
+        critres: bonus.critRes,
+        'atk-m': bonus.atkM,
+        'def-m': bonus.defM
+    };
+    Object.entries(values).forEach(([key, value]) => {
+        const el = document.getElementById(`crayon-aside-auto-${key}-${suffix}`);
+        if (el) el.textContent = formatCrayonAsideAutoOutputValue(value);
+    });
+}
+
+function normalizeCrayonAsideAutoSelections(state = {}) {
+    const validIds = new Set(getCrayonAsideAutoOptions().map(option => option.id));
+    return {
+        cur: Array.from(new Set((Array.isArray(state.cur) ? state.cur : []).filter(id => validIds.has(id)))),
+        tgt: Array.from(new Set((Array.isArray(state.tgt) ? state.tgt : []).filter(id => validIds.has(id))))
+    };
+}
+
+function renderCrayonAsideAutoControls() {
+    const options = getCrayonAsideAutoOptions();
+    ['cur', 'tgt'].forEach(sideKey => {
+        const list = document.getElementById(`crayon-aside-auto-list-${sideKey}`);
+        if (!list) return;
+        const selected = new Set(crayonAsideAutoSelections[sideKey] || []);
+
+        list.innerHTML = '';
+        if (options.length === 0) {
+            const empty = document.createElement('span');
+            empty.className = 'crayon-aside-auto-empty';
+            empty.textContent = '全体効果なし';
+            list.appendChild(empty);
+            return;
+        }
+        options.forEach(option => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'crayon-aside-auto-icon';
+            button.classList.toggle('is-on', selected.has(option.id));
+            button.title = [option.label, option.asideName, option.levelName, getCrayonAsideAutoSummary(option)].filter(Boolean).join('\n');
+            button.setAttribute('aria-label', `${option.label} ${selected.has(option.id) ? 'OFF' : 'ON'}`);
+            const iconPath = getCrayonAsideAutoIconPath(option);
+            if (iconPath) {
+                const img = document.createElement('img');
+                img.src = iconPath;
+                img.alt = option.apostleName;
+                button.appendChild(img);
+            } else {
+                button.textContent = option.apostleName?.slice(0, 1) || '?';
+            }
+            const level = document.createElement('span');
+            level.className = 'crayon-aside-auto-level';
+            level.textContent = `Lv${option.level}`;
+            button.appendChild(level);
+            button.addEventListener('click', () => {
+                const current = new Set(crayonAsideAutoSelections[sideKey] || []);
+                if (current.has(option.id)) current.delete(option.id);
+                else current.add(option.id);
+                crayonAsideAutoSelections[sideKey] = [...current];
+                renderCrayonAsideAutoControls();
+                updateUI();
+                saveState();
+            });
+            list.appendChild(button);
+        });
+        updateCrayonAsideAutoSummary(sideKey);
+    });
+}
+
 function getValues() {
 
 
@@ -3519,6 +3834,8 @@ function getValues() {
     });
 
     const getCrayonBoardBonuses = () => {
+        updateCrayonAsideAutoSummary('cur');
+        updateCrayonAsideAutoSummary('tgt');
         const stats = ['hp', 'atk', 'def', 'crit', 'critres'];
         const boards = [
             { id: 1, cost: 2, p: 3 },
@@ -3577,22 +3894,40 @@ function getValues() {
             crit: aBuff('aside-crit-tgt').str === '' ? asideCur.crit : aBuff('aside-crit-tgt').val,
             critRes: aBuff('aside-critres-tgt').str === '' ? asideCur.critRes : aBuff('aside-critres-tgt').val
         };
+        const asideAutoCur = getCrayonAsideAutoBonus('cur');
+        const asideAutoTgt = getCrayonAsideAutoBonus('tgt');
+        const activeAtkKey = dmgType === 'm' ? 'atkM' : 'atkP';
+        const activeDefKey = dmgType === 'm' ? 'defM' : 'defP';
 
         const applyExtra = (obj, key, val) => obj[key] += val;
         ['hp', 'atk', 'def'].forEach(s => {
             applyExtra(curBuffs, s, fCurBuff + asideCur[s]);
             applyExtra(tgtBuffs, s, fTgtBuff + asideTgt[s]);
         });
+        applyExtra(curBuffs, 'hp', asideAutoCur.hp);
+        applyExtra(curBuffs, 'atk', asideAutoCur[activeAtkKey]);
+        applyExtra(curBuffs, 'def', asideAutoCur[activeDefKey]);
+        applyExtra(tgtBuffs, 'hp', asideAutoTgt.hp);
+        applyExtra(tgtBuffs, 'atk', asideAutoTgt[activeAtkKey]);
+        applyExtra(tgtBuffs, 'def', asideAutoTgt[activeDefKey]);
         
         applyExtra(curBuffs, 'crit', fCurBuff + asideCur.crit);
         applyExtra(curBuffs, 'critDmg', fCurBuff + asideCur.crit);
         applyExtra(curBuffs, 'critRes', fCurBuff + asideCur.critRes);
         applyExtra(curBuffs, 'critDmgRes', fCurBuff + asideCur.critRes);
+        applyExtra(curBuffs, 'crit', asideAutoCur.crit);
+        applyExtra(curBuffs, 'critDmg', asideAutoCur.critDmg);
+        applyExtra(curBuffs, 'critRes', asideAutoCur.critRes);
+        applyExtra(curBuffs, 'critDmgRes', asideAutoCur.critDmgRes);
 
         applyExtra(tgtBuffs, 'crit', fTgtBuff + asideTgt.crit);
         applyExtra(tgtBuffs, 'critDmg', fTgtBuff + asideTgt.crit);
         applyExtra(tgtBuffs, 'critRes', fTgtBuff + asideTgt.critRes);
         applyExtra(tgtBuffs, 'critDmgRes', fTgtBuff + asideTgt.critRes);
+        applyExtra(tgtBuffs, 'crit', asideAutoTgt.crit);
+        applyExtra(tgtBuffs, 'critDmg', asideAutoTgt.critDmg);
+        applyExtra(tgtBuffs, 'critRes', asideAutoTgt.critRes);
+        applyExtra(tgtBuffs, 'critDmgRes', asideAutoTgt.critDmgRes);
 
         // Update UI
         const curCostEl = document.getElementById('crayon-current-cost');
@@ -3617,7 +3952,8 @@ function getValues() {
 
         // Return multipliers
         const mult = (key) => (1 + tgtBuffs[key]) / (1 + curBuffs[key]);
-        const hasDiff = reqCost !== 0 || fCurBuff !== fTgtBuff || ['hp','atk','def','crit','critRes'].some(k => asideCur[k] !== asideTgt[k]);
+        const hasAsideAutoDiff = ['hp','atk','def','crit','critDmg','critRes','critDmgRes'].some(k => curBuffs[k] !== tgtBuffs[k]);
+        const hasDiff = reqCost !== 0 || fCurBuff !== fTgtBuff || ['hp','atk','def','crit','critRes'].some(k => asideCur[k] !== asideTgt[k]) || hasAsideAutoDiff;
         const applyEnabled = !!document.getElementById('crayon-apply-toggle')?.checked;
         return {
             hp: { new: mult('hp'), cur: 1 },
@@ -3664,9 +4000,13 @@ function getValues() {
             const attCard = isSelfAttacker ? cardBonuses.self : cardBonuses.enemy;
             const defCard = isSelfAttacker ? cardBonuses.enemy : cardBonuses.self;
             const attackerDebuffs = isSelfAttacker ? inputs.self.debuffs : inputs.enemy.debuffs;
+            const defenderDebuffs = isSelfAttacker ? inputs.enemy.debuffs : inputs.self.debuffs;
             const attackerPoisonP = Math.max(0, Math.min(99, -(parseInt(attackerDebuffs.poison?.value || '0', 10) || 0)));
             const attackerNoiseP = Math.max(0, Math.min(50, -(parseInt(attackerDebuffs.noise?.value || '0', 10) || 0)));
             const attackerAngerP = isSelfAttacker ? 0 : Math.max(0, Math.min(200, parseInt(inputs.enemy.debuffs.anger?.value || '0', 10) || 0));
+            const defenderBreakTakenDmgUpP = Math.max(0, Math.min(45, parseFloat(defenderDebuffs.breakTakenDmg?.value || 0) || 0));
+            const defenderPainTakenDmgUpP = Math.max(0, Math.min(30, parseFloat(defenderDebuffs.painTakenDmg?.value || 0) || 0));
+            const defenderTakenDmgReductionP = Math.max(-100, Math.min(1000, parseFloat(defenderDebuffs.takenDmg?.value || 0) || 0));
             
             const rawAdd = parseFloat(att.mult.add?.value || 0);
             let addM = 1 + (rawAdd / 100);
@@ -3694,7 +4034,10 @@ function getValues() {
                 enemyDefDownP: attCard.enemyDefDownP || 0,
                 enemyCritResDownP: attCard.enemyCritResDownP || 0,
                 enemyCritDmgResDownP: attCard.enemyCritDmgResDownP || 0,
-                takenDmgP: defCard.takenDmgP || 0,
+                takenDmgP: (defCard.takenDmgP || 0) + defenderTakenDmgReductionP - defenderBreakTakenDmgUpP - defenderPainTakenDmgUpP,
+                defenderBreakTakenDmgUpP,
+                defenderPainTakenDmgUpP,
+                defenderTakenDmgReductionP,
                 attackerDmgDownPoisonP: attackerPoisonP,
                 attackerDmgDownNoiseP: attackerNoiseP,
                 attackerAngerP,
@@ -3978,9 +4321,9 @@ function updateChart(v, overrideSelf = null) {
     });
 }
 // --- Custom Presets & Dropdown Population ---
-const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.2';
-const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.1';
-const LEGACY_OLD_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.0';
+const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.3';
+const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.2';
+const LEGACY_OLD_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.1';
 
 function getLocalStorageWithFallback(key, ...fallbackKeys) {
     const raw = localStorage.getItem(key);
@@ -4017,6 +4360,72 @@ function syncDeleteButtonVisibility() {
         const presetValue = inputs[side]?.preset?.value || '';
         setDeleteButtonVisible(side, presetValue.startsWith('c_'));
     });
+}
+
+function setInputValueIfExists(input, value) {
+    if (!input || value === undefined || value === null) return;
+    input.value = String(value);
+}
+
+function applyPresetInputGroup(group, values = {}, defaults = {}) {
+    const merged = { ...defaults, ...(values || {}) };
+    Object.entries(merged).forEach(([key, value]) => {
+        setInputValueIfExists(group?.[key], value);
+    });
+}
+
+function getPresetTargetDebuffs(preset = {}) {
+    const modifiers = preset?.modifiers || {};
+    return preset?.targetDebuffs || modifiers.targetDebuffs || null;
+}
+
+function getPresetFixedDebuffs(preset = {}) {
+    const modifiers = preset?.modifiers || {};
+    return preset?.debuffs || modifiers.debuffs || null;
+}
+
+function getActiveEnemyTargetDebuffs() {
+    return getPresetTargetDebuffs(getSelectedPresetDataForSide('enemy')) || {};
+}
+
+function getActivePresetFixedDebuffs(side) {
+    return getPresetFixedDebuffs(getSelectedPresetDataForSide(side)) || {};
+}
+
+function resetEnemyTargetDebuffs() {
+    applyPresetInputGroup(inputs.self?.debuffs, {}, { breakTakenDmg: 0, painTakenDmg: 0, takenDmg: 0 });
+}
+
+function resetEnemyPresetDebuffs() {
+    applyPresetInputGroup(inputs.enemy?.debuffs, {}, { poison: 0, noise: 0, anger: 0, breakTakenDmg: 0, painTakenDmg: 0, takenDmg: 0 });
+}
+
+function applySidePresetModifiers(side, preset = {}, options = {}) {
+    const isEnemyPreset = side === 'enemy' && options.resetEnemyDebuffs !== false;
+    const defaultDebuffs = isEnemyPreset
+        ? { poison: 0, noise: 0, anger: 0, breakTakenDmg: 0, painTakenDmg: 0, takenDmg: 0 }
+        : {};
+    const defaultTargetDebuffs = isEnemyPreset
+        ? { breakTakenDmg: 0, painTakenDmg: 0, takenDmg: 0 }
+        : {};
+    const modifiers = preset.modifiers || {};
+    const addValues = preset.adds || modifiers.adds;
+    const multValues = (preset.mult && typeof preset.mult === 'object')
+        ? preset.mult
+        : modifiers.mult;
+
+    applyPresetInputGroup(inputs[side]?.debuffs, {}, defaultDebuffs);
+    if (side === 'enemy') {
+        applyPresetInputGroup(inputs.self?.debuffs, {}, defaultTargetDebuffs);
+    }
+    applyPresetInputGroup(inputs[side]?.adds, addValues);
+    applyPresetInputGroup(inputs[side]?.mult, multValues);
+
+    if (side === 'enemy' && preset.special !== undefined && inputs[side]?.mult?.special) {
+        inputs[side].mult.special.value = preset.special;
+    } else if (side === 'enemy' && isEnemyPreset && multValues?.special === undefined && inputs[side]?.mult?.special) {
+        inputs[side].mult.special.value = 100;
+    }
 }
 
 function saveCustomPreset(side) {
@@ -4099,6 +4508,8 @@ function applyPreset(side, value, shouldSave = true) {
             inputs.enemy.phaseGroup.style.display = 'none';
             inputs.enemy.phase.dataset.currentPreset = '';
             syncPhaseSpacer();
+            resetEnemyPresetDebuffs();
+            resetEnemyTargetDebuffs();
         }
         if (inputs[side]?.mult?.skill) inputs[side].mult.skill.value = 100;
         if (inputs[side]?.mult?.skillDropdown) {
@@ -4107,6 +4518,7 @@ function applyPreset(side, value, shouldSave = true) {
             inputs[side].mult.skillDropdown.dataset.selectedSkillCategory = "";
         }
         updateMainSkillList(side);
+        syncDebuffRoleVisibilitySections();
         updateUI();
         if (shouldSave) saveState();
         return;
@@ -4116,11 +4528,13 @@ function applyPreset(side, value, shouldSave = true) {
     if (value.startsWith('p_')) {
         const key = value.substring(2);
         presetData = PLAYER_PRESETS[key];
+        syncDmgTypeFromPreset(side, presetData);
         stats = presetData;
     } else if (value.startsWith('e_')) {
         const key = value.substring(2);
         const p = ENEMY_PRESETS[key];
         presetData = p;
+        syncDmgTypeFromPreset(side, p);
         const type = inputs.dmgType.value;
         stats = { 
             hp: p.hp,
@@ -4159,9 +4573,9 @@ function applyPreset(side, value, shouldSave = true) {
         if (value.startsWith('e_')) {
             const key = value.substring(2);
             const p = ENEMY_PRESETS[key];
-            if (inputs[side].mult && inputs[side].mult.special) {
-                inputs[side].mult.special.value = p.special !== undefined ? p.special : 100;
-            }
+            applySidePresetModifiers(side, p, { resetEnemyDebuffs: true });
+        } else if (side === 'enemy') {
+            resetEnemyTargetDebuffs();
         }
     }
     updateMainSkillList(side);
@@ -4174,6 +4588,7 @@ function applyPreset(side, value, shouldSave = true) {
         inputs[side].mult.skillDropdown.dataset.selectedSkillKey = "";
         inputs[side].mult.skillDropdown.dataset.selectedSkillCategory = "";
     }
+    syncDebuffRoleVisibilitySections();
     updateUI();
     if (shouldSave) saveState();
 }
@@ -4391,9 +4806,36 @@ function syncDmgTypeFromApostle(side, options = {}) {
     return true;
 }
 
+function syncDmgTypeFromPreset(side, preset, options = {}) {
+    if (!options.force && !isSideAttacker(side)) return false;
+    const dmgType = String(preset?.dmgType || '');
+    if (!/^(phys|mag)$/.test(dmgType) || !inputs.dmgType || inputs.dmgType.value === dmgType) return false;
+    inputs.dmgType.value = dmgType;
+    if (options.dispatchChange) {
+        inputs.dmgType.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    return true;
+}
+
+function getSelectedPresetDataForSide(side) {
+    const value = inputs[side]?.preset?.value || '';
+    if (value.startsWith('p_')) return PLAYER_PRESETS[value.substring(2)] || null;
+    if (value.startsWith('e_')) return ENEMY_PRESETS[value.substring(2)] || null;
+    if (value.startsWith('c_')) return loadCustomPresets()?.[side]?.[value.substring(2)] || null;
+    return null;
+}
+
+function syncDmgTypeFromSideSource(side, options = {}) {
+    if (!options.force && !isSideAttacker(side)) return false;
+    if (isApostleSkillSelectionEnabled(side) && getApostleAttackDmgType(inputs[side]?.mult?.apostle?.value || '')) {
+        return syncDmgTypeFromApostle(side, options);
+    }
+    return syncDmgTypeFromPreset(side, getSelectedPresetDataForSide(side), options);
+}
+
 function syncDmgTypeFromCurrentAttacker(options = {}) {
     const attackerSide = isSideAttacker('self') ? 'self' : 'enemy';
-    return syncDmgTypeFromApostle(attackerSide, options);
+    return syncDmgTypeFromSideSource(attackerSide, options);
 }
 
 function updateApostleSkillPickerVisibility(side) {
@@ -4463,12 +4905,63 @@ function getApostleMaxAsideLevel(apostleId) {
 
 function getSavedApostleSkillLevels(side) {
     const dropdown = inputs[side]?.mult?.skillDropdown;
+    const apostleId = inputs[side]?.mult?.apostle?.value || '';
+    const levelsByApostle = getSavedApostleSkillLevelsByApostle(side);
+    if (apostleId && levelsByApostle[apostleId]) {
+        return levelsByApostle[apostleId];
+    }
     try {
         const parsed = JSON.parse(dropdown?.dataset.skillLevels || '{}');
         return parsed && typeof parsed === 'object' ? parsed : {};
     } catch (e) {
         return {};
     }
+}
+
+function getSavedApostleSkillLevelsByApostle(side) {
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    try {
+        const parsed = JSON.parse(dropdown?.dataset.skillLevelsByApostle || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function setSavedApostleSkillLevelsByApostle(side, levelsByApostle) {
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    if (!dropdown) return;
+    dropdown.dataset.skillLevelsByApostle = JSON.stringify(levelsByApostle && typeof levelsByApostle === 'object' ? levelsByApostle : {});
+}
+
+function collectRenderedApostleSkillLevels(side) {
+    const controls = document.getElementById(`${side}-apostle-skill-levels`);
+    if (controls) {
+        const rendered = Object.fromEntries(Array.from(controls.querySelectorAll('select[data-level-group]'))
+            .map(select => [select.dataset.levelGroup, select.value]));
+        if (Object.keys(rendered).length) return rendered;
+    }
+    return getSavedApostleSkillLevels(side);
+}
+
+function rememberApostleSkillLevels(side, apostleId = '') {
+    const id = apostleId || inputs[side]?.mult?.apostle?.value || '';
+    if (!id) return;
+    const levels = collectRenderedApostleSkillLevels(side);
+    if (!levels || Object.keys(levels).length === 0) return;
+    const levelsByApostle = getSavedApostleSkillLevelsByApostle(side);
+    levelsByApostle[id] = levels;
+    setSavedApostleSkillLevelsByApostle(side, levelsByApostle);
+}
+
+function syncCurrentApostleSkillLevels(side, apostleId = '') {
+    const dropdown = inputs[side]?.mult?.skillDropdown;
+    if (!dropdown) return;
+    const id = apostleId || inputs[side]?.mult?.apostle?.value || '';
+    const levelsByApostle = getSavedApostleSkillLevelsByApostle(side);
+    const levels = id && levelsByApostle[id] ? levelsByApostle[id] : {};
+    dropdown.dataset.skillLevels = JSON.stringify(levels);
+    dropdown.dataset.currentApostleId = id;
 }
 
 function getApostleSkillLevelConfigForSide(side) {
@@ -4825,6 +5318,26 @@ function getApostleSkillEffectContext(skill, effect, skillEffects = []) {
     }
 
     const valueKind = String(effect?.valueKind || '');
+    const targetSkill = String(effect?.targetSkill || skill?.targetSkill || '').trim();
+    if (!context.title && /召喚獣.*自爆.*ダメージ/.test(valueKind)) {
+        context.title = '召喚獣の自爆ダメージ';
+    }
+    if (!context.condition && targetSkill) {
+        if (/召喚獣自爆/.test(targetSkill)) {
+            context.condition = '召喚獣自爆時';
+        } else if (/召喚獣破壊時/.test(targetSkill)) {
+            context.condition = '召喚獣破壊時';
+        } else if (/低学年/.test(targetSkill)) {
+            context.condition = '低学年スキル使用時';
+        } else if (/高学年/.test(targetSkill)) {
+            context.condition = '高学年スキル使用時';
+        } else if (/強化攻撃|普通攻撃_強化/.test(targetSkill)) {
+            context.condition = '強化攻撃時';
+        } else if (/基本攻撃|普通攻撃_基本/.test(targetSkill)) {
+            context.condition = '基本攻撃時';
+        }
+    }
+
     const durationEffect = skillEffects.find(item =>
         item !== effect
         && String(item?.valueKind || '') === valueKind
@@ -5235,6 +5748,7 @@ function renderApostleSkillLevelControls(side) {
             };
             const dropdown = inputs[side]?.mult?.skillDropdown;
             if (dropdown) dropdown.dataset.skillLevels = JSON.stringify(nextLevels);
+            rememberApostleSkillLevels(side);
             updateMainSkillList(side);
             updateUI();
             saveState();
@@ -5265,6 +5779,7 @@ function renderApostleSkillLevelControls(side) {
             };
             const dropdown = inputs[side]?.mult?.skillDropdown;
             if (dropdown) dropdown.dataset.skillLevels = JSON.stringify(nextLevels);
+            rememberApostleSkillLevels(side);
             updateMainSkillList(side);
             updateUI();
             saveState();
@@ -5494,6 +6009,21 @@ function updateMainSkillList(side = 'enemy') {
 
     updateApostleSkillPickerVisibility(side);
     const apostleId = isApostleSkillSelectionEnabled(side) ? (inputs[side]?.mult?.apostle?.value || '') : '';
+    const previousApostleId = dropdown.dataset.currentApostleId || '';
+    const apostleChanged = apostleId !== previousApostleId;
+    if (apostleId && previousApostleId !== apostleId) {
+        syncCurrentApostleSkillLevels(side, apostleId);
+    } else if (!apostleId) {
+        dropdown.dataset.currentApostleId = '';
+        dropdown.dataset.skillLevels = '{}';
+    }
+    if (apostleChanged) {
+        const levelControls = document.getElementById(`${side}-apostle-skill-levels`);
+        if (levelControls) {
+            levelControls.innerHTML = '';
+            levelControls.hidden = true;
+        }
+    }
     const skillLevels = getApostleSkillLevelConfigForSide(side);
     const selectedSkillKey = dropdown.dataset.selectedSkillKey || '';
     resetSkillDropdown(dropdown);
@@ -5588,6 +6118,8 @@ function applyEnemyPhaseSelection(shouldSave = true) {
             inputs.enemy.def.value = scaled('def_' + (type === 'phys' ? 'p' : 'm'), stats.def);
             inputs.enemy.critRes.value = scaled('critRes', stats.critRes);
             inputs.enemy.critDmgRes.value = scaled('critDmgRes', stats.critDmgRes);
+            applySidePresetModifiers('enemy', { ...p, ...(phase || {}) }, { resetEnemyDebuffs: true });
+            syncDebuffRoleVisibilitySections();
         }
     }
     updateUI();
@@ -5756,6 +6288,58 @@ function syncCrayonMobileControls() {
     syncCrayonInputMode();
 }
 
+function syncDebuffRoleVisibilitySections() {
+    const isSelf = document.getElementById('perspective-self')?.checked;
+    const selfDebuffs = document.querySelector('.self-debuff-section');
+    const enemyDebuffs = document.querySelector('.enemy-debuff-section');
+    const enemyTargetDebuffs = getActiveEnemyTargetDebuffs();
+
+    const setDebuffItemHidden = (el, hidden) => {
+        el.classList.toggle('debuff-role-hidden', hidden);
+        if (!hidden) return;
+        el.querySelectorAll('select, input').forEach(control => {
+            if (control.value !== '0') {
+                control.value = '0';
+            }
+        });
+    };
+
+    const syncDebuffRoleVisibility = (section, isAttacker, side) => {
+        if (!section) return;
+        const fixedDebuffs = getActivePresetFixedDebuffs(side);
+        section.querySelectorAll('.debuff-attacker-only').forEach(el => {
+            setDebuffItemHidden(el, !isAttacker);
+        });
+        section.querySelectorAll('.debuff-defender-only').forEach(el => {
+            setDebuffItemHidden(el, isAttacker);
+        });
+        section.querySelectorAll('.boss-target-debuff').forEach(el => {
+            const control = el.querySelector('select, input');
+            const id = control?.id || '';
+            const debuffKey = id.includes('break') ? 'breakTakenDmg' : id.includes('pain') ? 'painTakenDmg' : '';
+            const hasPresetDebuff = debuffKey && enemyTargetDebuffs[debuffKey] !== undefined && enemyTargetDebuffs[debuffKey] !== null;
+            setDebuffItemHidden(el, side !== 'self' || isAttacker || !hasPresetDebuff);
+        });
+        section.querySelectorAll('.preset-owned-debuff').forEach(el => {
+            const control = el.querySelector('select, input');
+            const id = control?.id || '';
+            const debuffKey = id.includes('pain') ? 'painTakenDmg' : id.includes('taken') ? 'takenDmg' : '';
+            const hasPresetDebuff = debuffKey && fixedDebuffs[debuffKey] !== undefined && fixedDebuffs[debuffKey] !== null;
+            setDebuffItemHidden(el, isAttacker || !hasPresetDebuff);
+        });
+        section.querySelectorAll('.preset-owned-attacker-debuff').forEach(el => {
+            const control = el.querySelector('select, input');
+            const id = control?.id || '';
+            const debuffKey = id.includes('anger') ? 'anger' : '';
+            const hasPresetDebuff = debuffKey && fixedDebuffs[debuffKey] !== undefined && fixedDebuffs[debuffKey] !== null;
+            setDebuffItemHidden(el, !isAttacker || !hasPresetDebuff);
+        });
+    };
+
+    syncDebuffRoleVisibility(selfDebuffs, isSelf, 'self');
+    syncDebuffRoleVisibility(enemyDebuffs, !isSelf, 'enemy');
+}
+
 function updatePerspectiveUI() {
     const isSelf = document.getElementById('perspective-self').checked;
     document.documentElement.dataset.initialPerspective = isSelf ? 'self' : 'enemy';
@@ -5791,7 +6375,7 @@ function updatePerspectiveUI() {
     if (selfMult) selfMult.classList.toggle('disabled-section', !isSelf);
     if (selfAtkAdds) selfAtkAdds.classList.toggle('disabled-section', !isSelf);
     if (selfDefAdds) selfDefAdds.classList.toggle('disabled-section', isSelf);
-    if (selfDebuffs) selfDebuffs.classList.toggle('disabled-section', !isSelf);
+    if (selfDebuffs) selfDebuffs.classList.remove('disabled-section');
 
     const enemyMult = document.querySelector('.enemy-mult-section');
     const enemySkill = document.querySelector('.enemy-skill-section');
@@ -5805,8 +6389,10 @@ function updatePerspectiveUI() {
     if (enemyMult) enemyMult.classList.toggle('disabled-section', isSelf);
     if (enemyAtkAdds) enemyAtkAdds.classList.toggle('disabled-section', isSelf);
     if (enemyDefAdds) enemyDefAdds.classList.toggle('disabled-section', !isSelf);
-    if (enemyDebuffs) enemyDebuffs.classList.toggle('disabled-section', isSelf);
-    const syncedDmgType = syncDmgTypeFromApostle(isSelf ? 'self' : 'enemy', { force: true });
+    if (enemyDebuffs) enemyDebuffs.classList.remove('disabled-section');
+
+    syncDebuffRoleVisibilitySections();
+    const syncedDmgType = syncDmgTypeFromSideSource(isSelf ? 'self' : 'enemy', { force: true });
     if (syncedDmgType) {
         updateMainSkillList('self');
         updateMainSkillList('enemy');
@@ -5927,18 +6513,30 @@ function initListeners() {
     ['self', 'enemy'].forEach(side => {
         const apostleEnabled = inputs[side]?.mult?.apostleEnabled;
         const apostleSelect = inputs[side]?.mult?.apostle;
-        const handleApostleControlChange = (sourceEl) => {
-            const shouldSyncDmgType = sourceEl === apostleSelect || (sourceEl === apostleEnabled && apostleEnabled.checked);
-            const syncedDmgType = shouldSyncDmgType && isSideAttacker(side) && syncDmgTypeFromApostle(side, { dispatchChange: true });
+        const rememberPreviousApostleSelectValue = () => {
+            const dropdown = inputs[side]?.mult?.skillDropdown;
+            if (!dropdown || !apostleSelect) return;
+            dropdown.dataset.previousApostleId = apostleSelect.value || dropdown.dataset.currentApostleId || '';
+        };
+        const handleApostleControlChange = (sourceEl, previousApostleIdOverride = '') => {
+            const dropdown = inputs[side]?.mult?.skillDropdown;
+            const shouldSyncDmgType = sourceEl === apostleSelect || sourceEl === apostleEnabled;
+            const syncedDmgType = shouldSyncDmgType && isSideAttacker(side) && syncDmgTypeFromSideSource(side, { dispatchChange: true });
             updateMainSkillList(side);
             if (syncedDmgType) updateMainSkillList(side === 'self' ? 'enemy' : 'self');
             updateUI();
             saveState();
+            if (dropdown && apostleSelect) dropdown.dataset.previousApostleId = apostleSelect.value || '';
         };
         if (apostleEnabled) apostleEnabled.addEventListener('change', () => handleApostleControlChange(apostleEnabled));
         if (apostleSelect) {
-            apostleSelect.addEventListener('change', () => handleApostleControlChange(apostleSelect));
-            apostleSelect.addEventListener('input', () => handleApostleControlChange(apostleSelect));
+            apostleSelect.addEventListener('pointerdown', rememberPreviousApostleSelectValue);
+            apostleSelect.addEventListener('focus', rememberPreviousApostleSelectValue);
+            apostleSelect.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const previousApostleId = inputs[side]?.mult?.skillDropdown?.dataset.previousApostleId || '';
+                handleApostleControlChange(apostleSelect, previousApostleId);
+            });
         }
     });
     document.addEventListener('change', (e) => {
@@ -5946,7 +6544,7 @@ function initListeners() {
         if (!select) return;
         const side = select.id.startsWith('self-') ? 'self' : select.id.startsWith('enemy-') ? 'enemy' : '';
         if (!side) return;
-        const syncedDmgType = isSideAttacker(side) && syncDmgTypeFromApostle(side, { dispatchChange: true });
+        const syncedDmgType = isSideAttacker(side) && syncDmgTypeFromSideSource(side, { dispatchChange: true });
         updateMainSkillList(side);
         if (syncedDmgType) updateMainSkillList(side === 'self' ? 'enemy' : 'self');
         updateUI();
@@ -6073,6 +6671,8 @@ const detailsBtn = document.getElementById('toggle-details-btn');
                     }
                 });
             });
+            crayonAsideAutoSelections.tgt = [...(crayonAsideAutoSelections.cur || [])];
+            renderCrayonAsideAutoControls();
             updateUI();
             saveState();
         });
@@ -6464,9 +7064,9 @@ function estimateDefSide(rows, common) {
 }
 
 // --- Persistence & Initialization ---
-const STORAGE_KEY = 'trickcal_calc_state_v3.2';
-const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v3.1';
-const LEGACY_OLD_STORAGE_KEY = 'trickcal_calc_state_v3.0';
+const STORAGE_KEY = 'trickcal_calc_state_v3.3';
+const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v3.2';
+const LEGACY_OLD_STORAGE_KEY = 'trickcal_calc_state_v3.1';
 const ANCIENT_STORAGE_KEY = 'trickcal_calc_state_v1.8';
 const SPELL_STORAGE_KEY = `${STORAGE_KEY}:spell`;
 const LEGACY_SPELL_STORAGE_KEY = `${LEGACY_STORAGE_KEY}:spell`;
@@ -7700,6 +8300,7 @@ function saveState() {
         spellSelections: normalizedSpellSelections,
         spellPresetSlot: activeSpellPresetSlotId,
         artifactPresetSlot: activeArtifactPresetSlotId,
+        crayonAsideAutoSelections: normalizeCrayonAsideAutoSelections(crayonAsideAutoSelections),
         synergy: collectSynergySelections(),
         skillSelection: collectSkillSelectionMetadata(),
         multiplierInputBaseVersion: 2,
@@ -7820,6 +8421,9 @@ function loadState() {
         if (typeof state.artifactPresetSlot === 'string') {
             activeArtifactPresetSlotId = state.artifactPresetSlot;
         }
+        if (state.crayonAsideAutoSelections) {
+            crayonAsideAutoSelections = normalizeCrayonAsideAutoSelections(state.crayonAsideAutoSelections);
+        }
         if (typeof state.mobileVisibleSide === 'string') {
             updateMobileSideUI(state.mobileVisibleSide);
         }
@@ -7900,6 +8504,9 @@ document.getElementById('reset-btn').addEventListener('click', () => {
         location.reload();
     } else if (activeTab === 'crayon') {
         document.querySelectorAll('input[id^="cb-"]').forEach(el => { el.value = 0; });
+        document.querySelectorAll('input[id^="aside-"]').forEach(el => { el.value = ''; });
+        crayonAsideAutoSelections = { cur: [], tgt: [] };
+        renderCrayonAsideAutoControls();
         const applyToggle = document.getElementById('crayon-apply-toggle');
         if (applyToggle) applyToggle.checked = false;
         updateUI();
@@ -7934,6 +8541,7 @@ renderArtifactPresetButtons();
 initializeApostleSkillSelectors();
 initializeSynergyUI();
 loadState();
+renderCrayonAsideAutoControls();
 initCollapsibleSections();
 updateMobileSideUI(mobileVisibleSide);
 updateMobileCrayonUI(mobileCrayonVisibleSide);

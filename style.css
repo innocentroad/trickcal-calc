@@ -2879,18 +2879,14 @@ select option {
     #perspective-self:checked ~ .side-panels .self-def-adds-section,
     #perspective-self:checked ~ .side-panels .enemy-mult-section,
     #perspective-self:checked ~ .side-panels .enemy-atk-adds-section,
-    #perspective-self:checked ~ .side-panels .enemy-debuff-section,
     #perspective-enemy:checked ~ .side-panels .self-mult-section,
     #perspective-enemy:checked ~ .side-panels .self-atk-adds-section,
-    #perspective-enemy:checked ~ .side-panels .self-debuff-section,
     #perspective-enemy:checked ~ .side-panels .enemy-def-adds-section,
     html[data-initial-perspective="self"] .self-def-adds-section,
     html[data-initial-perspective="self"] .enemy-mult-section,
     html[data-initial-perspective="self"] .enemy-atk-adds-section,
-    html[data-initial-perspective="self"] .enemy-debuff-section,
     html[data-initial-perspective="enemy"] .self-mult-section,
     html[data-initial-perspective="enemy"] .self-atk-adds-section,
-    html[data-initial-perspective="enemy"] .self-debuff-section,
     html[data-initial-perspective="enemy"] .enemy-def-adds-section {
         display: none;
     }
@@ -7183,6 +7179,138 @@ select option {
     border-color: rgba(96, 165, 250, 0.52);
 }
 
+.crayon-aside-auto {
+    margin-top: 0.55rem;
+}
+
+.crayon-aside-auto-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.crayon-aside-auto-label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+.crayon-aside-auto-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    margin-top: 0.35rem;
+    min-height: 2.6rem;
+}
+
+.crayon-aside-auto-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.45rem;
+    height: 2.45rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.68);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.58;
+    transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.crayon-aside-auto-icon:hover {
+    opacity: 0.86;
+    transform: translateY(-1px);
+    background: rgba(30, 41, 59, 0.86);
+}
+
+.crayon-aside-auto-icon.is-on {
+    opacity: 1;
+    background: rgba(20, 184, 166, 0.18);
+    box-shadow:
+        inset 0 0 0 1px rgba(94, 234, 212, 0.72),
+        0 0 0 1px rgba(20, 184, 166, 0.22),
+        0 0 12px rgba(20, 184, 166, 0.28);
+}
+
+.crayon-aside-auto-icon img {
+    display: block;
+    width: 2.28rem;
+    height: 2.28rem;
+    border-radius: 50%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.crayon-aside-auto-icon.is-on::after {
+    content: "";
+    position: absolute;
+    right: 0.12rem;
+    bottom: 0.12rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 0 1px rgba(6, 78, 59, 0.8);
+}
+
+.crayon-aside-auto-level {
+    position: absolute;
+    top: -0.12rem;
+    right: -0.12rem;
+    min-width: 1rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.88);
+    color: #fef3c7;
+    font-size: 0.58rem;
+    font-weight: 800;
+    line-height: 1;
+    padding: 0.12rem 0.18rem;
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.32);
+    pointer-events: none;
+}
+
+.crayon-aside-auto-empty {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    opacity: 0.72;
+    align-self: center;
+}
+
+.crayon-aside-auto-summary {
+    margin-top: 0.45rem;
+}
+
+.crayon-aside-manual-title {
+    margin: 0.65rem 0 0.35rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.crayon-input-group output {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.88);
+    padding: 0.3rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    height: 1.9rem;
+}
+
 .crayon-inline-count {
     display: flex;
     align-items: center;
@@ -7964,10 +8092,8 @@ select option {
 #perspective-self:checked ~ .side-panels .self-def-adds-section,
 #perspective-self:checked ~ .side-panels .enemy-mult-section,
 #perspective-self:checked ~ .side-panels .enemy-atk-adds-section,
-#perspective-self:checked ~ .side-panels .enemy-debuff-section,
 #perspective-enemy:checked ~ .side-panels .self-mult-section,
 #perspective-enemy:checked ~ .side-panels .self-atk-adds-section,
-#perspective-enemy:checked ~ .side-panels .self-debuff-section,
 #perspective-enemy:checked ~ .side-panels .enemy-def-adds-section {
     display: none;
 }
@@ -7975,12 +8101,14 @@ select option {
 html[data-initial-perspective="self"] .self-def-adds-section,
 html[data-initial-perspective="self"] .enemy-mult-section,
 html[data-initial-perspective="self"] .enemy-atk-adds-section,
-html[data-initial-perspective="self"] .enemy-debuff-section,
 html[data-initial-perspective="enemy"] .self-mult-section,
 html[data-initial-perspective="enemy"] .self-atk-adds-section,
-html[data-initial-perspective="enemy"] .self-debuff-section,
 html[data-initial-perspective="enemy"] .enemy-def-adds-section {
     display: none;
+}
+
+.debuff-role-hidden {
+    display: none !important;
 }
 
 

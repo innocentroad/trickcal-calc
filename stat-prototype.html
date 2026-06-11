@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stat Prototype | Trickcal Damage Calc</title>
+  <link rel="stylesheet" href="stat-prototype.css">
+</head>
+<body>
+  <main class="stat-shell">
+    <header class="stat-hero">
+      <div>
+        <p class="eyebrow">Stat Prototype</p>
+        <h1>ステータス計算 試作</h1>
+        <p class="hero-note">xlsx由来のDBを使って、基礎・装備・Rank・ボードを分けて検証します。</p>
+      </div>
+      <a class="back-link" href="index.html">計算機へ戻る</a>
+    </header>
+
+    <section class="control-card">
+      <label class="control-field apostle-field">
+        <span>使徒</span>
+        <select id="apostle-select"></select>
+      </label>
+      <label class="control-field">
+        <span>Rank</span>
+        <select id="rank-select"></select>
+      </label>
+      <label class="control-field">
+        <span>Lv</span>
+        <select id="level-select"></select>
+      </label>
+      <label class="control-field">
+        <span>★</span>
+        <select id="star-select"></select>
+      </label>
+      <label class="control-field">
+        <span>好感度Lv</span>
+        <select id="bond-select"></select>
+      </label>
+      <label class="control-field">
+        <span>アサイドLv</span>
+        <select id="aside-level-select"></select>
+      </label>
+      <label class="follow-toggle">
+        <input type="checkbox" id="follow-toggle">
+        <span>フォロー</span>
+      </label>
+    </section>
+
+    <section class="summary-hero">
+      <div class="summary-main">
+        <div class="portrait-card">
+          <div class="portrait-frame compact">
+            <img id="apostle-image" alt="">
+          </div>
+          <div>
+            <p class="eyebrow">Selected Apostle</p>
+            <h2 id="apostle-name">-</h2>
+            <p id="apostle-meta" class="muted-line"></p>
+          </div>
+        </div>
+        <div id="stat-total-grid" class="stat-total-grid"></div>
+      </div>
+      <details class="effect-details">
+        <summary class="summary-toggle-label">適用中効果</summary>
+        <div id="active-effect-list" class="active-effect-list"></div>
+      </details>
+    </section>
+
+    <section class="panel stat-breakdown-panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Breakdown</p>
+          <h2>ステータス上昇内訳</h2>
+        </div>
+        <p class="panel-note">基礎・装備・Rank・研究・ボードなど、どこで増えているかを一覧します。</p>
+      </div>
+      <div id="stat-breakdown-table" class="stat-breakdown-table"></div>
+    </section>
+
+    <section class="workspace">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Equipment</p>
+            <h2>装備tier / 装備値</h2>
+          </div>
+          <p class="panel-note">装備ごとに着脱と+0〜+5を保存します。</p>
+        </div>
+        <div id="equipment-grid" class="equipment-grid"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Base & Rank</p>
+            <h2>基礎タイプ / Rank全体効果</h2>
+          </div>
+        </div>
+        <div class="split-list">
+          <div>
+            <h3>基礎タイプ</h3>
+            <div id="base-type-list" class="compact-table-wrap"></div>
+          </div>
+          <div>
+            <h3>Rank全体効果</h3>
+            <div id="rank-bonus-list" class="compact-table-wrap"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel global-settings-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Global Effects</p>
+            <h2>研究 / Rank全体効果</h2>
+          </div>
+          <div class="setting-tabs" id="global-setting-tabs">
+            <button type="button" class="is-active" data-setting-tab="research">研究</button>
+            <button type="button" data-setting-tab="rank">Rank全体</button>
+          </div>
+        </div>
+        <div class="setting-panel is-active" data-setting-panel="research">
+          <p class="panel-note">研究は使徒ごとではなく全体設定として保存します。例: 10段階23回目なら、9段階44回目まで + 10段階23回目までを反映します。</p>
+          <div class="research-controls">
+            <label class="research-control">
+              <span>段階</span>
+              <select id="research-level-select"></select>
+            </label>
+            <label class="research-control">
+              <span>回目</span>
+              <select id="research-progress-select"></select>
+            </label>
+          </div>
+          <h3>選択使徒に適用中</h3>
+          <div id="active-research-list" class="research-table-wrap research-active-list"></div>
+          <details class="research-overview-details">
+            <summary>研究全体の適用一覧</summary>
+            <div id="research-grid" class="research-table-wrap"></div>
+          </details>
+        </div>
+        <div class="setting-panel" data-setting-panel="rank">
+          <p class="panel-note">使徒ごとのRankをまとめて設定し、Rank全体効果を確認します。</p>
+          <div id="rank-overview-summary" class="compact-table-wrap rank-overview-summary"></div>
+          <div id="rank-overview-grid" class="rank-overview-grid"></div>
+        </div>
+      </article>
+
+      <article class="panel board-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Board</p>
+            <h2>ボード情報</h2>
+          </div>
+          <div class="board-tabs" id="board-tabs">
+            <button type="button" class="is-active" data-board="1">1</button>
+            <button type="button" data-board="2">2</button>
+            <button type="button" data-board="3">3</button>
+          </div>
+        </div>
+        <div class="board-actions">
+          <button type="button" id="fill-board">表示中を全埋め</button>
+          <button type="button" id="clear-board">表示中を全解除</button>
+        </div>
+        <div id="board-special-list" class="board-special-list"></div>
+        <div class="board-workspace">
+          <div id="board-grid" class="board-grid"></div>
+          <div id="board-selection-summary" class="board-selection-summary"></div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="statData.js"></script>
+  <script src="stat-prototype.js"></script>
+</body>
+</html>

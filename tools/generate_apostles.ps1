@@ -67,6 +67,7 @@ $keyMap = @{
     "効果2値" = "effect2Value"
     "アサイド名" = "asideName"
     "Lv" = "level"
+    "SLv" = "level"
     "Lv内名前" = "levelName"
     "効果説明" = "effectDescription"
     "ステ適用" = "statApplyTo"

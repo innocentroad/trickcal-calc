@@ -131,7 +131,9 @@ function setupSmartStart(input) {
     const getBaseline = () => {
         const ph = parseFloat(input.placeholder);
         if (!isNaN(ph) && ph > 0) return ph;
-        const isMultiplier = ph >= 100 || (input.id && input.id.includes('mult')) || (input.defaultValue && parseFloat(input.defaultValue) >= 100);
+        const id = input.id || '';
+        const isExplicitHundredBase = id.includes('mult-skill') || id.includes('mult-sp');
+        const isMultiplier = ph >= 100 || isExplicitHundredBase || (input.defaultValue && parseFloat(input.defaultValue) >= 100);
         return isMultiplier ? 100 : null;
     };
 
@@ -4703,6 +4705,10 @@ function isApostlePassiveInfoEffect(effect) {
     return /パッシブ/.test(String(effect?.effectType || ''));
 }
 
+function isAmbiguousBasicAttackDamageUpEffect(effect) {
+    return /普通攻撃ダメージ量増加/.test(String(effect?.valueKind || ''));
+}
+
 function normalizeApostleSkillEntries(entries) {
     if (!entries) return [];
     return Array.isArray(entries) ? entries.filter(Boolean) : [entries];
@@ -4720,11 +4726,12 @@ function normalizeApostleStatNameForEffect(statName = '') {
     return `${name}増加`;
 }
 
-function normalizeApostleStatEffects(stats) {
+function normalizeApostleStatEffects(stats, options = {}) {
     return normalizeApostleSkillEntries(stats).map(stat => {
         const value = Number(stat?.increaseP ?? stat?.increase ?? stat?.value);
         if (!Number.isFinite(value) || value === 0) return null;
         const applyTo = String(stat?.statApplyTo || '本人');
+        if (options.excludeGlobal && /全体|味方/.test(applyTo)) return null;
         return {
             valueKind: normalizeApostleStatNameForEffect(stat?.statName),
             valueClass: '倍率',
@@ -4769,7 +4776,7 @@ function collectApostleSkillSources(apostle) {
         if (!data) return;
         const effects = [
             ...normalizeApostleSkillEntries(data.effects),
-            ...normalizeApostleStatEffects(data.stats)
+            ...normalizeApostleStatEffects(data.stats, { excludeGlobal: true })
         ];
         sources.push({
             skill: {
@@ -5251,6 +5258,10 @@ function applyApostleEffectToCardBonus(bonus, effect, value, options = {}) {
         bonus.otherP += value;
         return true;
     }
+    if (isAmbiguousBasicAttackDamageUpEffect(effect) && isIncrease && !targetsEnemy) {
+        bonus.addP += value;
+        return true;
+    }
     if (/基本攻撃|普通攻撃|強化攻撃/.test(valueKind) && /ダメージ/.test(valueKind) && isIncrease && !targetsEnemy) {
         bonus.basicAddP += value;
         return true;
@@ -5467,6 +5478,9 @@ function getApostleSkillEffectItemsForSide(side, options = {}) {
             const isPassiveEffect = /パッシブ/.test(String(effect?.effectType || ''));
             if (!context.condition && category !== 'パッシブ' && !isPassiveEffect) {
                 context.condition = `${getApostleSkillActionLabel(category)}使用時`;
+            }
+            if (isAmbiguousBasicAttackDamageUpEffect(effect)) {
+                context.meta.push('暫定: その他補正の可能性あり');
             }
             items.push({
                 key: `${apostle.id}:${sourceKey}:${effectIndex}`,
@@ -6304,9 +6318,9 @@ function syncDebuffRoleVisibilitySections() {
     const enemyDebuffs = document.querySelector('.enemy-debuff-section');
     const enemyTargetDebuffs = getActiveEnemyTargetDebuffs();
 
-    const setDebuffItemHidden = (el, hidden) => {
+    const setDebuffItemHidden = (el, hidden, options = {}) => {
         el.classList.toggle('debuff-role-hidden', hidden);
-        if (!hidden) return;
+        if (!options.reset) return;
         el.querySelectorAll('select, input').forEach(control => {
             if (control.value !== '0') {
                 control.value = '0';
@@ -6328,21 +6342,21 @@ function syncDebuffRoleVisibilitySections() {
             const id = control?.id || '';
             const debuffKey = id.includes('break') ? 'breakTakenDmg' : id.includes('pain') ? 'painTakenDmg' : '';
             const hasPresetDebuff = debuffKey && enemyTargetDebuffs[debuffKey] !== undefined && enemyTargetDebuffs[debuffKey] !== null;
-            setDebuffItemHidden(el, side !== 'self' || isAttacker || !hasPresetDebuff);
+            setDebuffItemHidden(el, side !== 'self' || isAttacker || !hasPresetDebuff, { reset: !hasPresetDebuff });
         });
         section.querySelectorAll('.preset-owned-debuff').forEach(el => {
             const control = el.querySelector('select, input');
             const id = control?.id || '';
             const debuffKey = id.includes('pain') ? 'painTakenDmg' : id.includes('taken') ? 'takenDmg' : '';
             const hasPresetDebuff = debuffKey && fixedDebuffs[debuffKey] !== undefined && fixedDebuffs[debuffKey] !== null;
-            setDebuffItemHidden(el, isAttacker || !hasPresetDebuff);
+            setDebuffItemHidden(el, isAttacker || !hasPresetDebuff, { reset: !hasPresetDebuff });
         });
         section.querySelectorAll('.preset-owned-attacker-debuff').forEach(el => {
             const control = el.querySelector('select, input');
             const id = control?.id || '';
             const debuffKey = id.includes('anger') ? 'anger' : '';
             const hasPresetDebuff = debuffKey && fixedDebuffs[debuffKey] !== undefined && fixedDebuffs[debuffKey] !== null;
-            setDebuffItemHidden(el, !isAttacker || !hasPresetDebuff);
+            setDebuffItemHidden(el, !isAttacker || !hasPresetDebuff, { reset: !hasPresetDebuff });
         });
     };
 

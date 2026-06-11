@@ -13,31 +13,12 @@ const APOSTLE_LIBRARY = [
       "position": "後列",
       "attackType": "物理",
       "initialSp": 0,
-      "spRecoveryPerSecond": 30,
-      "Rank2\n全体効果1": "会心 +24",
-      "Rank2\n全体効果2": "会心ダメージ +24",
-      "Rank3\n全体効果1": "会心抵抗 +24",
-      "Rank3\n全体効果2": "会心DMG抵抗 +24",
-      "Rank4\n全体効果1": "HP +234",
-      "Rank4\n全体効果2": "物理攻撃力 +16",
-      "Rank5\n全体効果1": "魔法攻撃力 +16",
-      "Rank5\n全体効果2": "物理防御力 +33",
-      "Rank6\n全体効果1": "魔法防御力 +33",
-      "Rank6\n全体効果2": "会心 +24",
-      "Rank7\n全体効果1": "会心ダメージ +24",
-      "Rank7\n全体効果2": "会心抵抗 +24",
-      "Rank8\n全体効果1": "会心DMG抵抗 +24",
-      "Rank8\n全体効果2": "HP +234",
-      "Rank9\n全体効果1": "物理攻撃力 +16",
-      "Rank9\n全体効果2": "魔法攻撃力 +16",
-      "Rank10\n全体効果1": "物理防御力 +33",
-      "Rank10\n全体効果2": "魔法防御力 +33",
-      "boardType": "防御+抵抗",
-      "boardShape": "エルフTypeA"
+      "spRecoveryPerSecond": 30
     },
     "statTypes": {
       "hp": 1,
       "atkP": 4,
+      "atkM": 0,
       "defP": 1,
       "defM": 1,
       "crit": 4,
@@ -313,18 +294,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "防御+抵抗",
-      "raceBoardType": "エルフTypeA",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -339,30 +318,11 @@ const APOSTLE_LIBRARY = [
       "position": "中列",
       "attackType": "魔法",
       "initialSp": 0,
-      "spRecoveryPerSecond": 44,
-      "Rank2\n全体効果1": "物理攻撃力 +16",
-      "Rank2\n全体効果2": "魔法攻撃力 +16",
-      "Rank3\n全体効果1": "物理防御力 +33",
-      "Rank3\n全体効果2": "魔法防御力 +33",
-      "Rank4\n全体効果1": "会心 +24",
-      "Rank4\n全体効果2": "会心ダメージ +24",
-      "Rank5\n全体効果1": "会心抵抗 +24",
-      "Rank5\n全体効果2": "会心DMG抵抗 +24",
-      "Rank6\n全体効果1": "HP +234",
-      "Rank6\n全体効果2": "物理攻撃力 +16",
-      "Rank7\n全体効果1": "魔法攻撃力 +16",
-      "Rank7\n全体効果2": "物理防御力 +33",
-      "Rank8\n全体効果1": "魔法防御力 +33",
-      "Rank8\n全体効果2": "会心 +24",
-      "Rank9\n全体効果1": "会心ダメージ +24",
-      "Rank9\n全体効果2": "会心抵抗 +24",
-      "Rank10\n全体効果1": "会心DMG抵抗 +24",
-      "Rank10\n全体効果2": "HP +234",
-      "boardType": "攻撃+防御",
-      "boardShape": "魔女TypeC"
+      "spRecoveryPerSecond": 44
     },
     "statTypes": {
       "hp": 4,
+      "atkP": 0,
       "atkM": 4,
       "defP": 3,
       "defM": 3,
@@ -579,18 +539,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "攻撃+防御",
-      "raceBoardType": "魔女TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -604,30 +562,11 @@ const APOSTLE_LIBRARY = [
       "position": "中列",
       "attackType": "魔法",
       "initialSp": 0,
-      "spRecoveryPerSecond": 40,
-      "Rank2\n全体効果1": "物理防御力 +33",
-      "Rank2\n全体効果2": "魔法防御力 +33",
-      "Rank3\n全体効果1": "会心 +24",
-      "Rank3\n全体効果2": "会心ダメージ +24",
-      "Rank4\n全体効果1": "会心抵抗 +24",
-      "Rank4\n全体効果2": "会心DMG抵抗 +24",
-      "Rank5\n全体効果1": "HP +234",
-      "Rank5\n全体効果2": "物理攻撃力 +16",
-      "Rank6\n全体効果1": "魔法攻撃力 +16",
-      "Rank6\n全体効果2": "物理防御力 +33",
-      "Rank7\n全体効果1": "魔法防御力 +33",
-      "Rank7\n全体効果2": "会心 +24",
-      "Rank8\n全体効果1": "会心ダメージ +24",
-      "Rank8\n全体効果2": "会心抵抗 +24",
-      "Rank9\n全体効果1": "会心DMG抵抗 +24",
-      "Rank9\n全体効果2": "HP +234",
-      "Rank10\n全体効果1": "物理攻撃力 +16",
-      "Rank10\n全体効果2": "魔法攻撃力 +16",
-      "boardType": "会心+HP",
-      "boardShape": "幽霊TypeC"
+      "spRecoveryPerSecond": 40
     },
     "statTypes": {
       "hp": 3,
+      "atkP": 0,
       "atkM": 4,
       "defP": 3,
       "defM": 3,
@@ -1061,18 +1000,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "会心+HP",
-      "raceBoardType": "幽霊TypeC",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -1086,31 +1023,12 @@ const APOSTLE_LIBRARY = [
       "position": "前列",
       "attackType": "物理",
       "initialSp": 0,
-      "spRecoveryPerSecond": 30,
-      "Rank2\n全体効果1": "会心抵抗 +24",
-      "Rank2\n全体効果2": "会心DMG抵抗 +24",
-      "Rank3\n全体効果1": "HP +234",
-      "Rank3\n全体効果2": "物理攻撃力 +16",
-      "Rank4\n全体効果1": "魔法攻撃力 +16",
-      "Rank4\n全体効果2": "物理防御力 +33",
-      "Rank5\n全体効果1": "魔法防御力 +33",
-      "Rank5\n全体効果2": "会心 +24",
-      "Rank6\n全体効果1": "会心ダメージ +24",
-      "Rank6\n全体効果2": "会心抵抗 +24",
-      "Rank7\n全体効果1": "会心DMG抵抗 +24",
-      "Rank7\n全体効果2": "HP +234",
-      "Rank8\n全体効果1": "物理攻撃力 +16",
-      "Rank8\n全体効果2": "魔法攻撃力 +16",
-      "Rank9\n全体効果1": "物理防御力 +33",
-      "Rank9\n全体効果2": "魔法防御力 +33",
-      "Rank10\n全体効果1": "会心 +24",
-      "Rank10\n全体効果2": "会心ダメージ +24",
-      "boardType": "抵抗+会心",
-      "boardShape": "エルフTypeE"
+      "spRecoveryPerSecond": 30
     },
     "statTypes": {
       "hp": 5,
       "atkP": 2,
+      "atkM": 0,
       "defP": 5,
       "defM": 5,
       "crit": 2,
@@ -1260,18 +1178,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "抵抗+会心",
-      "raceBoardType": "エルフTypeE",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -1286,12 +1202,11 @@ const APOSTLE_LIBRARY = [
       "position": "前列",
       "attackType": "魔法",
       "initialSp": 160,
-      "spRecoveryPerSecond": 40,
-      "boardType": "攻撃+防御",
-      "boardShape": "エルフTypeC"
+      "spRecoveryPerSecond": 40
     },
     "statTypes": {
       "hp": 5,
+      "atkP": 0,
       "atkM": 2,
       "defP": 5,
       "defM": 5,
@@ -1734,18 +1649,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "攻撃+防御",
-      "raceBoardType": "エルフTypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -1758,10 +1671,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "前列",
       "attackType": "魔法",
-      "boardType": "防御+抵抗",
-      "boardShape": "精霊TypeB"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -1944,18 +1867,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "防御+抵抗",
-      "raceBoardType": "精霊TypeB",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -1969,10 +1890,20 @@ const APOSTLE_LIBRARY = [
       "role": "支援",
       "position": "中列",
       "attackType": "魔法",
-      "boardType": "抵抗+会心",
-      "boardShape": "精霊TypeD"
+      "initialSp": 100,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 1,
+      "defP": 4,
+      "defM": 4,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -2321,18 +2252,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "抵抗+会心",
-      "raceBoardType": "精霊TypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -2347,12 +2276,11 @@ const APOSTLE_LIBRARY = [
       "position": "前列",
       "attackType": "魔法",
       "initialSp": 150,
-      "spRecoveryPerSecond": 50,
-      "boardType": "会心+HP",
-      "boardShape": "龍族TypeB"
+      "spRecoveryPerSecond": 50
     },
     "statTypes": {
       "hp": 5,
+      "atkP": 0,
       "atkM": 2,
       "defP": 5,
       "defM": 5,
@@ -2733,18 +2661,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "竜族",
       "boardType": "会心+HP",
-      "raceBoardType": "龍族TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -2757,10 +2683,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "後列",
       "attackType": "魔法",
-      "boardType": "抵抗+会心",
-      "boardShape": "妖精TypeD"
+      "initialSp": 150,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 5,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -2982,18 +2918,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "抵抗+会心",
-      "raceBoardType": "妖精TypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -3006,10 +2940,20 @@ const APOSTLE_LIBRARY = [
       "role": "支援",
       "position": "中列",
       "attackType": "魔法",
-      "boardType": "抵抗+会心",
-      "boardShape": "幽霊TypeB"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -3172,18 +3116,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "抵抗+会心",
-      "raceBoardType": "幽霊TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -3196,10 +3138,21 @@ const APOSTLE_LIBRARY = [
       "race": "獣人",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "抵抗+会心",
-      "boardShape": "獣人TypeD"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 20
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -3463,18 +3416,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "抵抗+会心",
-      "raceBoardType": "獣人TypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -3487,10 +3438,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "後列",
       "attackType": "魔法",
-      "boardType": "攻撃+防御",
-      "boardShape": "妖精TypeC"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -3688,18 +3649,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "攻撃+防御",
-      "raceBoardType": "妖精TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -3712,10 +3671,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "中列",
       "attackType": "物理",
-      "boardType": "攻撃+防御",
-      "boardShape": "エルフTypeC"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 50
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -3980,18 +3949,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "攻撃+防御",
-      "raceBoardType": "エルフTypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -4004,10 +3971,20 @@ const APOSTLE_LIBRARY = [
       "role": "支援",
       "position": "中列",
       "attackType": "魔法",
-      "boardType": "HP+攻撃",
-      "boardShape": "精霊TypeC"
+      "initialSp": 200,
+      "spRecoveryPerSecond": 50
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 2,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 2,
+      "defM": 2,
+      "crit": 1,
+      "critDmg": 1,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -4166,32 +4143,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "HP+攻撃",
-      "raceBoardType": "精霊TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "carren",
     "name": "カレン",
     "basic": {
+      "rarity": 2,
       "personality": "活発",
       "race": "妖精",
       "role": "支援",
       "position": "後列",
-      "boardType": "抵抗+会心",
-      "boardShape": "妖精TypeD"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 2,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 2,
+      "defM": 2,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": {
@@ -4307,18 +4294,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "抵抗+会心",
-      "raceBoardType": "妖精TypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -4331,10 +4316,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "後列",
       "attackType": "物理",
-      "boardType": "防御+抵抗",
-      "boardShape": "エルフTypeA"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": {
@@ -4481,18 +4476,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "防御+抵抗",
-      "raceBoardType": "エルフTypeA",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -4505,10 +4498,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "前列",
       "attackType": "物理",
-      "boardType": "防御+抵抗",
-      "boardShape": "龍族TypeC"
+      "initialSp": 200,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -4747,18 +4750,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "竜族",
       "boardType": "防御+抵抗",
-      "raceBoardType": "龍族TypeC",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -4771,10 +4772,20 @@ const APOSTLE_LIBRARY = [
       "role": "支援",
       "position": "後列",
       "attackType": "魔法",
-      "boardType": "HP+攻撃",
-      "boardShape": "妖精TypeA"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 0,
+      "atkM": 1,
+      "defP": 4,
+      "defM": 4,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -5202,33 +5213,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "HP+攻撃",
-      "raceBoardType": "妖精TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "kyuri",
     "name": "キュウイ",
     "basic": {
+      "rarity": 1,
       "personality": "純粋",
       "race": "妖精",
       "role": "支援",
       "position": "中列",
       "attackType": "魔法",
-      "boardType": "HP+攻撃",
-      "boardShape": "妖精TypeA"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 2,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 2,
+      "defM": 2,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": {
@@ -5328,18 +5348,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "HP+攻撃",
-      "raceBoardType": "妖精TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -5353,10 +5371,20 @@ const APOSTLE_LIBRARY = [
       "role": "守備",
       "position": "前列",
       "attackType": "魔法",
-      "boardType": "会心+HP",
-      "boardShape": "妖精TypeE"
+      "initialSp": 200,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 5,
+      "defM": 5,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 5,
+      "critDmgRes": 5
+    },
     "skills": [
       {
         "effects": [
@@ -5830,18 +5858,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "会心+HP",
-      "raceBoardType": "妖精TypeE",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -5854,10 +5880,20 @@ const APOSTLE_LIBRARY = [
       "role": "守備",
       "position": "前列",
       "attackType": "物理",
-      "boardType": "防御+抵抗",
-      "boardShape": "獣人TypeE"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkP": 2,
+      "atkM": 0,
+      "defP": 5,
+      "defM": 5,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -6068,31 +6104,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "防御+抵抗",
-      "raceBoardType": "獣人TypeE",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "sari",
     "name": "サリー",
     "basic": {
+      "rarity": 2,
       "personality": "純粋",
       "race": "幽霊",
       "role": "攻撃",
-      "boardType": "会心+HP",
-      "boardShape": "幽霊TypeC"
+      "position": "中列",
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": {
@@ -6205,18 +6252,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "会心+HP",
-      "raceBoardType": "幽霊TypeC",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -6229,10 +6274,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "後列",
       "attackType": "物理",
-      "boardType": "HP+攻撃",
-      "boardShape": "精霊TypeC"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -6339,18 +6394,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "HP+攻撃",
-      "raceBoardType": "精霊TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -6363,10 +6416,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "前列",
       "attackType": "物理",
-      "boardType": "攻撃+防御",
-      "boardShape": "幽霊TypeA"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 25
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -6548,18 +6611,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "攻撃+防御",
-      "raceBoardType": "幽霊TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -6572,10 +6633,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "中列",
       "attackType": "魔法",
-      "boardType": "防御+抵抗",
-      "boardShape": "龍族TypeC"
+      "initialSp": 0,
+      "spRecoveryPerSecond": 25
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -6748,18 +6819,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "竜族",
       "boardType": "防御+抵抗",
-      "raceBoardType": "龍族TypeC",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -6773,10 +6842,20 @@ const APOSTLE_LIBRARY = [
       "role": "攻撃",
       "position": "後列",
       "attackType": "物理",
-      "boardType": "防御+抵抗",
-      "boardShape": "幽霊TypeD"
+      "initialSp": 50,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 5,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -7037,18 +7116,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "防御+抵抗",
-      "raceBoardType": "幽霊TypeD",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -7060,10 +7137,21 @@ const APOSTLE_LIBRARY = [
       "race": "竜族",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "抵抗+会心",
-      "boardShape": "龍族TypeA"
+      "attackType": "物理",
+      "initialSp": 200,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 5,
+      "critDmg": 5,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -7325,18 +7413,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "竜族",
       "boardType": "抵抗+会心",
-      "raceBoardType": "龍族TypeA",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -7348,10 +7434,21 @@ const APOSTLE_LIBRARY = [
       "race": "妖精",
       "role": "支援",
       "position": "後列",
-      "boardType": "抵抗+会心",
-      "boardShape": "妖精TypeD"
+      "attackType": "魔法",
+      "initialSp": 100,
+      "spRecoveryPerSecond": 44
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 1,
+      "defP": 4,
+      "defM": 4,
+      "crit": 1,
+      "critDmg": 1,
+      "critRes": 5,
+      "critDmgRes": 5
+    },
     "skills": [
       {
         "effects": [
@@ -7611,18 +7708,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "抵抗+会心",
-      "raceBoardType": "妖精TypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -7634,10 +7729,21 @@ const APOSTLE_LIBRARY = [
       "race": "精霊",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "攻撃+防御",
-      "boardShape": "精霊TypeA"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -7806,18 +7912,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "攻撃+防御",
-      "raceBoardType": "精霊TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -7829,10 +7933,21 @@ const APOSTLE_LIBRARY = [
       "race": "竜族",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "会心+HP",
-      "boardShape": "龍族TypeB"
+      "attackType": "物理",
+      "initialSp": 200,
+      "spRecoveryPerSecond": 50
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -8018,18 +8133,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "竜族",
       "boardType": "会心+HP",
-      "raceBoardType": "龍族TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -8041,10 +8154,21 @@ const APOSTLE_LIBRARY = [
       "race": "魔女",
       "role": "守備",
       "position": "前列",
-      "boardType": "攻撃+防御",
-      "boardShape": "魔女TypeC"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 40
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 4,
+      "defM": 4,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -8499,18 +8623,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "攻撃+防御",
-      "raceBoardType": "魔女TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -8522,10 +8644,21 @@ const APOSTLE_LIBRARY = [
       "race": "幽霊",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "攻撃+防御",
-      "boardShape": "幽霊TypeA"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 5,
+      "critDmg": 5,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -8648,18 +8781,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "攻撃+防御",
-      "raceBoardType": "幽霊TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -8671,10 +8802,21 @@ const APOSTLE_LIBRARY = [
       "race": "幽霊",
       "role": "守備",
       "position": "前列",
-      "boardType": "攻撃+防御",
-      "boardShape": "幽霊TypeA"
+      "attackType": "魔法",
+      "initialSp": 150,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 5,
+      "defM": 5,
+      "crit": 2,
+      "critDmg": 2,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -9053,32 +9195,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "攻撃+防御",
-      "raceBoardType": "幽霊TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "taida",
     "name": "タイダー",
     "basic": {
+      "rarity": 2,
       "personality": "活発",
       "race": "エルフ",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "HP+攻撃",
-      "boardShape": "エルフTypeB"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": {
@@ -9185,32 +9337,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "HP+攻撃",
-      "raceBoardType": "エルフTypeB",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "chopi",
     "name": "チョッピー",
     "basic": {
+      "rarity": 2,
       "personality": "憂鬱",
       "race": "獣人",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "防御+抵抗",
-      "boardShape": "獣人TypeE"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -9326,18 +9488,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "防御+抵抗",
-      "raceBoardType": "獣人TypeE",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -9349,10 +9509,21 @@ const APOSTLE_LIBRARY = [
       "race": "獣人",
       "role": "支援",
       "position": "中列",
-      "boardType": "抵抗+会心",
-      "boardShape": "獣人TypeD"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 2,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 2,
+      "defM": 2,
+      "crit": 2,
+      "critDmg": 2,
+      "critRes": 5,
+      "critDmgRes": 5
+    },
     "skills": [
       {
         "effects": [
@@ -9635,18 +9806,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "抵抗+会心",
-      "raceBoardType": "獣人TypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -9658,10 +9827,21 @@ const APOSTLE_LIBRARY = [
       "race": "精霊",
       "role": "支援",
       "position": "中列",
-      "boardType": "会心+HP",
-      "boardShape": "精霊TypeE"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 44
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 2,
+      "atkP": 0,
+      "atkM": 3,
+      "defP": 2,
+      "defM": 2,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -9947,18 +10127,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "会心+HP",
-      "raceBoardType": "精霊TypeE",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -9970,10 +10148,21 @@ const APOSTLE_LIBRARY = [
       "race": "妖精",
       "role": "支援",
       "position": "前列",
-      "boardType": "攻撃+防御",
-      "boardShape": "妖精TypeC"
+      "attackType": "魔法",
+      "initialSp": 200,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 1,
+      "defP": 4,
+      "defM": 4,
+      "crit": 1,
+      "critDmg": 1,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -10261,18 +10450,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "攻撃+防御",
-      "raceBoardType": "妖精TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -10284,10 +10471,21 @@ const APOSTLE_LIBRARY = [
       "race": "獣人",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "攻撃+防御",
-      "boardShape": "獣人TypeA"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 5,
+      "critDmg": 5,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -10525,31 +10723,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "攻撃+防御",
-      "raceBoardType": "獣人TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "patula",
     "name": "パトラ",
     "basic": {
+      "rarity": 1,
       "personality": "冷静",
       "race": "妖精",
       "role": "攻撃",
-      "boardType": "攻撃+防御",
-      "boardShape": "妖精TypeC"
+      "position": "前列",
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -10662,18 +10871,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "攻撃+防御",
-      "raceBoardType": "妖精TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -10685,10 +10892,21 @@ const APOSTLE_LIBRARY = [
       "race": "魔女",
       "role": "支援",
       "position": "後列",
-      "boardType": "防御+抵抗",
-      "boardShape": "魔女TypeE"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 2,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 2,
+      "defM": 2,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -11200,18 +11418,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "防御+抵抗",
-      "raceBoardType": "魔女TypeE",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -11223,10 +11439,21 @@ const APOSTLE_LIBRARY = [
       "race": "精霊",
       "role": "守備",
       "position": "前列",
-      "boardType": "HP+攻撃",
-      "boardShape": "精霊TypeC"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkP": 5,
+      "atkM": 0,
+      "defP": 5,
+      "defM": 5,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -11384,18 +11611,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "HP+攻撃",
-      "raceBoardType": "精霊TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -11407,10 +11632,21 @@ const APOSTLE_LIBRARY = [
       "race": "エルフ",
       "role": "支援",
       "position": "中列",
-      "boardType": "HP+攻撃",
-      "boardShape": "エルフTypeB"
+      "attackType": "魔法",
+      "initialSp": 100,
+      "spRecoveryPerSecond": 44
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 1,
+      "defP": 4,
+      "defM": 4,
+      "crit": 1,
+      "critDmg": 1,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -11709,18 +11945,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "HP+攻撃",
-      "raceBoardType": "エルフTypeB",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -11732,10 +11966,21 @@ const APOSTLE_LIBRARY = [
       "race": "エルフ",
       "role": "支援",
       "position": "前列",
-      "boardType": "攻撃+防御",
-      "boardShape": "エルフTypeC"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 5,
+      "atkM": 0,
+      "defP": 4,
+      "defM": 4,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -11893,18 +12138,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "攻撃+防御",
-      "raceBoardType": "エルフTypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -11916,10 +12159,21 @@ const APOSTLE_LIBRARY = [
       "race": "精霊",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "会心+HP",
-      "boardShape": "精霊TypeE"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 5,
+      "critDmg": 5,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -12266,18 +12520,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "会心+HP",
-      "raceBoardType": "精霊TypeE",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -12289,10 +12541,21 @@ const APOSTLE_LIBRARY = [
       "race": "魔女",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "HP+攻撃",
-      "boardShape": "魔女TypeD"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 20
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -12483,18 +12746,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "HP+攻撃",
-      "raceBoardType": "魔女TypeD",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -12506,10 +12767,21 @@ const APOSTLE_LIBRARY = [
       "race": "エルフ",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "防御+抵抗",
-      "boardShape": "エルフTypeA"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -12730,23 +13002,165 @@ const APOSTLE_LIBRARY = [
     ],
     "favoriteCard": {},
     "aside": {
-      "levels": {}
+      "name": "宇宙船艦",
+      "levels": {
+        "1": {
+          "name": "宇宙船艦ヘイリー",
+          "stats": [
+            {
+              "statApplyTo": "本人",
+              "statName": "最大HP",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "物理攻撃力",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心ダメージ",
+              "increaseP": 6
+            }
+          ],
+          "effects": []
+        },
+        "2": {
+          "name": "地球をフライバイ",
+          "stats": [],
+          "effects": [
+            {
+              "valueKind": "攻撃力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "condition": "強化攻撃バフ獲得時",
+              "effectTarget": "自身を除く中列の味方使徒",
+              "fixedValue": 32
+            },
+            {
+              "valueKind": "攻撃力増加",
+              "valueClass": "持続時間",
+              "effectType": "バフ",
+              "condition": "強化攻撃バフ獲得時",
+              "effectTarget": "自身を除く中列の味方使徒",
+              "fixedValue": 6
+            },
+            {
+              "valueKind": "防御力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "condition": "強化攻撃バフ獲得時",
+              "effectTarget": "自身を除く中列の味方使徒",
+              "fixedValue": 16
+            },
+            {
+              "valueKind": "防御力増加",
+              "valueClass": "持続時間",
+              "effectType": "バフ",
+              "condition": "強化攻撃バフ獲得時",
+              "effectTarget": "自身を除く中列の味方使徒",
+              "fixedValue": 6
+            },
+            {
+              "valueKind": "苦痛",
+              "valueClass": "状態付与",
+              "effectType": "デバフ",
+              "effectTarget": "低学年スキルの最後の一撃",
+              "targetSkill": "敵",
+              "reference": "低学年スキル"
+            },
+            {
+              "valueKind": "苦痛",
+              "valueClass": "持続時間",
+              "effectType": "デバフ",
+              "effectTarget": "低学年スキルの最後の一撃",
+              "targetSkill": "敵",
+              "reference": "低学年スキル",
+              "fixedValue": 5
+            },
+            {
+              "valueKind": "軍艦召喚",
+              "valueClass": "召喚",
+              "effectType": "召喚",
+              "effectTarget": "高学年スキル使用時",
+              "targetSkill": "自身",
+              "reference": "高学年スキル"
+            },
+            {
+              "valueKind": "砲弾総物理ダメージ",
+              "valueClass": "倍率",
+              "effectType": "攻撃",
+              "condition": "軍艦召喚時",
+              "effectTarget": "前方の敵",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 2250
+            },
+            {
+              "valueKind": "砲弾物理ダメージ",
+              "valueClass": "倍率",
+              "effectType": "攻撃",
+              "condition": "軍艦召喚時",
+              "effectTarget": "前方の敵",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 375
+            },
+            {
+              "valueKind": "砲弾数",
+              "valueClass": "ヒット数",
+              "effectType": "攻撃",
+              "condition": "軍艦召喚時",
+              "effectTarget": "前方の敵",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 6
+            }
+          ],
+          "description": "強化攻撃バフの獲得時、自身を除く中列の味方使徒の攻撃力と防御力を増加させる。低学年スキルの最後の一撃に確定で苦痛を付与する。高学年スキル使用時、軍艦が召喚される。軍艦は前方の敵に砲弾を6発降らせ、範囲物理ダメージを与える。"
+        },
+        "3": {
+          "name": "味方基地防衛作戦",
+          "stats": [
+            {
+              "statApplyTo": "全体",
+              "statName": "会心",
+              "increaseP": 3
+            },
+            {
+              "statApplyTo": "全体",
+              "statName": "物理防御力",
+              "increaseP": 3
+            }
+          ],
+          "effects": [
+            {
+              "valueKind": "被ダメージ量減少",
+              "valueClass": "倍率",
+              "effectType": "パッシブ",
+              "effectTarget": "味方全員",
+              "fixedValue": 7.5
+            }
+          ],
+          "description": "味方全員の敵からの被ダメージ量を減少させる。"
+        }
+      }
     },
     "board": {
       "race": "エルフ",
       "boardType": "防御+抵抗",
-      "raceBoardType": "エルフTypeA",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -12758,10 +13172,21 @@ const APOSTLE_LIBRARY = [
       "race": "獣人",
       "role": "攻撃",
       "position": "前列",
-      "boardType": "会心+HP",
-      "boardShape": "獣人TypeB"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 5,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -12924,18 +13349,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "会心+HP",
-      "raceBoardType": "獣人TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -12947,10 +13370,21 @@ const APOSTLE_LIBRARY = [
       "race": "魔女",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "会心+HP",
-      "boardShape": "魔女TypeA"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": {
@@ -13069,31 +13503,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "会心+HP",
-      "raceBoardType": "魔女TypeA",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
     "id": "veroo",
     "name": "ベル",
     "basic": {
+      "rarity": 1,
       "personality": "憂鬱",
       "race": "幽霊",
       "role": "攻撃",
-      "boardType": "攻撃+防御",
-      "boardShape": "幽霊TypeA"
+      "position": "中列",
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -13220,18 +13665,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "攻撃+防御",
-      "raceBoardType": "幽霊TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -13243,10 +13686,21 @@ const APOSTLE_LIBRARY = [
       "race": "魔女",
       "role": "守備",
       "position": "前列",
-      "boardType": "抵抗+会心",
-      "boardShape": "魔女TypeB"
+      "attackType": "物理",
+      "initialSp": 200,
+      "spRecoveryPerSecond": 25
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 4,
+      "defM": 4,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -13435,18 +13889,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "抵抗+会心",
-      "raceBoardType": "魔女TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -13458,10 +13910,21 @@ const APOSTLE_LIBRARY = [
       "race": "魔女",
       "role": "支援",
       "position": "後列",
-      "boardType": "防御+抵抗",
-      "boardShape": "魔女TypeE"
+      "attackType": "魔法",
+      "initialSp": 200,
+      "spRecoveryPerSecond": 50
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 1,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 1,
+      "defM": 1,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 1,
+      "critDmgRes": 1
+    },
     "skills": [
       {
         "effects": [
@@ -13717,18 +14180,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "防御+抵抗",
-      "raceBoardType": "魔女TypeE",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -13740,10 +14201,21 @@ const APOSTLE_LIBRARY = [
       "race": "獣人",
       "role": "支援",
       "position": "中列",
-      "boardType": "HP+攻撃",
-      "boardShape": "獣人TypeC"
+      "attackType": "魔法",
+      "initialSp": 150,
+      "spRecoveryPerSecond": 44
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 2,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 2,
+      "defM": 2,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -13859,32 +14331,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "HP+攻撃",
-      "raceBoardType": "獣人TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "maestromk2",
     "name": "マエストロMK2",
     "basic": {
+      "rarity": 2,
       "personality": "狂気",
       "race": "エルフ",
       "role": "守備",
       "position": "前列",
-      "boardType": "会心+HP",
-      "boardShape": "エルフTypeD"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkP": 5,
+      "atkM": 0,
+      "defP": 5,
+      "defM": 5,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -14021,18 +14503,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "会心+HP",
-      "raceBoardType": "エルフTypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -14044,10 +14524,21 @@ const APOSTLE_LIBRARY = [
       "race": "妖精",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "防御+抵抗",
-      "boardShape": "妖精TypeB"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -14238,18 +14729,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "防御+抵抗",
-      "raceBoardType": "妖精TypeB",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -14261,10 +14750,21 @@ const APOSTLE_LIBRARY = [
       "race": "妖精",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "HP+攻撃",
-      "boardShape": "妖精TypeA"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -14426,32 +14926,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "妖精",
       "boardType": "HP+攻撃",
-      "raceBoardType": "妖精TypeA",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "mynx",
     "name": "ミンス",
     "basic": {
+      "rarity": 1,
       "personality": "活発",
       "race": "獣人",
       "role": "攻撃",
       "position": "前列",
-      "boardType": "HP+攻撃",
-      "boardShape": "獣人TypeC"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -14558,31 +15068,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "HP+攻撃",
-      "raceBoardType": "獣人TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "maison",
     "name": "メゾン",
     "basic": {
+      "rarity": 1,
       "personality": "狂気",
       "race": "幽霊",
       "role": "攻撃",
-      "boardType": "抵抗+会心",
-      "boardShape": "幽霊TypeB"
+      "position": "後列",
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 20
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -14709,18 +15230,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "抵抗+会心",
-      "raceBoardType": "幽霊TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -14732,10 +15251,21 @@ const APOSTLE_LIBRARY = [
       "race": "精霊",
       "role": "支援",
       "position": "後列",
-      "boardType": "HP+攻撃",
-      "boardShape": "精霊TypeC"
+      "attackType": "魔法",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 1,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 1,
+      "defM": 1,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 1,
+      "critDmgRes": 1
+    },
     "skills": [
       {
         "effects": [
@@ -14939,18 +15469,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "精霊",
       "boardType": "HP+攻撃",
-      "raceBoardType": "精霊TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -14962,10 +15490,21 @@ const APOSTLE_LIBRARY = [
       "race": "獣人",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "HP+攻撃",
-      "boardShape": "獣人TypeC"
+      "attackType": "魔法",
+      "initialSp": 100,
+      "spRecoveryPerSecond": 20
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 4,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": [
@@ -15375,32 +15914,42 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "HP+攻撃",
-      "raceBoardType": "獣人TypeC",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "yumimi",
     "name": "ユミミ",
     "basic": {
+      "rarity": 2,
       "personality": "狂気",
       "race": "獣人",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "会心+HP",
-      "boardShape": "獣人TypeB"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": {
@@ -15507,18 +16056,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "獣人",
       "boardType": "会心+HP",
-      "raceBoardType": "獣人TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -15531,10 +16078,21 @@ const APOSTLE_LIBRARY = [
       "race": "？？？",
       "role": "支援",
       "position": "中列",
-      "boardType": "攻撃+防御",
-      "boardShape": "？？？"
+      "attackType": "魔法",
+      "initialSp": 220,
+      "spRecoveryPerSecond": 40
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 0,
+      "atkM": 2,
+      "defP": 4,
+      "defM": 4,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -15918,19 +16476,443 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "？？？",
       "boardType": "攻撃+防御",
-      "raceBoardType": "？？？",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体防御",
-        "2-1": "全体攻撃",
-        "2-2": "全体HP",
-        "2-3": "全体防御",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
+  },
+  {
+    "id": "risty",
+    "name": "リスティ",
+    "basic": {
+      "rarity": 3,
+      "personality": "憂鬱",
+      "race": "エルフ",
+      "role": "攻撃",
+      "position": "後列",
+      "attackType": "物理"
+    },
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
+    "skills": [
+      {
+        "effects": [
+          {
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "敵/HP最高/範囲",
+            "levels": {
+              "1": 135,
+              "2": 148,
+              "3": 161,
+              "4": 174,
+              "5": 187,
+              "6": 200,
+              "7": 213,
+              "8": 226,
+              "9": 239,
+              "10": 252,
+              "11": 265,
+              "12": 278,
+              "13": 291,
+              "14": 304,
+              "15": 317
+            }
+          },
+          {
+            "valueKind": "最後の一撃の物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "敵/HP最高/範囲",
+            "levels": {
+              "1": 270,
+              "2": 297,
+              "3": 324,
+              "4": 351,
+              "5": 378,
+              "6": 405,
+              "7": 432,
+              "8": 459,
+              "9": 486,
+              "10": 513,
+              "11": 540,
+              "12": 567,
+              "13": 594,
+              "14": 621,
+              "15": 648
+            }
+          },
+          {
+            "valueKind": "再探索",
+            "valueClass": "回数",
+            "effectType": "条件",
+            "effectTarget": "敵が倒されなかった場合",
+            "fixedValue": 3
+          }
+        ],
+        "skillType": "低学年",
+        "skillName": "テクノマンシー",
+        "description": "HPが最も高い敵に範囲物理ダメージを与える。敵が倒されなかった場合、最大3回まで再度敵を探し出し範囲物理ダメージを与える。最後の一撃はより高いダメージを与える。"
+      },
+      {
+        "effects": [
+          {
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "残りHP割合が最も低い敵3体",
+            "levels": {
+              "1": 40,
+              "2": 43,
+              "3": 45,
+              "4": 48,
+              "5": 51,
+              "6": 53,
+              "7": 56,
+              "8": 59,
+              "9": 61,
+              "10": 64,
+              "11": 67,
+              "12": 69,
+              "13": 72,
+              "14": 75,
+              "15": 77
+            }
+          },
+          {
+            "valueKind": "ブロック数",
+            "valueClass": "ヒット数",
+            "effectType": "攻撃",
+            "effectTarget": "残りHP割合が最も低い敵3体",
+            "fixedValue": 10
+          },
+          {
+            "valueKind": "対象数",
+            "valueClass": "対象数",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 3
+          },
+          {
+            "valueKind": "最後の一撃の物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "残りHP割合が最も低い敵3体",
+            "levels": {
+              "1": 160,
+              "2": 171,
+              "3": 181,
+              "4": 192,
+              "5": 203,
+              "6": 213,
+              "7": 224,
+              "8": 235,
+              "9": 245,
+              "10": 256,
+              "11": 267,
+              "12": 277,
+              "13": 288,
+              "14": 299,
+              "15": 309
+            }
+          },
+          {
+            "valueKind": "気絶",
+            "valueClass": "状態付与",
+            "effectType": "デバフ",
+            "effectTarget": "敵"
+          },
+          {
+            "valueKind": "気絶",
+            "valueClass": "持続時間",
+            "effectType": "デバフ",
+            "effectTarget": "敵",
+            "fixedValue": 3
+          }
+        ],
+        "skillType": "高学年",
+        "skillName": "ボクセルグリッチ",
+        "description": "残りHP割合が最も低い敵3体にブロックを10個ずつ落として物理ダメージを与える。最後に落ちるブロックはより高いダメージを与え、気絶を付与する。スキル発動中に対象を変更できる。",
+        "cooldownSeconds": 26
+      },
+      {
+        "effects": {
+          "valueKind": "気絶",
+          "valueClass": "持続時間",
+          "effectType": "パッシブ",
+          "effectTarget": "敵",
+          "reference": "高学年スキル",
+          "levels": {
+            "1": 4,
+            "2": 4.2,
+            "3": 4.4,
+            "4": 4.6,
+            "5": 4.8,
+            "6": 5,
+            "7": 5.2,
+            "8": 5.4,
+            "9": 5.6,
+            "10": 5.8,
+            "11": 6,
+            "12": 6.2,
+            "13": 6.4,
+            "14": 6.6,
+            "15": 6.8
+          }
+        },
+        "skillType": "パッシブ",
+        "skillName": "パッシブスキル",
+        "description": "高学年スキルの気絶の持続時間が変更される。"
+      },
+      {
+        "effects": {
+          "valueKind": "物理ダメージ",
+          "valueClass": "倍率",
+          "effectType": "攻撃",
+          "effectTarget": "敵",
+          "fixedValue": 80
+        },
+        "skillType": "普通攻撃_基本",
+        "skillName": "基本",
+        "description": "飲み干した缶を投げて敵に物理ダメージを与える。"
+      },
+      {
+        "effects": [
+          {
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 120
+          },
+          {
+            "valueKind": "確定会心",
+            "valueClass": "固定値",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 1
+          },
+          {
+            "valueKind": "発動条件",
+            "valueClass": "回数",
+            "effectType": "条件",
+            "effectTarget": "自身",
+            "reference": "普通攻撃",
+            "fixedValue": 4
+          }
+        ],
+        "skillType": "普通攻撃_強化",
+        "skillName": "強化",
+        "description": "4回攻撃するごとに敵の個人情報を収集し、確定会心物理ダメージを与える。"
+      }
+    ],
+    "favoriteCard": {
+      "name": "リスティの模造グローブ",
+      "kind": "遺物",
+      "levels": {
+        "1": [
+          {
+            "effects": [
+              {
+                "valueKind": "ハッキング",
+                "valueClass": "固定値",
+                "effectType": "条件",
+                "effectTarget": "敵",
+                "fixedValue": 3
+              },
+              {
+                "valueKind": "確定会心",
+                "valueClass": "条件",
+                "effectType": "攻撃",
+                "effectTarget": "敵"
+              },
+              {
+                "valueKind": "SP回復",
+                "valueClass": "固定値",
+                "effectType": "バフ",
+                "effectTarget": "自身"
+              }
+            ],
+            "targetSkill": "普通攻撃_強化",
+            "skillName": "強化",
+            "description": "3回攻撃するごとに敵をハッキングし、確定会心物理ダメージを与える。強化攻撃使用後、自身のSPを回復する。"
+          }
+        ],
+        "3": [
+          {
+            "effects": [
+              {
+                "valueKind": "物理攻撃力増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9
+              },
+              {
+                "valueKind": "会心ステータス増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9
+              },
+              {
+                "valueKind": "会心ダメージ増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9
+              }
+            ],
+            "targetSkill": "愛用Lv3",
+            "skillName": "愛用Lv3",
+            "description": "リスティの物理攻撃力増加9%、会心増加9%、会心ダメージ増加9%"
+          }
+        ]
+      }
+    },
+    "aside": {
+      "name": "本日のPOTG",
+      "levels": {
+        "1": {
+          "name": "リーグ・オブ・エルフ最強者",
+          "stats": [
+            {
+              "statApplyTo": "本人",
+              "statName": "最大HP",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "物理攻撃力",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心ダメージ",
+              "increaseP": 6
+            }
+          ],
+          "effects": []
+        },
+        "2": {
+          "name": "天才ハッカーの登場",
+          "stats": [],
+          "effects": [
+            {
+              "valueKind": "SP回復",
+              "valueClass": "倍率",
+              "effectType": "回復",
+              "effectTarget": "自身",
+              "targetSkill": "低学年スキル",
+              "fixedValue": 75
+            },
+            {
+              "valueKind": "SP回復クールタイム",
+              "valueClass": "クールタイム",
+              "effectType": "回復",
+              "effectTarget": "自身",
+              "targetSkill": "低学年スキル",
+              "fixedValue": 10
+            },
+            {
+              "valueKind": "追加物理ダメージ",
+              "valueClass": "倍率",
+              "effectType": "攻撃",
+              "effectTarget": "残りHP割合が最も低い敵3体",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 160
+            },
+            {
+              "valueKind": "追加攻撃",
+              "valueClass": "回数",
+              "effectType": "攻撃",
+              "effectTarget": "残りHP割合が最も低い敵3体",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 3
+            }
+          ],
+          "description": "低学年スキルで敵を退治すると、SPを回復する。高学年スキル使用後、残りHP割合が最も低い敵3体に追加で3回物理ダメージを与える。"
+        },
+        "3": {
+          "name": "リスティのスーパーセーブ",
+          "stats": [
+            {
+              "statApplyTo": "全体",
+              "statName": "会心ダメージ",
+              "increaseP": 3
+            },
+            {
+              "statApplyTo": "全体",
+              "statName": "物理防御力",
+              "increaseP": 3
+            }
+          ],
+          "effects": [
+            {
+              "valueKind": "SP回復量",
+              "valueClass": "固定値",
+              "effectType": "バフ",
+              "effectTarget": "後列の味方",
+              "fixedValue": 4
+            }
+          ],
+          "description": "後列の味方の1秒ごとのSP回復量を増加させる。"
+        }
+      }
+    },
+    "board": {
+      "race": "エルフ",
+      "boardType": "攻撃+防御",
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体防御",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体防御",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
+    }
+  },
+  {
+    "id": "renewa",
+    "name": "リニュア",
+    "basic": {
+      "rarity": 3,
+      "eldain": "永遠のこだま",
+      "personality": "狂気",
+      "race": "エルフ"
+    },
+    "statTypes": {},
+    "skills": null,
+    "favoriteCard": {},
+    "aside": {
+      "levels": {}
+    },
+    "board": null
   },
   {
     "id": "leets",
@@ -15941,10 +16923,21 @@ const APOSTLE_LIBRARY = [
       "race": "竜族",
       "role": "攻撃",
       "position": "前列",
-      "boardType": "HP+攻撃",
-      "boardShape": "龍族TypeD"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 40
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 5,
+      "atkM": 0,
+      "defP": 4,
+      "defM": 4,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -16277,18 +17270,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "竜族",
       "boardType": "HP+攻撃",
-      "raceBoardType": "龍族TypeD",
-      "cells": {
-        "1-1": "全体攻撃",
-        "1-2": "全体HP",
-        "2-1": "全体攻撃",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体攻撃",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -16300,10 +17291,21 @@ const APOSTLE_LIBRARY = [
       "race": "幽霊",
       "role": "攻撃",
       "position": "前列",
-      "boardType": "抵抗+会心",
-      "boardShape": "幽霊TypeB"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -16502,18 +17504,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "幽霊",
       "boardType": "抵抗+会心",
-      "raceBoardType": "幽霊TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -16525,10 +17525,21 @@ const APOSTLE_LIBRARY = [
       "race": "竜族",
       "role": "守備",
       "position": "前列",
-      "boardType": "会心+HP",
-      "boardShape": "龍族TypeB"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 3,
+      "atkM": 0,
+      "defP": 5,
+      "defM": 4,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -16788,18 +17799,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "竜族",
       "boardType": "会心+HP",
-      "raceBoardType": "龍族TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
   },
   {
@@ -16810,10 +17819,22 @@ const APOSTLE_LIBRARY = [
       "personality": "活発",
       "race": "獣人",
       "role": "攻撃",
-      "boardType": "抵抗+会心",
-      "boardShape": "獣人TypeD"
+      "position": "中列",
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -16973,37 +17994,148 @@ const APOSTLE_LIBRARY = [
     ],
     "favoriteCard": {},
     "aside": {
-      "levels": {}
+      "name": "ブレーンルポ",
+      "levels": {
+        "1": {
+          "name": "反アニマル缶戦線の知識王",
+          "stats": [
+            {
+              "statApplyTo": "本人",
+              "statName": "最大HP",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "物理攻撃力",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心",
+              "increaseP": 6
+            },
+            {
+              "statApplyTo": "本人",
+              "statName": "会心ダメージ",
+              "increaseP": 6
+            }
+          ],
+          "effects": []
+        },
+        "2": {
+          "name": "三銃士の大冒険",
+          "stats": [],
+          "effects": [
+            {
+              "valueKind": "普通攻撃ダメージ量増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "targetSkill": "普通攻撃",
+              "fixedValue": 200
+            },
+            {
+              "valueKind": "攻撃速度増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "condition": "自身に目くらまし付与時",
+              "effectTarget": "自身",
+              "fixedValue": 75
+            },
+            {
+              "valueKind": "攻撃速度増加",
+              "valueClass": "持続時間",
+              "effectType": "バフ",
+              "condition": "自身に目くらまし付与時",
+              "effectTarget": "自身",
+              "fixedValue": 6
+            },
+            {
+              "valueKind": "クールタイム減少",
+              "valueClass": "クールタイム",
+              "effectType": "バフ",
+              "condition": "自身に目くらまし付与時",
+              "effectTarget": "自身",
+              "targetSkill": "高学年スキル",
+              "fixedValue": 4
+            },
+            {
+              "valueKind": "初回普通攻撃強化",
+              "valueClass": "スキル変更",
+              "effectType": "パッシブ",
+              "condition": "ウェーブ開始時",
+              "effectTarget": "自身",
+              "targetSkill": "普通攻撃"
+            }
+          ],
+          "description": "普通攻撃の与ダメージが増加する。自身に目くらましが付与されると攻撃速度が増加し、高学年スキルのクールタイムが減少する。ウェーブ開始時、自身の最初の普通攻撃は強化攻撃で発動する。"
+        },
+        "3": {
+          "name": "最高の戦友なのだ！",
+          "stats": [
+            {
+              "statApplyTo": "全体",
+              "statName": "物理攻撃力",
+              "increaseP": 3
+            },
+            {
+              "statApplyTo": "全体",
+              "statName": "会心ダメージ抵抗",
+              "increaseP": 3
+            }
+          ],
+          "effects": [
+            {
+              "valueKind": "攻撃速度増加",
+              "valueClass": "倍率",
+              "effectType": "パッシブ",
+              "effectTarget": "味方全員",
+              "fixedValue": 7
+            }
+          ],
+          "description": "味方全員の攻撃速度を増加させる。"
+        }
+      }
     },
     "board": {
       "race": "獣人",
       "boardType": "抵抗+会心",
-      "raceBoardType": "獣人TypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
     "id": "layze",
     "name": "レイジー",
     "basic": {
+      "rarity": 2,
       "personality": "冷静",
       "race": "エルフ",
       "role": "攻撃",
       "position": "後列",
-      "boardType": "防御+抵抗",
-      "boardShape": "エルフTypeA"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 30
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 3,
+      "atkP": 4,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 4,
+      "critDmg": 4,
+      "critRes": 2,
+      "critDmgRes": 2
+    },
     "skills": [
       {
         "effects": {
@@ -17116,18 +18248,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "防御+抵抗",
-      "raceBoardType": "エルフTypeA",
-      "cells": {
-        "1-1": "全体防御",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体攻撃",
-        "2-2": "全体会心",
-        "2-3": "全体HP",
-        "3-1": "全体攻撃",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体防御",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体攻撃",
+      "bt2_2": "全体会心",
+      "bt2_3": "全体HP",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -17139,10 +18269,21 @@ const APOSTLE_LIBRARY = [
       "race": "魔女",
       "role": "攻撃",
       "position": "中列",
-      "boardType": "抵抗+会心",
-      "boardShape": "魔女TypeB"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 37
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 4,
+      "atkP": 3,
+      "atkM": 0,
+      "defP": 3,
+      "defM": 3,
+      "crit": 5,
+      "critDmg": 5,
+      "critRes": 3,
+      "critDmgRes": 3
+    },
     "skills": [
       {
         "effects": [
@@ -17298,18 +18439,16 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "魔女",
       "boardType": "抵抗+会心",
-      "raceBoardType": "魔女TypeB",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体会心抵抗",
-        "2-1": "全体会心",
-        "2-2": "全体HP",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体会心",
-        "3-2": "全体HP",
-        "3-3": "全体防御",
-        "3-4": "全体会心抵抗"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体会心抵抗",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体HP",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体会心",
+      "bt3_2": "全体HP",
+      "bt3_3": "全体防御",
+      "bt3_4": "全体会心抵抗",
+      "cells": {}
     }
   },
   {
@@ -17321,10 +18460,21 @@ const APOSTLE_LIBRARY = [
       "race": "エルフ",
       "role": "守備",
       "position": "前列",
-      "boardType": "会心+HP",
-      "boardShape": "エルフTypeD"
+      "attackType": "物理",
+      "initialSp": 0,
+      "spRecoveryPerSecond": 50
     },
-    "statTypes": {},
+    "statTypes": {
+      "hp": 5,
+      "atkP": 1,
+      "atkM": 0,
+      "defP": 5,
+      "defM": 5,
+      "crit": 3,
+      "critDmg": 3,
+      "critRes": 4,
+      "critDmgRes": 4
+    },
     "skills": [
       {
         "effects": [
@@ -17530,398 +18680,17 @@ const APOSTLE_LIBRARY = [
     "board": {
       "race": "エルフ",
       "boardType": "会心+HP",
-      "raceBoardType": "エルフTypeD",
-      "cells": {
-        "1-1": "全体会心",
-        "1-2": "全体HP",
-        "2-1": "全体会心",
-        "2-2": "全体防御",
-        "2-3": "全体会心抵抗",
-        "3-1": "全体攻撃",
-        "3-2": "全体会心",
-        "3-3": "全体HP",
-        "3-4": "全体防御"
-      }
+      "bt1_1": "全体会心",
+      "bt1_2": "全体HP",
+      "bt2_1": "全体会心",
+      "bt2_2": "全体防御",
+      "bt2_3": "全体会心抵抗",
+      "bt3_1": "全体攻撃",
+      "bt3_2": "全体会心",
+      "bt3_3": "全体HP",
+      "bt3_4": "全体防御",
+      "cells": {}
     }
-  },
-  {
-    "id": "risty",
-    "name": "リスティ",
-    "basic": {},
-    "statTypes": {},
-    "skills": [
-      {
-        "effects": [
-          {
-            "valueKind": "物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "敵/HP最高/範囲",
-            "levels": {
-              "1": 135,
-              "2": 148,
-              "3": 161,
-              "4": 174,
-              "5": 187,
-              "6": 200,
-              "7": 213,
-              "8": 226,
-              "9": 239,
-              "10": 252,
-              "11": 265,
-              "12": 278,
-              "13": 291,
-              "14": 304,
-              "15": 317
-            }
-          },
-          {
-            "valueKind": "最後の一撃の物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "敵/HP最高/範囲",
-            "levels": {
-              "1": 270,
-              "2": 297,
-              "3": 324,
-              "4": 351,
-              "5": 378,
-              "6": 405,
-              "7": 432,
-              "8": 459,
-              "9": 486,
-              "10": 513,
-              "11": 540,
-              "12": 567,
-              "13": 594,
-              "14": 621,
-              "15": 648
-            }
-          },
-          {
-            "valueKind": "再探索",
-            "valueClass": "回数",
-            "effectType": "条件",
-            "effectTarget": "敵が倒されなかった場合",
-            "fixedValue": 3
-          }
-        ],
-        "skillType": "低学年",
-        "skillName": "テクノマンシー",
-        "description": "HPが最も高い敵に範囲物理ダメージを与える。敵が倒されなかった場合、最大3回まで再度敵を探し出し範囲物理ダメージを与える。最後の一撃はより高いダメージを与える。"
-      },
-      {
-        "effects": [
-          {
-            "valueKind": "物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "残りHP割合が最も低い敵3体",
-            "levels": {
-              "1": 40,
-              "2": 43,
-              "3": 45,
-              "4": 48,
-              "5": 51,
-              "6": 53,
-              "7": 56,
-              "8": 59,
-              "9": 61,
-              "10": 64,
-              "11": 67,
-              "12": 69,
-              "13": 72,
-              "14": 75,
-              "15": 77
-            }
-          },
-          {
-            "valueKind": "ブロック数",
-            "valueClass": "ヒット数",
-            "effectType": "攻撃",
-            "effectTarget": "残りHP割合が最も低い敵3体",
-            "fixedValue": 10
-          },
-          {
-            "valueKind": "対象数",
-            "valueClass": "対象数",
-            "effectType": "攻撃",
-            "effectTarget": "敵",
-            "fixedValue": 3
-          },
-          {
-            "valueKind": "最後の一撃の物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "残りHP割合が最も低い敵3体",
-            "levels": {
-              "1": 160,
-              "2": 171,
-              "3": 181,
-              "4": 192,
-              "5": 203,
-              "6": 213,
-              "7": 224,
-              "8": 235,
-              "9": 245,
-              "10": 256,
-              "11": 267,
-              "12": 277,
-              "13": 288,
-              "14": 299,
-              "15": 309
-            }
-          },
-          {
-            "valueKind": "気絶",
-            "valueClass": "状態付与",
-            "effectType": "デバフ",
-            "effectTarget": "敵"
-          },
-          {
-            "valueKind": "気絶",
-            "valueClass": "持続時間",
-            "effectType": "デバフ",
-            "effectTarget": "敵",
-            "fixedValue": 3
-          }
-        ],
-        "skillType": "高学年",
-        "skillName": "ボクセルグリッチ",
-        "description": "残りHP割合が最も低い敵3体にブロックを10個ずつ落として物理ダメージを与える。最後に落ちるブロックはより高いダメージを与え、気絶を付与する。スキル発動中に対象を変更できる。",
-        "cooldownSeconds": 26
-      },
-      {
-        "effects": {
-          "valueKind": "気絶",
-          "valueClass": "持続時間",
-          "effectType": "パッシブ",
-          "effectTarget": "敵",
-          "reference": "高学年スキル",
-          "levels": {
-            "1": 4,
-            "2": 4.2,
-            "3": 4.4,
-            "4": 4.6,
-            "5": 4.8,
-            "6": 5,
-            "7": 5.2,
-            "8": 5.4,
-            "9": 5.6,
-            "10": 5.8,
-            "11": 6,
-            "12": 6.2,
-            "13": 6.4,
-            "14": 6.6,
-            "15": 6.8
-          }
-        },
-        "skillType": "パッシブ",
-        "skillName": "パッシブスキル",
-        "description": "高学年スキルの気絶の持続時間が変更される。"
-      },
-      {
-        "effects": {
-          "valueKind": "物理ダメージ",
-          "valueClass": "倍率",
-          "effectType": "攻撃",
-          "effectTarget": "敵",
-          "fixedValue": 80
-        },
-        "skillType": "普通攻撃_基本",
-        "skillName": "基本",
-        "description": "飲み干した缶を投げて敵に物理ダメージを与える。"
-      },
-      {
-        "effects": [
-          {
-            "valueKind": "物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "敵",
-            "fixedValue": 120
-          },
-          {
-            "valueKind": "確定会心",
-            "valueClass": "固定値",
-            "effectType": "攻撃",
-            "effectTarget": "敵",
-            "fixedValue": 1
-          },
-          {
-            "valueKind": "発動条件",
-            "valueClass": "回数",
-            "effectType": "条件",
-            "effectTarget": "自身",
-            "reference": "普通攻撃",
-            "fixedValue": 4
-          }
-        ],
-        "skillType": "普通攻撃_強化",
-        "skillName": "強化",
-        "description": "4回攻撃するごとに敵の個人情報を収集し、確定会心物理ダメージを与える。"
-      }
-    ],
-    "favoriteCard": {
-      "name": "リスティの模造グローブ",
-      "kind": "遺物",
-      "levels": {
-        "1": [
-          {
-            "effects": [
-              {
-                "valueKind": "ハッキング",
-                "valueClass": "固定値",
-                "effectType": "条件",
-                "effectTarget": "敵",
-                "fixedValue": 3
-              },
-              {
-                "valueKind": "確定会心物理ダメージ",
-                "valueClass": "条件",
-                "effectType": "攻撃",
-                "effectTarget": "敵"
-              },
-              {
-                "valueKind": "SP回復",
-                "valueClass": "固定値",
-                "effectType": "バフ",
-                "effectTarget": "自身"
-              }
-            ],
-            "targetSkill": "普通攻撃_強化",
-            "skillName": "強化",
-            "description": "3回攻撃するごとに敵をハッキングし、確定会心物理ダメージを与える。強化攻撃使用後、自身のSPを回復する。"
-          }
-        ],
-        "3": [
-          {
-            "effects": [
-              {
-                "valueKind": "物理攻撃力増加",
-                "valueClass": "倍率",
-                "effectType": "バフ",
-                "effectTarget": "自身",
-                "fixedValue": 9
-              },
-              {
-                "valueKind": "会心ステータス増加",
-                "valueClass": "倍率",
-                "effectType": "バフ",
-                "effectTarget": "自身",
-                "fixedValue": 9
-              },
-              {
-                "valueKind": "会心ダメージ増加",
-                "valueClass": "倍率",
-                "effectType": "バフ",
-                "effectTarget": "自身",
-                "fixedValue": 9
-              }
-            ],
-            "targetSkill": "愛用Lv3",
-            "skillName": "愛用Lv3",
-            "description": "リスティの物理攻撃力増加9%、会心増加9%、会心ダメージ増加9%"
-          }
-        ]
-      }
-    },
-    "aside": {
-      "name": "本日のPOTG",
-      "levels": {
-        "1": {
-          "name": "リーグ・オブ・エルフ最強者",
-          "stats": [
-            {
-              "statApplyTo": "本人",
-              "statName": "最大HP",
-              "increaseP": 6
-            },
-            {
-              "statApplyTo": "本人",
-              "statName": "物理攻撃力",
-              "increaseP": 6
-            },
-            {
-              "statApplyTo": "本人",
-              "statName": "会心",
-              "increaseP": 6
-            },
-            {
-              "statApplyTo": "本人",
-              "statName": "会心ダメージ",
-              "increaseP": 6
-            }
-          ],
-          "effects": []
-        },
-        "2": {
-          "name": "天才ハッカーの登場",
-          "stats": [],
-          "effects": [
-            {
-              "valueKind": "SP回復",
-              "valueClass": "倍率",
-              "effectType": "回復",
-              "effectTarget": "自身",
-              "targetSkill": "低学年スキル",
-              "fixedValue": 75
-            },
-            {
-              "valueKind": "SP回復クールタイム",
-              "valueClass": "クールタイム",
-              "effectType": "回復",
-              "effectTarget": "自身",
-              "targetSkill": "低学年スキル",
-              "fixedValue": 10
-            },
-            {
-              "valueKind": "追加物理ダメージ",
-              "valueClass": "倍率",
-              "effectType": "攻撃",
-              "effectTarget": "残りHP割合が最も低い敵3体",
-              "targetSkill": "高学年スキル",
-              "fixedValue": 160
-            },
-            {
-              "valueKind": "追加攻撃",
-              "valueClass": "回数",
-              "effectType": "攻撃",
-              "effectTarget": "残りHP割合が最も低い敵3体",
-              "targetSkill": "高学年スキル",
-              "fixedValue": 3
-            }
-          ],
-          "description": "低学年スキルで敵を退治すると、SPを回復する。高学年スキル使用後、残りHP割合が最も低い敵3体に追加で3回物理ダメージを与える。"
-        },
-        "3": {
-          "name": "リスティのスーパーセーブ",
-          "stats": [
-            {
-              "statApplyTo": "全体",
-              "statName": "会心ダメージ",
-              "increaseP": 3
-            },
-            {
-              "statApplyTo": "全体",
-              "statName": "物理防御力",
-              "increaseP": 3
-            }
-          ],
-          "effects": [
-            {
-              "valueKind": "SP回復量",
-              "valueClass": "固定値",
-              "effectType": "バフ",
-              "effectTarget": "後列の味方",
-              "fixedValue": 4
-            }
-          ],
-          "description": "後列の味方の1秒ごとのSP回復量を増加させる。"
-        }
-      }
-    },
-    "board": null
   }
 ];
 

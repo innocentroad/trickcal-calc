@@ -15890,7 +15890,18 @@ const APOSTLE_LIBRARY = [
         },
         "3": {
           "name": "モモ～ハッ！",
-          "stats": [],
+          "stats": [
+            {
+              "statApplyTo": "全体",
+              "statName": "魔法攻撃力",
+              "increaseP": 3
+            },
+            {
+              "statApplyTo": "全体",
+              "statName": "会心ダメージ",
+              "increaseP": 3
+            }
+          ],
           "effects": [
             {
               "valueKind": "与ダメージ量増加",

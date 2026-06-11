@@ -19,7 +19,7 @@
     </script>
     <script>
         try {
-            const raw = localStorage.getItem('trickcal_calc_state_v3.3') || localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
+            const raw = localStorage.getItem('trickcal_calc_state_v3.3.1') || localStorage.getItem('trickcal_calc_state_v3.3') || localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
             const state = raw ? JSON.parse(raw) : null;
             document.documentElement.dataset.initialPerspective = state?.perspective || 'self';
             document.documentElement.dataset.initialTab = state?.tab || 'calc';
@@ -97,7 +97,7 @@
     <div class="app-container">
         <header>
             <div class="header-content">
-                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v3.3</small></h1>
+                <h1>Trickcal Damage Calc <small style="font-size: 0.4em; opacity: 0.7;">v3.3.1</small></h1>
                 <div class="tabs header-tabs">
                     <button class="tab-btn" data-tab="calc">ダメージ<br>計算</button>
                     <button class="tab-btn" data-tab="spell">スペル<br>選択</button>
@@ -170,7 +170,7 @@
 <input type="radio" name="perspective" id="perspective-enemy" value="enemy" style="display:none;">
 <script>
     try {
-        const raw = localStorage.getItem('trickcal_calc_state_v3.3') || localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
+        const raw = localStorage.getItem('trickcal_calc_state_v3.3.1') || localStorage.getItem('trickcal_calc_state_v3.3') || localStorage.getItem('trickcal_calc_state_v3.2') || localStorage.getItem('trickcal_calc_state_v3.1') || localStorage.getItem('trickcal_calc_state_v3.0') || localStorage.getItem('trickcal_calc_state_v1.8');
         const state = raw ? JSON.parse(raw) : null;
         const savedPerspective = state?.perspective;
         if (savedPerspective === 'enemy') {

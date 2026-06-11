@@ -4333,9 +4333,10 @@ function updateChart(v, overrideSelf = null) {
     });
 }
 // --- Custom Presets & Dropdown Population ---
-const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.3';
-const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.2';
-const LEGACY_OLD_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.1';
+const CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.3.1';
+const LEGACY_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.3';
+const LEGACY_OLD_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.2';
+const LEGACY_OLDER_CUSTOM_PRESETS_KEY = 'trickcal_custom_presets_v3.1';
 
 function getLocalStorageWithFallback(key, ...fallbackKeys) {
     const raw = localStorage.getItem(key);
@@ -4352,7 +4353,7 @@ function getLocalStorageWithFallback(key, ...fallbackKeys) {
 }
 
 function loadCustomPresets() {
-    const raw = getLocalStorageWithFallback(CUSTOM_PRESETS_KEY, LEGACY_CUSTOM_PRESETS_KEY, LEGACY_OLD_CUSTOM_PRESETS_KEY);
+    const raw = getLocalStorageWithFallback(CUSTOM_PRESETS_KEY, LEGACY_CUSTOM_PRESETS_KEY, LEGACY_OLD_CUSTOM_PRESETS_KEY, LEGACY_OLDER_CUSTOM_PRESETS_KEY);
     if (!raw) return { self: {}, enemy: {} };
     try {
         return JSON.parse(raw);
@@ -7088,26 +7089,30 @@ function estimateDefSide(rows, common) {
 }
 
 // --- Persistence & Initialization ---
-const STORAGE_KEY = 'trickcal_calc_state_v3.3';
-const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v3.2';
-const LEGACY_OLD_STORAGE_KEY = 'trickcal_calc_state_v3.1';
+const STORAGE_KEY = 'trickcal_calc_state_v3.3.1';
+const LEGACY_STORAGE_KEY = 'trickcal_calc_state_v3.3';
+const LEGACY_OLD_STORAGE_KEY = 'trickcal_calc_state_v3.2';
+const LEGACY_OLDER_STORAGE_KEY = 'trickcal_calc_state_v3.1';
 const ANCIENT_STORAGE_KEY = 'trickcal_calc_state_v1.8';
 const SPELL_STORAGE_KEY = `${STORAGE_KEY}:spell`;
 const LEGACY_SPELL_STORAGE_KEY = `${LEGACY_STORAGE_KEY}:spell`;
 const LEGACY_OLD_SPELL_STORAGE_KEY = `${LEGACY_OLD_STORAGE_KEY}:spell`;
+const LEGACY_OLDER_SPELL_STORAGE_KEY = `${LEGACY_OLDER_STORAGE_KEY}:spell`;
 const ARTIFACT_PRESETS_KEY = `${STORAGE_KEY}:artifact-presets`;
 const LEGACY_ARTIFACT_PRESETS_KEY = `${LEGACY_STORAGE_KEY}:artifact-presets`;
 const LEGACY_OLD_ARTIFACT_PRESETS_KEY = `${LEGACY_OLD_STORAGE_KEY}:artifact-presets`;
+const LEGACY_OLDER_ARTIFACT_PRESETS_KEY = `${LEGACY_OLDER_STORAGE_KEY}:artifact-presets`;
 const SPELL_PRESETS_KEY = `${STORAGE_KEY}:spell-presets`;
 const LEGACY_SPELL_PRESETS_KEY = `${LEGACY_STORAGE_KEY}:spell-presets`;
 const LEGACY_OLD_SPELL_PRESETS_KEY = `${LEGACY_OLD_STORAGE_KEY}:spell-presets`;
+const LEGACY_OLDER_SPELL_PRESETS_KEY = `${LEGACY_OLDER_STORAGE_KEY}:spell-presets`;
 const ARTIFACT_PRESET_SLOT_COUNT = 9;
 let activeArtifactPresetSlotId = '';
 let activeSpellPresetSlotId = '';
 
 function loadArtifactPresets() {
     try {
-        const raw = getLocalStorageWithFallback(ARTIFACT_PRESETS_KEY, LEGACY_ARTIFACT_PRESETS_KEY, LEGACY_OLD_ARTIFACT_PRESETS_KEY);
+        const raw = getLocalStorageWithFallback(ARTIFACT_PRESETS_KEY, LEGACY_ARTIFACT_PRESETS_KEY, LEGACY_OLD_ARTIFACT_PRESETS_KEY, LEGACY_OLDER_ARTIFACT_PRESETS_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
         if (!parsed || typeof parsed !== 'object') return {};
         return parsed;
@@ -7157,7 +7162,7 @@ function renderCalcSpellDeckPreview() {
 
 function loadSpellPresets() {
     try {
-        const raw = getLocalStorageWithFallback(SPELL_PRESETS_KEY, LEGACY_SPELL_PRESETS_KEY, LEGACY_OLD_SPELL_PRESETS_KEY);
+        const raw = getLocalStorageWithFallback(SPELL_PRESETS_KEY, LEGACY_SPELL_PRESETS_KEY, LEGACY_OLD_SPELL_PRESETS_KEY, LEGACY_OLDER_SPELL_PRESETS_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
         if (!parsed || typeof parsed !== 'object') return {};
         return parsed;
@@ -8228,7 +8233,7 @@ function saveSpellSelectionsState() {
 
 function loadSpellSelectionsState() {
     try {
-        const raw = getLocalStorageWithFallback(SPELL_STORAGE_KEY, LEGACY_SPELL_STORAGE_KEY, LEGACY_OLD_SPELL_STORAGE_KEY);
+        const raw = getLocalStorageWithFallback(SPELL_STORAGE_KEY, LEGACY_SPELL_STORAGE_KEY, LEGACY_OLD_SPELL_STORAGE_KEY, LEGACY_OLDER_SPELL_STORAGE_KEY);
         if (!raw) return false;
         const state = JSON.parse(raw);
         if (state?.selections) {
@@ -8297,7 +8302,7 @@ function migrateLegacyZeroBaseMultiplierInputs(state = {}) {
 
 function saveStatePatch(patch) {
     try {
-        const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY, LEGACY_OLD_STORAGE_KEY);
+        const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY, LEGACY_OLD_STORAGE_KEY, LEGACY_OLDER_STORAGE_KEY);
         const state = raw ? JSON.parse(raw) : {};
         Object.assign(state, patch);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -8360,7 +8365,7 @@ function saveState() {
 }
 
 function loadState() {
-    const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY, LEGACY_OLD_STORAGE_KEY);
+    const raw = getLocalStorageWithFallback(STORAGE_KEY, LEGACY_STORAGE_KEY, LEGACY_OLD_STORAGE_KEY, LEGACY_OLDER_STORAGE_KEY);
     if (!raw) return;
     try {
         isRestoringState = true;
@@ -8524,6 +8529,7 @@ document.getElementById('reset-btn').addEventListener('click', () => {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(LEGACY_STORAGE_KEY);
         localStorage.removeItem(LEGACY_OLD_STORAGE_KEY);
+        localStorage.removeItem(LEGACY_OLDER_STORAGE_KEY);
         localStorage.removeItem(ANCIENT_STORAGE_KEY);
         location.reload();
     } else if (activeTab === 'crayon') {

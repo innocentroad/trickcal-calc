@@ -1691,6 +1691,59 @@ const CARD_LIBRARY = {
             ],
         },
         {
+            id: "spell_renewa_time_paradox",
+            kind: "spell",
+            rarity: "伝説",
+            signature: true,
+            favoriteCharacter: "リニュア",
+            name: "リニュアのタイムパラドックス",
+            cost: 27,
+            bonusesByStar: [
+                { critRateP: 9.1, critDmgP: 4.9 },
+                { critRateP: 11.4, critDmgP: 6.1 },
+                { critRateP: 13.7, critDmgP: 7.3 },
+                { critRateP: 16.0, critDmgP: 8.5 },
+                { critRateP: 18.3, critDmgP: 9.7 },
+                { critRateP: 20.6, critDmgP: 10.9 }
+            ],
+            conditionalEffects: [
+                {
+                    id: "renewa_wave_damage_up",
+                    type: "toggle",
+                    defaultEnabled: true,
+                    nonStacking: true,
+                    label: "ウェーブ開始時 全員 与ダメ増加",
+                    shortLabel: "開幕 与ダメ増",
+                    bonusesByStar: [
+                        { addP: 32.0 },
+                        { addP: 36.0 },
+                        {},
+                        {},
+                        {}
+                    ],
+                    descriptionByStar: [
+                        "30秒間 / この効果はスタックしない",
+                        "30秒間 / この効果はスタックしない",
+                        "30秒間 / 星3以降の値は未確認 / この効果はスタックしない",
+                        "30秒間 / 星3以降の値は未確認 / この効果はスタックしない",
+                        "30秒間 / 星3以降の値は未確認 / この効果はスタックしない"
+                    ]
+                },
+                {
+                    id: "renewa_signature_haste",
+                    type: "info",
+                    label: "Lv.1 最高攻撃力の味方 攻撃速度増加",
+                    description: "15秒ごと / 攻撃速度+50% / 持続時間10秒"
+                },
+                {
+                    id: "renewa_signature_lv3",
+                    type: "info",
+                    label: "Lv.3",
+                    description: "高学年スキルのクールタイムが5秒減少する"
+                }
+            ],
+        },
+        {
             id: "spell_beauty_is_sin",
             kind: "spell",
             rarity: "伝説",
@@ -2351,6 +2404,7 @@ const CARD_SOLDER_DATA = {
     spell_alice_hex: { 1: { atkP: 1.9, critRateP: 1.9 }, 2: { atkP: 3.9, critRateP: 3.9 } },
     spell_epica_anthem: { 1: { atkP: 2.6, critDmgP: 1.3 }, 2: { atkP: 5.2, critDmgP: 2.7 } },
     spell_yiide_dream: { 1: { critResP: 1.9, critDmgResP: 1.0 }, 2: { critResP: 3.8, critDmgResP: 2.1 } },
+    spell_renewa_time_paradox: { 1: { critRateP: 2.3, critDmgP: 1.2 }, 2: { critRateP: 4.6, critDmgP: 2.4 } },
     spell_suspicious_potion: { 1: { critRateP: 4.7, critDmgP: 2.9 }, 2: { critRateP: 5.9, critDmgP: 3.7 } },
     spell_beauty_is_sin: { 1: { critRateP: 2.4, critDmgP: 1.2 }, 2: { critRateP: 4.8, critDmgP: 2.5 } },
     spell_battle_master: { 1: { atkP: 4.0 }, 2: { atkP: 8.1 } },

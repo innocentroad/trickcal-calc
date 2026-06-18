@@ -3,6 +3,8 @@ $ErrorActionPreference = "Stop"
 $baseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3CUX8t7JVmCPZv5grrc1MwSxW54ScZeLbi5tOuuzCFqoNNOzu3PP0MDuO3vo9INw9rNGlck1z3aBj/pub?single=true&output=csv&gid="
 $csvDir = Join-Path $PSScriptRoot "..\tmp\apostles"
 $outPath = Join-Path $PSScriptRoot "..\apostles.js"
+$xlsxPath = Join-Path $PSScriptRoot "trickcal_datasheet.xlsx"
+$exportCsvScript = Join-Path $PSScriptRoot "export-apostle-csvs.py"
 
 $sheets = [ordered]@{
     basic = "2049454371"
@@ -24,16 +26,27 @@ $keyMap = @{
     "種族" = "race"
     "役割" = "role"
     "配列" = "position"
+    "配置列" = "position"
     "攻撃タイプ" = "attackType"
+    "攻撃Type" = "attackType"
     "HPタイプ" = "hpType"
+    "HPTier" = "hpType"
     "物理攻撃力タイプ" = "atkPType"
+    "物理攻撃力Tier" = "atkPType"
     "魔法攻撃力タイプ" = "atkMType"
+    "魔法攻撃力Tier" = "atkMType"
     "物理防御力タイプ" = "defPType"
+    "物理防御力Tier" = "defPType"
     "魔法防御力タイプ" = "defMType"
+    "魔法防御力Tier" = "defMType"
     "会心タイプ" = "critType"
+    "会心Tier" = "critType"
     "会心DMGタイプ" = "critDmgType"
+    "会心DMGTier" = "critDmgType"
     "会心抵抗タイプ" = "critResType"
+    "会心抵抗Tier" = "critResType"
     "会心DMG抵抗タイプ" = "critDmgResType"
+    "会心DMG抵抗Tier" = "critDmgResType"
     "SP回復" = "initialSp"
     "初期SP" = "initialSp"
     "毎秒SP回復量" = "spRecoveryPerSecond"
@@ -197,8 +210,8 @@ function Apply-EffectDefaults($data) {
 
 function Add-EffectIfPresent($effects, $data) {
     $data = Apply-EffectDefaults $data
-    if (-not (Has-EffectPayload $data)) { return @($effects) }
-    return @($effects) + @($data)
+    if (-not (Has-EffectPayload $data)) { return ,@($effects) }
+    return ,(@($effects) + @($data))
 }
 
 function Get-RowValue($row, [string]$key) {
@@ -247,6 +260,7 @@ function Remove-InternalGroupKeys($list) {
     if (-not $list) { return @() }
     foreach ($item in $list) {
         if ($item.Contains("_groupKey")) { $item.Remove("_groupKey") }
+        if ($item.Contains("effects")) { $item.effects = @($item.effects) }
     }
     return $list
 }
@@ -399,8 +413,13 @@ function Ensure-ApostleFromRow($byId, $row) {
 
 New-Item -ItemType Directory -Force -Path $csvDir | Out-Null
 
-foreach ($name in $sheets.Keys) {
-    Invoke-WebRequest -Uri ($baseUrl + $sheets[$name]) -OutFile (Join-Path $csvDir "$name.csv")
+if ((Test-Path -LiteralPath $xlsxPath) -and (Test-Path -LiteralPath $exportCsvScript)) {
+    & py -3.12 $exportCsvScript $xlsxPath $csvDir
+    Write-Output "Exported local xlsx sheets to $csvDir"
+} else {
+    foreach ($name in $sheets.Keys) {
+        Invoke-WebRequest -Uri ($baseUrl + $sheets[$name]) -OutFile (Join-Path $csvDir "$name.csv")
+    }
 }
 
 $basicRows = Read-NormalizedCsv "basic"
@@ -476,6 +495,9 @@ foreach ($row in $boardRows) {
     if (-not $apostle) { continue }
 
     $board = Compact-Row $row
+    if ($board.Contains("X_pos") -or $board.Contains("Y_pos") -or $board.Contains("マス_type")) {
+        continue
+    }
     $cells = [ordered]@{}
 
     foreach ($key in @($board.Keys)) {

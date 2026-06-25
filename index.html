@@ -85,11 +85,14 @@
             .header-social-link { width: 1.55rem !important; height: 1.55rem !important; }
             .header-social-link.note-link { position: static !important; }
             .header-social-icon { width: 0.78rem !important; height: 0.78rem !important; }
+            .new-calculator-notice { gap: 0.35rem !important; padding: 0.26rem 0.45rem !important; font-size: 10.5px !important; }
+            .new-calculator-notice a { padding-inline: 0.55rem !important; font-size: 10.5px !important; }
         }
         @media (max-width: 390px) {
             .tab-btn { font-size: 10px !important; padding-inline: 2px !important; }
             #reset-btn { font-size: 10px !important; padding-inline: 5px !important; }
             .header-social-link { width: 1.42rem !important; height: 1.42rem !important; }
+            .new-calculator-notice span { display: none; }
         }
     </style>
 </head>
@@ -112,6 +115,11 @@
                 </div>
             </div>
         </header>
+
+        <div class="new-calculator-notice" role="note" aria-label="新しい計算機への案内">
+            <span>編成・ステータス管理と連携した新しい計算機を公開中</span>
+            <a href="https://innocentroad.github.io/trickcal-manager/formation-damage-calc.html" target="_blank" rel="noopener noreferrer">新計算機を開く</a>
+        </div>
 
         <div class="apply-float-controller" id="apply-float-controller">
             <button type="button" class="apply-float-toggle" id="apply-float-toggle" aria-expanded="false" aria-controls="apply-float-panel">
